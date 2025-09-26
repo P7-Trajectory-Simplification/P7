@@ -46,7 +46,7 @@ These files, due to their size, have been inserted into a database for easier ac
 
 
 ## Guide
-To replicate the described process, upload the raw CSV files into directories corresponding to their date (year/month/day). 
-Then run the script data_processor.processor_run() to process the CSV, i.e. remove irrelevant columns and rows with missing or malformatted data.
-Then run the script data_splitter.split_run() to split the data into multiple files based on the imo number of the ship.
+To replicate the described process, upload the raw CSV files into directories corresponding to their date (year/month/day).\
+Then run the script data_processor.processor_run() to process the CSV, i.e. remove irrelevant columns and rows with missing or malformatted data.\
+Then run the script data_splitter.split_run() to split the data into multiple files based on the imo number of the ship.\
 Finally, run the script data_uploader.upload_run() to upload the processed and split data into the database.
