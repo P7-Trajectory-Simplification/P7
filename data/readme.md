@@ -40,5 +40,13 @@ In order to reduce the size of the dataset, some columns have been removed from 
 - `ETA`
 
 Furthermore, to reduce individual file size, the data has been split into multiple files, each containing data for a specific vessel.
+The CSV files have been sorted into a Hive-style partitioned directory structure based on the year, month, and day. This structure allows for more efficient querying and data retrieval.
 
 These files, due to their size, have been inserted into a database for easier access and querying. The database tables are: vessels and vessel_logs.
+
+
+## Guide
+To replicate the described process, upload the raw CSV files into directories corresponding to their date (year/month/day). 
+Then run the script data_processor.processor_run() to process the CSV, i.e. remove irrelevant columns and rows with missing or malformatted data.
+Then run the script data_splitter.split_run() to split the data into multiple files based on the imo number of the ship.
+Finally, run the script data_uploader.upload_run() to upload the processed and split data into the database.
