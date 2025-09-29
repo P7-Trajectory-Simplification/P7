@@ -11,13 +11,25 @@
     
 }
 
-.body button {
+.algorithms button {
     border: none;
     border-right: solid;
     border-color: black;
-    background-color: white;
+    background: none;
     margin-top: 5px;
     margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.algorithms button:hover {
+    color: #71797E;
+}
+
+.algorithms button:disabled {
+    font-weight: bold;
+    color: black;
+    cursor: not-allowed;
+    
 }
 
 .algorithms :last-child {
