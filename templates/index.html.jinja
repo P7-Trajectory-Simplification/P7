@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <link rel="stylesheet" href="{{url_for('static', filename='CSS/style.css')}}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+    crossorigin=""/>
 </head>
 <body>
   <div class="title">
@@ -10,13 +13,14 @@
   </div>
   <div class="body">
     <div class="algorithms">
-      <button>Ours</button>
-      <button>SQUISH</button>
-      <button>SQUISH-E</button>
-      <button>DP</button>
+      {% for alg in algorithms %}
+        <button id="{{alg}}">{{alg}}</button>
+      {% endfor %}
     </div>
-    <div class="map">
-    </div>
+     <div id="map"></div>
   </div>
 </body>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""></script>
 <script src="{{url_for('static', filename='JS/index.js')}}"></script>

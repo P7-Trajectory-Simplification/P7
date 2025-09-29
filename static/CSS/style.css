@@ -3,6 +3,14 @@
     justify-self: center;
 }
 
+.body {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    
+}
+
 .body button {
     border: none;
     border-right: solid;
@@ -16,10 +24,9 @@
     border-right: none;
 }
 
-.map {
+#map {
     border: solid;
-    border-color: black;
-    border-width: 3px;
-    width: 1000px;
+    width: 90%;
     height: 500px;
+    justify-self: center;
 }
