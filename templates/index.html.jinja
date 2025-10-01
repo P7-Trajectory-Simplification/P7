@@ -8,10 +8,10 @@
     crossorigin=""/>
 </head>
 <body>
-  <div class="title">
-    <h1>Trajectory Simplification Map</h1>
-  </div>
   <div class="body">
+    <div class="title">
+      <h1>Trajectory Simplification Map</h1>
+    </div>
     <div class="algorithms">
       <h2>Algorithms</h2>
       {% for alg in algorithms %}
@@ -19,6 +19,11 @@
       {% endfor %}
     </div>
      <div id="map"></div>
+     <input type="range" min="1" max="10000" value="5000" class="slider" id="myRange" oninput="updateSlider(this)">
+     <div id="sliderInfo">
+      <label for="myRange">Time:</label>
+      <output id="timeValue">5000</output>
+     </div>
   </div>
 </body>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

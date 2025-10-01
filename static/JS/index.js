@@ -43,3 +43,18 @@ switchAlgorithm = async () => {
     console.error('Error fetching algorithm data:', error);
   }
 }
+
+
+function updateSlider(slider) {
+  const val = slider.value;
+  const min = slider.min || 0;
+  const max = slider.max || 100;
+  const percent = ((val - min) / (max - min)) * 100;
+  
+  // Update output
+  timeValue.value = val;
+  
+  // Update fill style
+  slider.style.background = `linear-gradient(to right, #d56c6c ${percent}%, #c9c9c9 ${percent}%)`;
+}
+updateSlider(document.getElementById("myRange")); // init
