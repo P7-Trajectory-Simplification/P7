@@ -9,5 +9,6 @@ def index():
 
 @app.route('/algorithm')
 def get_algorithm_ours():
-    name = request.args.get("name")
-    return {"name": name, "description": f"{name} algorithm"}
+    algs = request.args.get("algs")
+    start_time = request.args.get("start_time")
+    return {"description": algs, "time": start_time}

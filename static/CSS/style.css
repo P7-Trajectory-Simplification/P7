@@ -8,39 +8,55 @@
     flex-direction: column;
     flex-wrap: wrap;
     align-content: center;
-    
+    font-family: montserrat;
 }
 
-.algorithms h2 {
-    font-size: 24px;
-    margin-bottom: 0;
-    text-decoration: underline;
+
+.algorithms {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+    margin-top: 10px;
 }
 
-.algorithms button {
+.checkbox {
     border: none;
-    border-right: solid;
     border-color: black;
     background: none;
     margin-top: 5px;
     margin-bottom: 10px;
     cursor: pointer;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+.checkbox input[type="checkbox"] {
+    display: none;
 }
 
-.algorithms button:hover {
-    color: #71797E;
+.checkbox label {
+    font-size: 18px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: solid;
+    border-color: black;
+    cursor: pointer;
+    user-select: none;
 }
 
-.algorithms button:disabled {
+.checkbox input[type="checkbox"]:checked + label {
+    background-color: #d56c6c;
     font-weight: bold;
-    color: black;
-    cursor: not-allowed;
-    
 }
 
-.algorithms :last-child {
-    border-right: none;
+.checkbox:first-child{
+    padding-left: 0;
 }
+.checkbox:last-child{
+    padding-right: 0;
+}
+
+
+
 
 #map {
     border: solid;
@@ -49,13 +65,13 @@
     justify-self: center;
 }
 
-#sliderInfo {
+#slider_info {
     width: 90%;
     display: flex;
     align-items: center;
 }
 
-#sliderInfo output {
+#slider_info output {
     margin-left: 5px;
     margin-top: 0px;
     margin-bottom: 0px;
@@ -63,6 +79,7 @@
 
 input[type=range] {
   margin-top: 15px;
+  margin-bottom: 15px;
   width: 90%;
   cursor: pointer;
   -webkit-appearance: none;
@@ -88,4 +105,33 @@ input[type="range"]::-webkit-slider-thumb {
 input[type="range"]:focus::-webkit-slider-thumb { 
     outline: 3px solid #d56c6c; 
     outline-offset: 0.125rem; 
+}
+
+input[type="date"]{
+    margin-top: 15px;
+    padding: 5px 10px;
+    font-size: 18px;
+    width: fit-content;
+    border: solid;
+    border-color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;  /* positioned relative to input now */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;          /* invisible but clickable */
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+
+/* Inner text field area */
+input[type="date"]::-webkit-datetime-edit {
+  pointer-events: none;
 }

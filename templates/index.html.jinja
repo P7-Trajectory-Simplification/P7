@@ -6,23 +6,29 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
     crossorigin=""/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="body">
     <div class="title">
       <h1>Trajectory Simplification Map</h1>
     </div>
-    <div class="algorithms">
-      <h2>Algorithms</h2>
+    <div class="algorithms"> 
       {% for alg in algorithms %}
-        <button id="{{alg}}">{{alg}}</button>
-      {% endfor %}
+      <div class="checkbox">
+        <input type="checkbox" id="{{alg}}" value="{{alg}}">
+        <label for="{{alg}}">{{alg}}</label><br>
+      </div>
+    {% endfor %}
     </div>
      <div id="map"></div>
-     <input type="range" min="1" max="10000" value="5000" class="slider" id="myRange" oninput="updateSlider(this)">
-     <div id="sliderInfo">
-      <label for="myRange">Time:</label>
-      <output id="timeValue">5000</output>
+     <input type="date" id="date_picker" value="2024-01-01" min="2024-01-01" max="2024-12-01">
+     <input type="range" min="0" max="86399" value="0" class="slider" id="time_range" oninput="updateSlider(this)">
+     <div id="slider_info">
+      <label for="time_range">Time:</label>
+      <output id="time_value"></output>
      </div>
   </div>
 </body>
