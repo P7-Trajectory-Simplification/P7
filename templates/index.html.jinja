@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{{url_for('static', filename='CSS/style.css')}}">
+</head>
+<body>
+  <div class="title">
+    <h1>Trajectory Simplification Map</h1>
+  </div>
+  <div class="body">
+    <div class="algorithms">
+      <button>Ours</button>
+      <button>SQUISH</button>
+      <button>SQUISH-E</button>
+      <button>DP</button>
+    </div>
+    <div class="map">
+    </div>
+  </div>
+</body>
+<script src="{{url_for('static', filename='JS/index.js')}}"></script>

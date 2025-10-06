@@ -1,0 +1,25 @@
+.title h1{
+    font-size: 48px;
+    justify-self: center;
+}
+
+.body button {
+    border: none;
+    border-right: solid;
+    border-color: black;
+    background-color: white;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.algorithms :last-child {
+    border-right: none;
+}
+
+.map {
+    border: solid;
+    border-color: black;
+    border-width: 3px;
+    width: 1000px;
+    height: 500px;
+}
