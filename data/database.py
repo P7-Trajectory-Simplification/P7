@@ -2,7 +2,9 @@ import pandas as pd
 import os
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, text, Connection
+from sqlalchemy import create_engine, text, Connection, Sequence, Row
+
+from vessel_log import VesselLog
 
 
 def open_connection() -> Connection:
@@ -30,17 +32,23 @@ def store_vessel(conn: Connection, file_path):
         conn.execute(statement, {"imo": imo, "name": name, "ship_type": ship_type})
 
 
-def get_all_vessels(conn: Connection):
+def get_all_vessels():
+    conn = open_connection()
     statement = text("SELECT * FROM vessels;")
     result = conn.execute(statement)
     return result.fetchall()
 
-def get_vessel_info(conn: Connection, imo: int):
+def get_vessel_info(imo: int):
+    conn = open_connection()
     statement = text("SELECT * FROM vessels WHERE imo = :imo;")
     result = conn.execute(statement, {"imo": imo})
     return result.fetchone()
 
-def get_vessel_logs(conn: Connection, imo: int, start_ts: str, end_ts: str):
+def get_vessel_logs(imo: int, start_ts: str, end_ts: str) -> list[VesselLog]:
+    conn = open_connection()
     statement = text("SELECT lat, lon, ts FROM vessel_logs WHERE imo = :imo AND ts >= :start_ts AND ts <= :end_ts;")
     result = conn.execute(statement, {"imo": imo, "start_ts": start_ts, "end_ts": end_ts})
-    return result.fetchall()
+    return hydrate_vessel_logs(result.fetchall())
+
+def hydrate_vessel_logs(raw_logs: Sequence[Row]) -> list[VesselLog]:
+    return [VesselLog(lat, lon, ts) for lat, lon, ts in raw_logs]

@@ -1,4 +1,7 @@
-def douglas_peucker(points: list[tuple[float, float]], epsilon: float) -> list[tuple[float, float]]:
+from vessel_log import VesselLog
+
+
+def douglas_peucker(points: list[VesselLog], epsilon: float) -> list[VesselLog]:
     """
     Simplifies a given set of points using the Douglas-Peucker algorithm.
 
@@ -27,7 +30,7 @@ def douglas_peucker(points: list[tuple[float, float]], epsilon: float) -> list[t
     return [points[0], points[end]]
 
 
-def haversine_distance(points, start):
+def haversine_distance(first: VesselLog, second: VesselLog):
     """
     Calculates the Haversine distance between two points on the Earth.
 
@@ -41,20 +44,18 @@ def haversine_distance(points, start):
     from math import radians, sin, cos, sqrt, atan2
 
     R = 6371000  # Radius of the Earth in meters
-    lat1, lon1 = points
-    lat2, lon2 = start
 
-    dlat = radians(lat2 - lat1)
-    dlon = radians(lon2 - lon1)
+    dlat = radians(second.lat - first.lat)
+    dlon = radians(second.lon - first.lon)
 
-    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    a = sin(dlat / 2) ** 2 + cos(radians(first.lat)) * cos(radians(second.lat)) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
     distance = R * c
     return distance
 
 
-def perpendicular_distance(points: tuple[float, float], start: tuple[float, float], end: tuple[float, float]) -> float:
+def perpendicular_distance(points: VesselLog, start: VesselLog, end: VesselLog) -> float:
     """
     Calculates the perpendicular distance from a point to a line segment.
 
@@ -69,6 +70,6 @@ def perpendicular_distance(points: tuple[float, float], start: tuple[float, floa
     if start == end:
         return haversine_distance(points, start)
 
-    num = abs((end[1] - start[1]) * points[0] - (end[0] - start[0]) * points[1] + end[0] * start[1] - end[1] * start[0])
-    den = ((end[1] - start[1]) ** 2 + (end[0] - start[0]) ** 2) ** 0.5
+    num = abs((end.lon - start.lon) * points.lat - (end.lat - start.lat) * points.lon + end.lat * start.lon - end.lon * start.lat)
+    den = ((end.lon - start.lon) ** 2 + (end.lat - start.lat) ** 2) ** 0.5
     return num / den
