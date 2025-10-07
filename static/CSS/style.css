@@ -65,18 +65,6 @@
     justify-self: center;
 }
 
-#slider_info {
-    width: 90%;
-    display: flex;
-    align-items: center;
-}
-
-#slider_info output {
-    margin-left: 5px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
-
 input[type=range] {
   margin-top: 15px;
   margin-bottom: 15px;
@@ -107,8 +95,13 @@ input[type="range"]:focus::-webkit-slider-thumb {
     outline-offset: 0.125rem; 
 }
 
+#date_box {
+    flex: 1;
+    justify-content: flex-end;
+    display: flex;
+}
+
 input[type="date"]{
-    margin-top: 15px;
     padding: 5px 10px;
     font-size: 18px;
     width: fit-content;
@@ -134,4 +127,75 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Inner text field area */
 input[type="date"]::-webkit-datetime-edit {
   pointer-events: none;
+}
+
+#settings {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#range_button_container {
+    flex: 1;
+    align-items: center;
+    display: flex;
+    gap: 5px;
+}
+
+#range_button_container button {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    position: relative;
+}
+
+#play_button {
+    border-radius: 50%;
+    border-style: solid;
+    border-color: #d56c6c;
+    background: white;
+    transition: 0.3s;
+}
+
+#play_button:hover {
+    background-color: #c9c9c9;
+}
+
+#play_button svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 60%;
+}
+
+#range_button_container button svg path {
+    fill: #d56c6c;
+}
+
+#play_button.pause svg.play,
+#play_button.play svg.pause {
+    display: none;
+}
+
+#play_button.pause svg.pause,
+#play_button.play svg.play {
+    display: block;
+}
+
+#forward, #rewind {
+    border: none;
+    background: white;
+}
+
+#forward svg,
+#rewind svg {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 100%;
+    width: 100%;
+    position: absolute;
 }

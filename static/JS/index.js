@@ -1,62 +1,23 @@
-
-var map = L.map('map').setView([57.04708, 9.924603], 12);
-
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
-
-
 const algorithms = document.querySelectorAll(".checkbox input")
 const slider = document.querySelector("#time_range")
 const date_picker = document.querySelector("#date_picker")
+const play_btn = document.querySelector('#play_button');
+const forward_btn = document.querySelector('#forward');
+const rewind_btn = document.querySelector('#rewind');
+const speeds = [1, 5, 10, 30, 60, 300, 600, 1800, 3600]; // seconds per step
+
+let speed_state = 0;
 let is_checked = false;
+let time_step = 1;
+let interval;
 
-/*This event listener decides which button has been pressed, and should therefore
-also be used to implement the algorithms*/
-algorithms.forEach(algorithm => {
-    algorithm.addEventListener("change", () => {
-      check_checked();
-      if (is_checked) {
-        algorithm_request();
-      }
-    });
-});
 
-slider.addEventListener("input", () => {
+//Functions
+function request_if_checked() {
   if (is_checked) {
     algorithm_request();
-  }
-});
-
-date_picker.addEventListener("input", () => {
-  if (is_checked) {
-    algorithm_request();
-  }
-});
-
-
-algorithm_request = async () => {
-  selected = [];
-  //Implement algorithm switching here
-  try {
-    algorithms.forEach(alg => {
-      if (alg.checked == true) {
-        selected.push(alg.id)
-      }
-    });
-    time = new Date(slider.value * 1000).toISOString().split('T')[1].split('.')[0];
-    start_time = date_picker.value + " " + time;
-  
-    console.log(`Selected algorithm(s): ${selected}`);
-    const response = await fetch(`/algorithm?algs=${selected}&start_time=${start_time}`);
-    const data = await response.json();
-    console.log(data);
-  } catch (error) {
-    console.error('Error fetching algorithm data:', error);
   }
 }
-
 
 function updateSlider() {
   const val = slider.value;
@@ -66,15 +27,11 @@ function updateSlider() {
   
   var date_time = new Date(val * 1000);
   var time = date_time.toISOString().split('T')[1].split('.')[0];
-
-  //First timestamp = 2024-01-01 00:00:01
-  // Update output
   time_value.value = time;
-  
-  // Update fill style
+
   slider.style.background = `linear-gradient(to right, #d56c6c ${percent}%, #c9c9c9 ${percent}%)`;
 }
-updateSlider(); // init
+
 
 
 function check_checked() {
@@ -90,8 +47,9 @@ function check_checked() {
   }
 }
 
+
 function pass_time() {
-  slider.value = parseInt(slider.value) + 1;
+  slider.value = parseInt(slider.value) + time_step;
   if (slider.value == slider.max) {
     slider.value = slider.min;
     let date = new Date(date_picker.value);
@@ -99,16 +57,44 @@ function pass_time() {
     date_picker.value = date.toISOString().split('T')[0];
   }
   updateSlider();
-  if (is_checked) {
-    algorithm_request();
+  request_if_checked();
+}
+
+function start_pass_time() {
+  interval = setInterval(pass_time, 1000);
+}
+function stop_pass_time() {
+  clearInterval(interval);
+}
+
+
+// Event listeners 
+algorithms.forEach(algorithm => algorithm.addEventListener("change", () => {
+  check_checked();
+  request_if_checked();
+}));
+slider.addEventListener("input", request_if_checked);
+date_picker.addEventListener("input", request_if_checked);
+
+play_btn.addEventListener('click',() => {
+  play_btn.classList.toggle('play')
+  play_btn.classList.toggle('pause')
+  if (play_btn.classList.contains('pause')) {
+    start_pass_time()
+  } else {
+    stop_pass_time()
   }
-}
+})
 
-let start_pass_time = () => {
-  setInterval(pass_time, 1000);
-}
-let stop_pass_time = () => {
-  clearInterval(pass_time);
-}
+forward_btn.addEventListener('click', () => {
+  speed_state = Math.min(speeds.length - 1, speed_state + 1);
+  time_step = speeds[speed_state];
+})
 
-start_pass_time()
+rewind_btn.addEventListener('click', () => {
+  speed_state = Math.max(0, speed_state - 1);
+  time_step = speeds[speed_state];
+})
+
+
+updateSlider(); // init
