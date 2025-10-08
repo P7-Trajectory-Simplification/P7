@@ -46,7 +46,7 @@ def get_vessel_info(imo: int):
 
 def get_vessel_logs(imo: int, start_ts: str, end_ts: str) -> list[VesselLog]:
     conn = open_connection()
-    statement = text("SELECT lat, lon, ts FROM vessel_logs WHERE imo = :imo AND ts >= :start_ts AND ts <= :end_ts;")
+    statement = text("SELECT lat, lon, ts FROM vessel_logs WHERE imo = :imo AND ts >= :start_ts AND ts <= :end_ts ORDER BY ts;")
     result = conn.execute(statement, {"imo": imo, "start_ts": start_ts, "end_ts": end_ts})
     return hydrate_vessel_logs(result.fetchall())
 
