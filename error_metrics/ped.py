@@ -1,3 +1,4 @@
+from math import sqrt
 
 def ped (point, start_seg, end_seg):
     """Point to segment Perpendicular Euclidean distance.
@@ -10,8 +11,6 @@ def ped (point, start_seg, end_seg):
     Returns:
         float: The minimum Euclidean distance from the point to the segment.
     """
-    from math import sqrt
-
     x, y = point
     x1, y1 = start_seg
     x2, y2 = end_seg
