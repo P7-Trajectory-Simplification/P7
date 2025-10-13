@@ -14,7 +14,8 @@ def sed(point, simplified_point):
     """
     x, y, _ = point
     x_s, y_s, _ = simplified_point
-
+    
+    # Calculates the Euclidean distance between the two points
     distance = sqrt((x - x_s)**2 + (y - y_s)**2)
     return distance
 

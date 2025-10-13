@@ -5,17 +5,18 @@ def ped (point, start_seg, end_seg):
     """Point to segment Perpendicular Euclidean distance.
 
     Args:
-        point (tuple): (x, y) coordinates of the point.
-        start_seg (tuple): (x, y) coordinates of the start of the segment.
-        end_seg (tuple): (x, y) coordinates of the end of the segment.
+        point (tuple): (x, y, t) coordinates of the point and timestamp.
+        start_seg (tuple): (x, y, t) coordinates and timestamp of the start of the segment.
+        end_seg (tuple): (x, y, t) coordinates and timestamp of the end of the segment.
 
     Returns:
         float: The minimum Euclidean distance from the point to the segment.
     """
-    x, y = point
-    x1, y1 = start_seg
-    x2, y2 = end_seg
+    x, y, _ = point
+    x1, y1, _ = start_seg
+    x2, y2, _ = end_seg
     
+    # Calculates the distance when the segment is a point
     if (x1 == x2) and (y1 == y2):
         distance = sqrt((x - x1)**2 + (y - y1)**2)
         return distance
@@ -23,6 +24,9 @@ def ped (point, start_seg, end_seg):
     # Projection factor t: how far along the segment the projection lies
     t = ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / ((x2 - x1)**2 + (y2 - y1)**2)
 
+    """Determines whether the projection falls on the segment or outside it, 
+    if t < 0 the point is before the segment and if t > 1 the point is after the segment,
+    otherwise the projection falls on the segment."""
     if t < 0:
         # Closest to the start of the segment
         distance = sqrt((x - x1)**2 + (y - y1)**2)
@@ -39,8 +43,8 @@ def ped (point, start_seg, end_seg):
 def find_segment(point, trajectory):
     """Find the segment in the trajectory whose time interval is closest to the point's time."""
     point_time = point[2]
-    min_time_diff = float('inf')
-    closest_segment = None
+    #min_time_diff = float('inf')
+    #closest_segment = None
 
     for i in range(len(trajectory) - 1):
         start = trajectory[i]
@@ -48,6 +52,7 @@ def find_segment(point, trajectory):
         # Find time difference between point_time and the segment's interval
         if start[2] <= point_time <= end[2]:
             return (start, end)
+        #The following code is commented out, since it considers edge cases where the point time is outside the segment time interval, which shouldn't be possible in our case.
         """else:
             # If outside, compute how far the point_time is from the nearest endpoint
             time_diff = min(abs((point_time - start[2]).total_seconds()),
@@ -57,25 +62,27 @@ def find_segment(point, trajectory):
                 closest_segment = (start, end)
 
     return closest_segment"""
+    
+    #Print to inform that the point is outside the segment time interval and a segment therefore hasn't been chosen.
     print("Point time is outside the segment time interval.")
     return None
         
-def ped_results(trajectory1, trajectory2):
+def ped_results(raw_data_trajectory, simplified_trajectory):
     """Calculate the average Point to segment Euclidean distance between two trajectories and the maximum Point to segment Euclidean distance between two trajectories.
 
     Args:
-        trajectory1 (list): List of (x, y, timestamp) tuples for the first trajectory.
-        trajectory2 (list): List of (x, y, timestamp) tuples for the second trajectory.
+        trajectory1 (list): List of (x, y, timestamp) tuples for the raw data trajectory.
+        trajectory2 (list): List of (x, y, timestamp) tuples for the simplified trajectory.
 
     Returns:
-        float: The average PED between the two trajectories.
+        float: The average PED between the two trajectories and the max distance.
     """
     max_distance = 0
     total_distance = 0
     count = 0
 
-    for point in trajectory1:
-        segment = find_segment(point, trajectory2)
+    for point in raw_data_trajectory:
+        segment = find_segment(point, simplified_trajectory)
         if segment is not None:
             start_seg, end_seg = segment
             distance = ped((point[0], point[1]), (start_seg[0], start_seg[1]), (end_seg[0], end_seg[1]))
