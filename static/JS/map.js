@@ -8,13 +8,13 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 var popup = L.popup();
 
-function onMapClick(e) {
+function on_map_click(e) {
     popup
         .setLatLng(e.latlng)
         .setContent("You clicked the map at " + e.latlng.toString())
         .openOn(map);
 }
-map.on('click', onMapClick);
+map.on('click', on_map_click);
 
 
 function clear_map() {
