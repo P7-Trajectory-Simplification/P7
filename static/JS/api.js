@@ -8,7 +8,7 @@ async function algorithm_request() {
   selected = [];
   try {
     algorithms.forEach(alg => {
-      if (alg.checked == true) {
+      if (alg.checked) {
         selected.push(alg.id)
       }
     });
