@@ -4,6 +4,8 @@ from sqlalchemy import case
 from algorithms.isolate_routes import isolate_routes
 from data.database import get_all_vessels, get_vessel_logs
 from algorithms.dp import douglas_peucker
+from algorithms.squish import squish
+from vessel_log import VesselLog
 
 app = Flask(__name__)
 
@@ -23,19 +25,31 @@ def get_data(csv_algorithms: str, end_time: str):
             case 'DP':
                 simplified_routes = []
                 for route in routes:
-                    simplified_routes.append(douglas_peucker(route, 0.001))
+                    simplified_routes.append(douglas_peucker(route["route"], 0.001))
 
                 response[alg] = routes_to_array(simplified_routes)
-            #case 'SQUISH':
+            case 'SQUISH':
+                simplified_routes = []
+                for route in routes:
+                    squish(route["route"], route["squish_buff"])
+                    temp = []
+                    for item in route["squish_buff"]:
+                        temp.append(item[0])
+                    simplified_routes.append(temp)
+                response[alg] = routes_to_array(simplified_routes)
+
             #case 'SQUISH-E':
-            
-    response['raw'] = routes_to_array(routes)
+    temp = []
+    for route in routes:
+        temp.append(route['route'])
+
+    response['raw'] = routes_to_array(temp)
     return response
 
 
 
 
-def routes_to_array(routes):
+def routes_to_array(routes: list[VesselLog]):
     routes_array = []
     for route in routes:
         temp_array = []

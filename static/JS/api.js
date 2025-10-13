@@ -17,10 +17,12 @@ async function algorithm_request() {
 
     const response = await fetch(`/algorithm?algs=${selected}&end_time=${end_time}`);
     const data = await response.json();
-    dp_data = data.DP;
-    raw_data = data.raw;
+    squish_data = data.SQUISH?data.SQUISH:[];
+    dp_data = data.DP?data.DP:[];
+    raw_data = data.raw?data.raw:[];
     clear_map();
-    plot_to_map(raw_data, 'blue');
+    plot_to_map(squish_data, 'green');
+    //plot_to_map(raw_data, 'blue');
     plot_to_map(dp_data, 'red');
     console.log(data);
   } catch (error) {

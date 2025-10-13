@@ -1,3 +1,4 @@
+from algorithms.great_circle_math import point_to_great_circle
 from vessel_log import VesselLog
 
 
@@ -17,7 +18,7 @@ def douglas_peucker(points: list[VesselLog], epsilon: float) -> list[VesselLog]:
     end = len(points) - 1
     for i in range(1, end):
         # Calculate the perpendicular distance from point to line segment
-        d = perpendicular_distance(points[i], points[0], points[end])
+        d = point_to_great_circle(points[0].get_coords(), points[end].get_coords(), points[i].get_coords())
         if d > dmax:
             index = i
             dmax = d

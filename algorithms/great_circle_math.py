@@ -22,7 +22,7 @@ def magnitude(vector):
     return np.sqrt(vector.dot(vector))
 
 
-def latlonToVector(latlon):
+def latlon_to_vector(latlon):
     """Given a latitude and longitude-pair, return a numpy array-representation of a 3D unit vector that corresponds to that latitude and longitude.
     Floating-point errors may occur, but from testing them seem very very small.
 
@@ -42,7 +42,7 @@ def latlonToVector(latlon):
     return np.divide(vector, magnitude(vector))
 
 
-def pointToGreatCircle(latlon_a, latlon_b, latlon_c, radius=1):
+def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
     """Given the latitude and longitudes of three points A, B, and C, where a great circle connects A and B,
     return the length of the geodesic from C to that great circle.
     Implementation of method explained in https://web.archive.org/web/20171230114759/http://mathforum.org/library/drmath/view/51785.html
@@ -59,9 +59,9 @@ def pointToGreatCircle(latlon_a, latlon_b, latlon_c, radius=1):
         The radius of the sphere where A and B are points. Defaults to 1.
     """
     # we transform the latlons into unit vectors coming from the center of the sphere
-    vector_a = latlonToVector(latlon_a)
-    vector_b = latlonToVector(latlon_b)
-    vector_c = latlonToVector(latlon_c)
+    vector_a = latlon_to_vector(latlon_a)
+    vector_b = latlon_to_vector(latlon_b)
+    vector_c = latlon_to_vector(latlon_c)
 
     # vector_n is normal to the plane of the great circle between A and B
     vector_n = np.cross(vector_a, vector_b) / magnitude(np.cross(vector_a, vector_b))
@@ -76,7 +76,7 @@ def pointToGreatCircle(latlon_a, latlon_b, latlon_c, radius=1):
     return distance * radius
 
 
-def greatCircleDistance(latlon_a, latlon_b, radius=1):
+def great_circle_distance(latlon_a, latlon_b, radius=1):
     """Given a pair of latitudes and longitudes describing points on a sphere A and B, computes the great circle-distance between those points
     i.e. the length of the geodesic connecting those points
 
@@ -90,15 +90,15 @@ def greatCircleDistance(latlon_a, latlon_b, radius=1):
         The radius of the sphere where A and B are points. Defaults to 1.
     """
     # implementation of method as described in https://en.wikipedia.org/wiki/N-vector#Example_1:_Great_circle_distance
-    vector_a = latlonToVector(latlon_a)
-    vector_b = latlonToVector(latlon_b)
+    vector_a = latlon_to_vector(latlon_a)
+    vector_b = latlon_to_vector(latlon_b)
     angular_difference = np.arctan(
         magnitude(np.cross(vector_a, vector_b)) / vector_a.dot(vector_b)
     )
     return angular_difference * radius
 
 
-def predictSphereMovement(latlon, distance, bearing, radius=1):
+def predict_sphere_movement(latlon, distance, bearing, radius=1):
     """Given a position on a sphere described by latitude and longitude, a distance value, and a bearing,
     return a tuple containing the latitude and longitude of the destination point.
 
@@ -126,7 +126,7 @@ def predictSphereMovement(latlon, distance, bearing, radius=1):
     return (final_latitude, final_longitude)
 
 
-def getFinalBearing(latlon_a, latlon_b):
+def get_final_bearing(latlon_a, latlon_b):
     """Given a pair of latitudes and longitudes describing points on a sphere A and B,
     computes the direction of the geodesic from A to B at point B i.e. the bearing of some hypothetical vehicle at point B.
 
@@ -142,7 +142,7 @@ def getFinalBearing(latlon_a, latlon_b):
     angle_ANB = longitude_b - longitude_a
     AN = np.radians(90) - latitude_a
     # we're just interested in angles right now, so we use greatCircleDistance's default radius of 1 to make things easier
-    AB = greatCircleDistance(latlon_a, latlon_b)
+    AB = great_circle_distance(latlon_a, latlon_b)
     # using the sine rule we can find the angle ABN
     angle_ABN = np.arcsin((np.sin(angle_ANB) * np.sin(AN)) / np.sin(AB))
     # the new bearing is exactly ABN
@@ -152,7 +152,7 @@ def getFinalBearing(latlon_a, latlon_b):
 if __name__ == "__main__":
     # how far from university to the border (defined by a geodesic)
     print(
-        pointToGreatCircle(
+        point_to_great_circle(
             (np.radians(54.916584), np.radians(8.605293)),
             (np.radians(54.818675), np.radians(9.446560)),
             (np.radians(57.011476), np.radians(9.990813)),
@@ -162,7 +162,7 @@ if __name__ == "__main__":
 
     # how far from university to Klarup
     print(
-        greatCircleDistance(
+        point_to_great_circle(
             (np.radians(57.011257), np.radians(10.063530)),
             (np.radians(57.012349), np.radians(9.990929)),
             radius=EARTH_RADIUS_METERS,
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     )
 
     # from the university and 4500 meters East
-    latitude, longitude = predictSphereMovement(
+    latitude, longitude = predict_sphere_movement(
         (np.radians(57.012313), np.radians(9.991171)),
         4500,
         np.radians(90),
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     )
     print((np.rad2deg(latitude), np.rad2deg(longitude)))
 
-    bearing = getFinalBearing(
+    bearing = get_final_bearing(
         (np.radians(57.012313), np.radians(9.991171)),
         (np.radians(57.011549), np.radians(10.057820)),
     )
