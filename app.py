@@ -49,7 +49,7 @@ def get_data(csv_algorithms: str, end_time: str):
 
 
 
-def routes_to_array(routes: list[VesselLog]):
+def routes_to_array(routes: list[list[VesselLog]]):
     routes_array = []
     for route in routes:
         temp_array = []
