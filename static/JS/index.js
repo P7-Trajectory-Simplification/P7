@@ -1,6 +1,8 @@
-const algorithms = document.querySelectorAll(".checkbox input")
-const slider = document.querySelector("#time_range")
-const date_picker = document.querySelector("#date_picker")
+const algorithms = document.querySelectorAll('.checkbox input');
+const show_errors = document.querySelector('#show_errors');
+const analytics_info = document.querySelector('#analytics_info');
+const slider = document.querySelector('#time_range');
+const date_picker = document.querySelector('#date_picker');
 const play_btn = document.querySelector('#play_button');
 const forward_btn = document.querySelector('#forward');
 const rewind_btn = document.querySelector('#rewind');
@@ -75,6 +77,11 @@ algorithms.forEach(algorithm => algorithm.addEventListener("change", () => {
 }));
 slider.addEventListener("input", request_if_checked);
 date_picker.addEventListener("input", request_if_checked);
+
+show_errors.addEventListener('click', () => {
+  show_errors.classList.toggle('active');
+  analytics_info.classList.toggle('active');
+});
 
 play_btn.addEventListener('click',() => {
   play_btn.classList.toggle('play')
