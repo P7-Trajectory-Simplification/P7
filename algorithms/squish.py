@@ -1,13 +1,13 @@
-from algorithms.great_circle_math import point_to_great_circle
+from algorithms.great_circle_math import point_to_great_circle, EARTH_RADIUS_METERS
 from vessel_log import VesselLog
-
+import numpy as np
 
 def calc_sed(a: VesselLog, target: VesselLog, b: VesselLog) -> float:
     a_tuple = a.get_coords()
     b_tuple = b.get_coords()
     target_tuple = target.get_coords()
 
-    return point_to_great_circle(a_tuple, b_tuple, target_tuple)
+    return np.abs(point_to_great_circle(a_tuple, b_tuple, target_tuple, radius=EARTH_RADIUS_METERS))
 
 
 def find_min_sed(buff: list[(VesselLog, float)]) -> int:
@@ -18,7 +18,7 @@ def find_min_sed(buff: list[(VesselLog, float)]) -> int:
     return index
 
 
-def squish(points: list[VesselLog], buff: list, buff_size: int = 1000):
+def squish(points: list[VesselLog], buff: list, buff_size: int = 100):
     print(len(points))
     for i in range(0, len(points)):
         buff.append([points[i], float('inf')])
