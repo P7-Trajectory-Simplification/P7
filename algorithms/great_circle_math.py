@@ -89,12 +89,17 @@ def great_circle_distance(latlon_a, latlon_b, radius=1):
     radius   : _positive float or int_, optional
         The radius of the sphere where A and B are points. Defaults to 1.
     """
-    # implementation of method as described in https://en.wikipedia.org/wiki/N-vector#Example_1:_Great_circle_distance
-    vector_a = latlon_to_vector(latlon_a)
-    vector_b = latlon_to_vector(latlon_b)
-    angular_difference = np.arctan(
-        magnitude(np.cross(vector_a, vector_b)) / vector_a.dot(vector_b)
+    # implementation of method as described in https://en.wikipedia.org/wiki/Great-circle_distance#Formulae
+
+    latitude_a, longitude_a = latlon_a
+    latitude_b, longitude_b = latlon_b
+    longitude_delta = np.abs(longitude_a - longitude_b)
+    # spherical law of cosines lets us find the angular difference
+    angular_difference = np.arccos(
+        np.sin(latitude_a) * np.sin(latitude_b)
+        + np.cos(latitude_a) * np.cos(latitude_b) * np.cos(longitude_delta)
     )
+    # multiply with radius to get the distance covered
     return angular_difference * radius
 
 
@@ -141,7 +146,7 @@ def get_final_bearing(latlon_a, latlon_b):
     _, longitude_b = latlon_b
     angle_ANB = longitude_b - longitude_a
     AN = np.radians(90) - latitude_a
-    # we're just interested in angles right now, so we use greatCircleDistance's default radius of 1 to make things easier
+    # we're just interested in angles right now, so we use great_circle_distance's default radius of 1 to make things easier
     AB = great_circle_distance(latlon_a, latlon_b)
     # using the sine rule we can find the angle ABN
     angle_ABN = np.arcsin((np.sin(angle_ANB) * np.sin(AN)) / np.sin(AB))
@@ -162,7 +167,7 @@ if __name__ == "__main__":
 
     # how far from university to Klarup
     print(
-        point_to_great_circle(
+        great_circle_distance(
             (np.radians(57.011257), np.radians(10.063530)),
             (np.radians(57.012349), np.radians(9.990929)),
             radius=EARTH_RADIUS_METERS,
