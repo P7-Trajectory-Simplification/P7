@@ -14,6 +14,10 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, button {
     align-content: center;
 }
 
+.body * {
+    box-sizing: border-box;
+}
+
 #buttons {
     display: flex;
     flex-direction: row;
@@ -91,7 +95,6 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, button {
 
 #analytics_info th, #analytics_info td {
     border: 0px;
-    border-bottom: 1px  solid rgb(186, 186, 186);
     padding: 5px;
     text-align: center;
 }
@@ -104,6 +107,11 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, button {
     display: flex;
     padding: 20px 5px;
     text-align: center;
+    border-bottom: 1px  solid rgb(186, 186, 186);
+}
+
+#analytics_info tr > *:first-child {
+    font-weight: bold;
 }
 
 .algorithms {

@@ -6,14 +6,16 @@ function create_table() {
     const tr = table.insertRow();
     const td = tr.insertCell();
     for(let i = 0; i <= 3; i++) {
-        const td = document.createElement('th');
-        tr.appendChild(td);
-        td.textContent = error_metrics[i];
+        const th = document.createElement('th');
+        tr.appendChild(th);
+        th.textContent = error_metrics[i];
     }
     selected = get_selected_algorithms();
     selected.forEach(algorithm => {
         const tr = table.insertRow();
-        tr.textContent = algorithm;
+        const td = document.createElement('td');
+        tr.appendChild(td);
+        td.textContent = algorithm;
     });
     return table;
 }
