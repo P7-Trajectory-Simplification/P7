@@ -69,7 +69,6 @@ function stop_pass_time() {
   clearInterval(interval);
 }
 
-
 // Event listeners 
 algorithms.forEach(algorithm => algorithm.addEventListener("change", () => {
   check_checked();
@@ -81,6 +80,10 @@ date_picker.addEventListener("input", request_if_checked);
 show_errors.addEventListener('click', () => {
   show_errors.classList.toggle('active');
   analytics_info.classList.toggle('active');
+  analytics_info.querySelector('table').remove();
+  table = create_table();
+  analytics_info.append(table);
+
 });
 
 play_btn.addEventListener('click',() => {

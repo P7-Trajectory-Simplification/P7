@@ -75,9 +75,35 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, button {
     border-radius: 5px;
     padding: 10px;
     margin-bottom: 10px;
-    height: 200px;
     width: 90%;
+    height: fit-content;
     transition: 0.3s;
+}
+
+#analytics_info table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#analytics_info th {
+    font-weight: bold;
+}
+
+#analytics_info th, #analytics_info td {
+    border: 0px;
+    border-bottom: 1px  solid rgb(186, 186, 186);
+    padding: 5px;
+    text-align: center;
+}
+
+#analytics_info tr:first-child {
+    display: table-row;
+}
+
+#analytics_info tr {
+    display: flex;
+    padding: 20px 5px;
+    text-align: center;
 }
 
 .algorithms {

@@ -4,14 +4,20 @@ let squish_e_data = [];
 let our_data = [];
 let raw_data = [];
 
-async function algorithm_request() {
+function get_selected_algorithms() {
   selected = [];
-  try {
-    algorithms.forEach(alg => {
+  algorithms.forEach(alg => {
       if (alg.checked) {
         selected.push(alg.id)
       }
     });
+  return selected;
+}
+
+async function algorithm_request() {
+  selected = [];
+  try {
+    selected = get_selected_algorithms();
     time = new Date(slider.value * 1000).toISOString().split('T')[1].split('.')[0];
     end_time = date_picker.value + " " + time;
 
