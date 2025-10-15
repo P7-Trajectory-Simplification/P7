@@ -1,6 +1,7 @@
-const algorithms = document.querySelectorAll(".checkbox input")
-const slider = document.querySelector("#time_range")
-const date_picker = document.querySelector("#date_picker")
+const algorithms = document.querySelectorAll('.checkbox input');
+const slider = document.querySelector('#time_range');
+const start_date = document.querySelector('#start_date');
+const end_date = document.querySelector('#end_date');
 const play_btn = document.querySelector('#play_button');
 const forward_btn = document.querySelector('#forward');
 const rewind_btn = document.querySelector('#rewind');
@@ -52,9 +53,9 @@ function pass_time() {
   slider.value = parseInt(slider.value) + time_step;
   if (slider.value == slider.max) {
     slider.value = slider.min;
-    let date = new Date(date_picker.value);
+    let date = new Date(end_date.value);
     date.setDate(date.getDate() + 1);
-    date_picker.value = date.toISOString().split('T')[0];
+    end_date.value = date.toISOString().split('T')[0];
   }
   updateSlider();
   request_if_checked();
@@ -69,20 +70,21 @@ function stop_pass_time() {
 
 
 // Event listeners 
-algorithms.forEach(algorithm => algorithm.addEventListener("change", () => {
+algorithms.forEach(algorithm => algorithm.addEventListener('change', () => {
   check_checked();
   request_if_checked();
 }));
-slider.addEventListener("input", request_if_checked);
-date_picker.addEventListener("input", request_if_checked);
+slider.addEventListener('input', request_if_checked);
+start_date.addEventListener('input', request_if_checked);
+end_date.addEventListener('input', request_if_checked);
 
 play_btn.addEventListener('click',() => {
-  play_btn.classList.toggle('play')
-  play_btn.classList.toggle('pause')
+  play_btn.classList.toggle('play');
+  play_btn.classList.toggle('pause');
   if (play_btn.classList.contains('pause')) {
-    start_pass_time()
+    start_pass_time();
   } else {
-    stop_pass_time()
+    stop_pass_time();
   }
 })
 

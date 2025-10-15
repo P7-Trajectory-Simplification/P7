@@ -4,7 +4,7 @@ import numpy as np
 
 
 def douglas_peucker(points: list[VesselLog], epsilon: float) -> list[VesselLog]:
-    """
+    '''
     Simplifies a given set of points using the Douglas-Peucker algorithm.
 
     Parameters:
@@ -13,7 +13,7 @@ def douglas_peucker(points: list[VesselLog], epsilon: float) -> list[VesselLog]:
 
     Returns:
     list of tuples: Simplified list of points.
-    """
+    '''
     dmax = 0
     index = 0
     end = len(points) - 1

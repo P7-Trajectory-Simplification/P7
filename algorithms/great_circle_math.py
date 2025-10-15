@@ -12,25 +12,25 @@ EARTH_RADIUS_METERS = 6371e3
 
 
 def magnitude(vector):
-    """Given a vector, return its magnitude.
+    '''Given a vector, return its magnitude.
 
     Parameters
     ----------
     vector : any numpy arraylike that supports dot and sqrt
 
-    """
+    '''
     return np.sqrt(vector.dot(vector))
 
 
 def latlon_to_vector(latlon):
-    """Given a latitude and longitude-pair, return a numpy array-representation of a 3D unit vector that corresponds to that latitude and longitude.
+    '''Given a latitude and longitude-pair, return a numpy array-representation of a 3D unit vector that corresponds to that latitude and longitude.
     Floating-point errors may occur, but from testing them seem very very small.
 
     Parameters
     ----------
     latlon : _latitude and longitude-tuple_
         Latitude and longitude-pair
-    """
+    '''
     latitude, longitude = latlon
     vector = np.array(
         [
@@ -43,7 +43,7 @@ def latlon_to_vector(latlon):
 
 
 def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
-    """Given the latitude and longitudes of three points A, B, and C, where a great circle connects A and B,
+    '''Given the latitude and longitudes of three points A, B, and C, where a great circle connects A and B,
     return the length of the geodesic from C to that great circle.
     Implementation of method explained in https://web.archive.org/web/20171230114759/http://mathforum.org/library/drmath/view/51785.html
 
@@ -57,7 +57,7 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
         The latitude and longitude of the point whose distance to the great circle we want to know.
     radius   : _positive float or int_, optional
         The radius of the sphere where A and B are points. Defaults to 1.
-    """
+    '''
     # we transform the latlons into unit vectors coming from the center of the sphere
     vector_a = latlon_to_vector(latlon_a)
     vector_b = latlon_to_vector(latlon_b)
@@ -77,7 +77,7 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
 
 
 def great_circle_distance(latlon_a, latlon_b, radius=1):
-    """Given a pair of latitudes and longitudes describing points on a sphere A and B, computes the great circle-distance between those points
+    '''Given a pair of latitudes and longitudes describing points on a sphere A and B, computes the great circle-distance between those points
     i.e. the length of the geodesic connecting those points
 
     Parameters
@@ -88,7 +88,7 @@ def great_circle_distance(latlon_a, latlon_b, radius=1):
         The latitude and longitude of the second point on the great circle.
     radius   : _positive float or int_, optional
         The radius of the sphere where A and B are points. Defaults to 1.
-    """
+    '''
     # implementation of method as described in https://en.wikipedia.org/wiki/Great-circle_distance#Formulae
 
     latitude_a, longitude_a = latlon_a
@@ -104,7 +104,7 @@ def great_circle_distance(latlon_a, latlon_b, radius=1):
 
 
 def predict_sphere_movement(latlon, distance, bearing, radius=1):
-    """Given a position on a sphere described by latitude and longitude, a distance value, and a bearing,
+    '''Given a position on a sphere described by latitude and longitude, a distance value, and a bearing,
     return a tuple containing the latitude and longitude of the destination point.
 
     Parameters
@@ -117,7 +117,7 @@ def predict_sphere_movement(latlon, distance, bearing, radius=1):
         The direction of the movement, measured in radians clockwise from the North Pole.
     radius   : _positive float or int_, optional
         The radius of the sphere used for calculations. Defaults to 1.
-    """  # TODO check if it's actually clockwise!
+    '''  # TODO check if it's actually clockwise!
     latitude, longitude = latlon
     AB = distance / radius
     AN = np.radians(90) - latitude  # the colatitude of A
@@ -132,7 +132,7 @@ def predict_sphere_movement(latlon, distance, bearing, radius=1):
 
 
 def get_final_bearing(latlon_a, latlon_b):
-    """Given a pair of latitudes and longitudes describing points on a sphere A and B,
+    '''Given a pair of latitudes and longitudes describing points on a sphere A and B,
     computes the direction of the geodesic from A to B at point B i.e. the bearing of some hypothetical vehicle at point B.
 
     Parameters
@@ -141,7 +141,7 @@ def get_final_bearing(latlon_a, latlon_b):
         The starting point of our hypothetical vehicle's travel.
     latlon_b : _latitude and longitude-tuple_
         The endpoint of our hypothetical vehicle's travel. This function returns the vehicle's bearing at this point.
-    """
+    '''
     latitude_a, longitude_a = latlon_a
     _, longitude_b = latlon_b
     angle_ANB = longitude_b - longitude_a
@@ -154,7 +154,7 @@ def get_final_bearing(latlon_a, latlon_b):
     return angle_ABN
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # how far from university to the border (defined by a geodesic)
     print(
         point_to_great_circle(
