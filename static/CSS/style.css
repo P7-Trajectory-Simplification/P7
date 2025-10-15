@@ -23,6 +23,7 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, button {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    width: 90%;
 }
 
 #show_errors {
@@ -236,6 +237,7 @@ input[type="date"]::-webkit-datetime-edit {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 90%;
 }
 
 #range_button_container {
