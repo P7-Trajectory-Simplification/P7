@@ -9,3 +9,6 @@ class VesselLog:
 
     def get_coords(self) -> tuple[float, float]:
         return self.lat, self.lon
+
+    def __repr__(self):
+        return f"({self.lat}, {self.lon}) {self.ts}"
