@@ -51,6 +51,7 @@ def find_segment(point, trajectory):
         end = trajectory[i + 1]
         # Find time difference between point_time and the segment's interval
         if start[2] <= point_time <= end[2]:
+            print("DEBUG segment:", start, end)
             return (start, end)
         #The following code is commented out, since it considers edge cases where the point time is outside the segment time interval, which shouldn't be possible in our case.
         """else:
@@ -92,7 +93,8 @@ def ped_results(raw_data_trajectory, simplified_trajectory):
                 max_distance = distance
 
     if count == 0:
-        return float('inf')  # No valid segments found
+        return float('inf'), float('inf')  # both average and max are infinite
+
 
     avg_distance = total_distance / count
     return avg_distance, max_distance

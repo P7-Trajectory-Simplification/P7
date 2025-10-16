@@ -3,6 +3,7 @@ let squish_data = [];
 let squish_e_data = [];
 let our_data = [];
 let raw_data = [];
+let all_error_metrics = [[]]; // 2D array to hold error metrics for each algorithm
 
 function get_selected_algorithms() {
   selected = [];
@@ -29,6 +30,25 @@ async function algorithm_request() {
     plot_to_map(raw_data, 'blue');
     plot_to_map(dp_data, 'red');
     console.log(data);
+
+    const error_response = await fetch(`/error-metrics?algs=${selected}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      raw_data: raw_data,
+      simplified_data: dp_data
+    })
+    });
+
+const error_data = await error_response.json();
+all_error_metrics = error_data;
+
+
+    //const error_response = await fetch(`/error-metrics?algs=${selected}&raw_data=${raw_data}&simplified_data=${dp_data}`);
+    //const error_data = await error_response.json();
+    all_error_metrics = error_data;
   } catch (error) {
     console.error('Error fetching algorithm data:', error);
   }

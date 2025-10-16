@@ -65,5 +65,3 @@ def sed_results(raw_data_trajectory, simplified_trajectory):
 
     avg_distance = total_distance / count
     return avg_distance, max_distance
-
-from datetime import datetime, timedelta
