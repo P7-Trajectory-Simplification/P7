@@ -56,10 +56,10 @@ def latlon_to_vector(latlon):
 # we multiply by the radius and we're done
 
 
-def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
+def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1, ignore_sign=True):
     """Given the latitude and longitudes of three points A, B, and C, where a great circle connects A and B,
     return the length of the geodesic from C to that great circle.
-    Implementation of method explained in https://math.stackexchange.com/questions/337055/compute-minimum-distance-between-point-and-great-arc-on-sphere
+
     Parameters
     ----------
     latlon_a : _latitude and longitude-tuple_
@@ -70,7 +70,11 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
         The latitude and longitude of the point whose distance to the great circle we want to know.
     radius   : _positive float or int_, optional
         The radius of the sphere where A and B are points. Defaults to 1.
+    ignore_sign : _Boolean_, optional
+        Depending on the order of a and b in input, the result may be positive or negative, but the absolute value will be the same.
+        This argument forces the result to be nonnegative. Defaults to True.
     """
+    # Implementation of method explained in https://math.stackexchange.com/questions/337055/compute-minimum-distance-between-point-and-great-arc-on-sphere
     # we transform the latlons into unit vectors coming from the center of the sphere
     vector_a = latlon_to_vector(latlon_a)
     vector_b = latlon_to_vector(latlon_b)
@@ -80,7 +84,10 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
         (vector_c.dot(np.cross(vector_a, vector_b)))
         / magnitude(np.cross(vector_a, vector_b))
     )
-    return distance * radius
+    if ignore_sign:
+        return np.abs(distance * radius)
+    else:
+        return distance * radius
 
 
 def great_circle_distance(latlon_a, latlon_b, radius=1):
