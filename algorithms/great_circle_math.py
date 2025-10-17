@@ -103,17 +103,23 @@ def great_circle_distance(latlon_a, latlon_b, radius=1):
     radius   : _positive float or int_, optional
         The radius of the sphere where A and B are points. Defaults to 1.
     """
-    # implementation of method as described in https://en.wikipedia.org/wiki/Great-circle_distance#Formulae
 
+    # implementation of method described in https://en.wikipedia.org/wiki/Great-circle_navigation
     latitude_a, longitude_a = latlon_a
     latitude_b, longitude_b = latlon_b
-    longitude_delta = np.abs(longitude_a - longitude_b)
-    # spherical law of cosines lets us find the angular difference
-    angular_difference = np.arccos(
-        np.sin(latitude_a) * np.sin(latitude_b)
-        + np.cos(latitude_a) * np.cos(latitude_b) * np.cos(longitude_delta)
+    longitude_delta = longitude_b - longitude_a
+    y = np.sqrt(
+        np.square(
+            np.cos(latitude_a) * np.sin(latitude_b)
+            - np.sin(latitude_a) * np.cos(latitude_b) * np.cos(longitude_delta)
+        )
+        + np.square(np.cos(latitude_b) * np.sin(longitude_delta))
     )
-    # multiply with radius to get the distance covered
+    x = np.sin(latitude_a) * np.sin(latitude_b) + np.cos(latitude_a) * np.cos(
+        latitude_b
+    ) * np.cos(longitude_delta)
+    angular_difference = np.atan2(y, x)
+    # multiply angular difference with radius to get the distance covered
     return angular_difference * radius
 
 
