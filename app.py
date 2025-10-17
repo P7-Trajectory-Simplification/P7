@@ -67,11 +67,3 @@ def get_algorithm_ours():
     end_time = request.args.get("end_time")
     print(end_time)
     return get_data(algs, end_time)
-
-
-"""case 'Ours':
-                all_error_metrics.append(get_error_metrics(raw_data, simplified_data))
-            case 'SQUISH':
-                all_error_metrics.append(get_error_metrics(raw_data, simplified_data))
-            case 'SQUISH-E':
-                all_error_metrics.append(get_error_metrics(raw_data, simplified_data))"""

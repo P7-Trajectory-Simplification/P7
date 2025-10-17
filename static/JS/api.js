@@ -3,7 +3,7 @@ let squish_data = [];
 let squish_e_data = [];
 let our_data = [];
 let raw_data = [];
-let all_error_metrics = []; // 2D array to hold error metrics for each algorithm
+let all_error_metrics = [];
 
 function get_selected_algorithms() {
   selected = [];
