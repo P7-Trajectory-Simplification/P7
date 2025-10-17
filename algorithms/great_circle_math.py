@@ -42,11 +42,24 @@ def latlon_to_vector(latlon):
     return np.divide(vector, magnitude(vector))
 
 
+# used to be an implementation of https://web.archive.org/web/20171230114759/http://mathforum.org/library/drmath/view/51785.html
+# old comments in case we need to restore this
+# vector_n is normal to the plane of the great circle between A and B
+# vector_n = np.cross(vector_a, vector_b) / magnitude(np.cross(vector_a, vector_b))
+
+# N . C = cos(<NOC) with <NOC being the angle between N and C measured from the sphere's center
+# angle_nc = np.arccos(vector_n.dot(vector_c))
+
+# the difference between angle_nc and a right angle is the angular distance from C to the great circle between A and B
+# distance = np.radians(90) - angle_nc
+
+# we multiply by the radius and we're done
+
+
 def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
     '''Given the latitude and longitudes of three points A, B, and C, where a great circle connects A and B,
     return the length of the geodesic from C to that great circle.
-    Implementation of method explained in https://web.archive.org/web/20171230114759/http://mathforum.org/library/drmath/view/51785.html
-
+    Implementation of method explained in https://math.stackexchange.com/questions/337055/compute-minimum-distance-between-point-and-great-arc-on-sphere
     Parameters
     ----------
     latlon_a : _latitude and longitude-tuple_
@@ -63,16 +76,10 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
     vector_b = latlon_to_vector(latlon_b)
     vector_c = latlon_to_vector(latlon_c)
 
-    # vector_n is normal to the plane of the great circle between A and B
-    vector_n = np.cross(vector_a, vector_b) / magnitude(np.cross(vector_a, vector_b))
-
-    # N . C = cos(<NOC) with <NOC being the angle between N and C measured from the sphere's center
-    angle_nc = np.arccos(vector_n.dot(vector_c))
-
-    # the difference between angle_nc and a right angle is the angular distance from C to the great circle between A and B
-    distance = np.radians(90) - angle_nc
-
-    # we multiply by the radius and we're done
+    distance = np.arcsin(
+        (vector_c.dot(np.cross(vector_a, vector_b)))
+        / magnitude(np.cross(vector_a, vector_b))
+    )
     return distance * radius
 
 
