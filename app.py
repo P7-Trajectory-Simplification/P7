@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask import render_template
 from sqlalchemy import case
+from algorithms.dead_reckoning import dead_reckoning
 from algorithms.isolate_routes import isolate_routes
 from data.database import get_all_vessels, get_vessel_logs
 from algorithms.dp import douglas_peucker
@@ -19,15 +20,28 @@ def get_data(csv_algorithms: str, end_time: str):
     response = {}
     for alg in algorithms:
         match alg:
-            #case 'Ours':
+            case 'Ours':
+                pass
             case 'DP':
                 simplified_routes = []
                 for route in routes:
                     simplified_routes.append(douglas_peucker(route, 0.001))
 
                 response[alg] = routes_to_array(simplified_routes)
-            #case 'SQUISH':
-            #case 'SQUISH-E':
+            case 'SQUISH':
+                pass
+            case 'DR':
+                simplified_routes = []
+                for route in routes:
+                    simplified_route = []
+                    for point in route:
+                        simplified_route.append(point)
+                        simplified_route = dead_reckoning(simplified_route, tolerance=2000)
+                    simplified_routes.append(simplified_route)
+                    
+                response[alg] = routes_to_array(simplified_routes)
+            case 'SQUISH-E':
+                pass
             
     response['raw'] = routes_to_array(routes)
     return response
@@ -47,7 +61,7 @@ def routes_to_array(routes):
 
 @app.route('/')
 def index():
-    return render_template('index.html.jinja', algorithms=['Ours', 'SQUISH', 'SQUISH-E', 'DP'])
+    return render_template('index.html.jinja', algorithms=['Ours', 'SQUISH', 'SQUISH-E', 'DP', 'DR'])
 
 @app.route('/algorithm')
 def get_algorithm_ours():

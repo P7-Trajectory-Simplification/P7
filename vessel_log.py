@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import numpy as np
 
 class VesselLog:
     def __init__(self, lat: float, lon: float, ts: datetime):
@@ -8,7 +8,7 @@ class VesselLog:
         self.ts = ts
 
     def get_coords(self) -> tuple[float, float]:
-        return self.lat, self.lon
+        return np.radians(self.lat), np.radians(self.lon)
 
     def __repr__(self):
         return f"({self.lat}, {self.lon}) {self.ts}"

@@ -1,5 +1,6 @@
 from datetime import datetime
-from great_circle_math import (
+import numpy as np
+from algorithms.great_circle_math import (
     great_circle_distance,
     predict_sphere_movement,
     get_final_bearing,
@@ -63,12 +64,8 @@ def dead_reckoning(
         radius=EARTH_RADIUS_METERS,
     )
     # compare difference between predicted next point and potential next point to tolerance
-    if (
-        great_circle_distance(
-            latlon_predicted, newest_point.get_coords(), radius=EARTH_RADIUS_METERS
-        )
-        > tolerance
-    ):
+    error = great_circle_distance(latlon_predicted, newest_point.get_coords(), radius=EARTH_RADIUS_METERS)
+    if np.abs(error) > tolerance:
         # if the predicted point is further than we tolerate, reset prediction points
         prediction_startpoint = next_newest_point
         prediction_endpoint = newest_point
