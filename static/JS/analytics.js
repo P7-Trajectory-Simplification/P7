@@ -20,8 +20,8 @@ function create_table() {
         const errors = all_error_metrics[i];
         console.log(errors);
         for (let j = 0; j < errors.length; j++) {
-            const tr = table.rows[j + 1] || table.insertRow();
-            const td = tr.insertCell();
+            const td = document.createElement('td');
+            tr.appendChild(td);
             td.textContent = errors[j];
         }
         i++;

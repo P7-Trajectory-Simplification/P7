@@ -6,6 +6,7 @@ from data.database import get_all_vessels, get_vessel_logs
 from algorithms.dp import douglas_peucker
 from error_metrics.sed import sed_results
 from error_metrics.ped import ped_results
+from vessel_log import VesselLog
 
 app = Flask(__name__)
 
@@ -30,8 +31,11 @@ def get_data(csv_algorithms: str, end_time: str):
                 response[alg] = routes_to_array(simplified_routes)
             #case 'SQUISH':
             #case 'SQUISH-E':
-            
+
     response['raw'] = routes_to_array(routes)
+
+    response['error_metrics'] = [get_error_metrics(routes, simplified_routes)]
+
     return response
 
 
@@ -46,7 +50,7 @@ def routes_to_array(routes):
         routes_array.append(temp_array)
     return routes_array
 
-def get_error_metrics(raw_routes, simplified_routes):
+def get_error_metrics(raw_routes: list[VesselLog], simplified_routes):
     error_metrics = []
     ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
     sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
@@ -63,18 +67,6 @@ def get_algorithm_ours():
     end_time = request.args.get("end_time")
     print(end_time)
     return get_data(algs, end_time)
-
-@app.route('/error-metrics', methods=['POST'])
-def get_error_metrics_request():
-    algs = request.args.get("algs")
-    raw_data = request.json['raw_data']
-    simplified_data = request.json['simplified_data']
-    all_error_metrics = [[]]
-    for alg in algs.split(','):
-        match alg:
-            case 'DP':
-                all_error_metrics.append(get_error_metrics(raw_data, simplified_data))
-    return get_error_metrics(raw_data, simplified_data)
 
 
 """case 'Ours':

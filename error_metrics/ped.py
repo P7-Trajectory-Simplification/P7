@@ -86,14 +86,14 @@ def ped_results(raw_data_trajectory, simplified_trajectory):
         segment = find_segment(point, simplified_trajectory)
         if segment is not None:
             start_seg, end_seg = segment
-            distance = ped((point[0], point[1]), (start_seg[0], start_seg[1]), (end_seg[0], end_seg[1]))
+            distance = ped((point.lat.get_coords(), point.lon.get_coords()), (start_seg[0], start_seg[1]), (end_seg[0], end_seg[1]))
             total_distance += distance
             count += 1
         if distance > max_distance:
                 max_distance = distance
 
     if count == 0:
-        return float('inf'), float('inf')  # both average and max are infinite
+        return 0,0  # both average and max are zero
 
 
     avg_distance = total_distance / count
