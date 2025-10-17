@@ -56,10 +56,11 @@ def latlon_to_vector(latlon):
 # we multiply by the radius and we're done
 
 
-def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
+def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1, ignore_sign=True):
     '''Given the latitude and longitudes of three points A, B, and C, where a great circle connects A and B,
+
     return the length of the geodesic from C to that great circle.
-    Implementation of method explained in https://math.stackexchange.com/questions/337055/compute-minimum-distance-between-point-and-great-arc-on-sphere
+
     Parameters
     ----------
     latlon_a : _latitude and longitude-tuple_
@@ -70,7 +71,12 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
         The latitude and longitude of the point whose distance to the great circle we want to know.
     radius   : _positive float or int_, optional
         The radius of the sphere where A and B are points. Defaults to 1.
+    ignore_sign : _Boolean_, optional
+        Depending on the order of a and b in input, the result may be positive or negative, but the absolute value will be the same.
+        This argument forces the result to be nonnegative. Defaults to True.
     '''
+    # Implementation of method explained in https://math.stackexchange.com/questions/337055/compute-minimum-distance-between-point-and-great-arc-on-sphere
+      
     # we transform the latlons into unit vectors coming from the center of the sphere
     vector_a = latlon_to_vector(latlon_a)
     vector_b = latlon_to_vector(latlon_b)
@@ -80,7 +86,10 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1):
         (vector_c.dot(np.cross(vector_a, vector_b)))
         / magnitude(np.cross(vector_a, vector_b))
     )
-    return distance * radius
+    if ignore_sign:
+        return np.abs(distance * radius)
+    else:
+        return distance * radius
 
 
 def great_circle_distance(latlon_a, latlon_b, radius=1):
@@ -96,17 +105,23 @@ def great_circle_distance(latlon_a, latlon_b, radius=1):
     radius   : _positive float or int_, optional
         The radius of the sphere where A and B are points. Defaults to 1.
     '''
-    # implementation of method as described in https://en.wikipedia.org/wiki/Great-circle_distance#Formulae
-
+    
+    # implementation of method described in https://en.wikipedia.org/wiki/Great-circle_navigation
     latitude_a, longitude_a = latlon_a
     latitude_b, longitude_b = latlon_b
-    longitude_delta = np.abs(longitude_a - longitude_b)
-    # spherical law of cosines lets us find the angular difference
-    angular_difference = np.arccos(
-        np.sin(latitude_a) * np.sin(latitude_b)
-        + np.cos(latitude_a) * np.cos(latitude_b) * np.cos(longitude_delta)
+    longitude_delta = longitude_b - longitude_a
+    y = np.sqrt(
+        np.square(
+            np.cos(latitude_a) * np.sin(latitude_b)
+            - np.sin(latitude_a) * np.cos(latitude_b) * np.cos(longitude_delta)
+        )
+        + np.square(np.cos(latitude_b) * np.sin(longitude_delta))
     )
-    # multiply with radius to get the distance covered
+    x = np.sin(latitude_a) * np.sin(latitude_b) + np.cos(latitude_a) * np.cos(
+        latitude_b
+    ) * np.cos(longitude_delta)
+    angular_difference = np.atan2(y, x)
+    # multiply angular difference with radius to get the distance covered
     return angular_difference * radius
 
 
@@ -141,6 +156,7 @@ def predict_sphere_movement(latlon, distance, bearing, radius=1):
 def get_final_bearing(latlon_a, latlon_b):
     '''Given a pair of latitudes and longitudes describing points on a sphere A and B,
     computes the direction of the geodesic from A to B at point B i.e. the bearing of some hypothetical vehicle at point B.
+    Note that bearing is measured clockwise from the north-direction, so 90 degrees corresponds to East and -90 degrees corresponds to West.
 
     Parameters
     ----------
@@ -149,16 +165,21 @@ def get_final_bearing(latlon_a, latlon_b):
     latlon_b : _latitude and longitude-tuple_
         The endpoint of our hypothetical vehicle's travel. This function returns the vehicle's bearing at this point.
     '''
-    latitude_a, longitude_a = latlon_a
-    _, longitude_b = latlon_b
-    angle_ANB = longitude_b - longitude_a
-    AN = np.radians(90) - latitude_a
-    # we're just interested in angles right now, so we use great_circle_distance's default radius of 1 to make things easier
-    AB = great_circle_distance(latlon_a, latlon_b)
-    # using the sine rule we can find the angle ABN
-    angle_ABN = np.arcsin((np.sin(angle_ANB) * np.sin(AN)) / np.sin(AB))
-    # the new bearing is exactly ABN
-    return angle_ABN
+    # based on the method covered in https://geophydog.cool/post/geometry_on_a_sphere/#__2-the-azimuth-and-back-azimuth__
+    # REVIEW maybe not the most prestigious source but their method *does* work.
+    # NOTE the points have to be swapped in order to compute back-azimuth i.e. the bearing at the end of the path
+    latitude_a, longitude_a = latlon_b
+    latitude_b, longitude_b = latlon_a
+    longitude_delta = longitude_b - longitude_a
+    y = np.sin(longitude_delta) * np.cos(latitude_b)
+    x = np.cos(latitude_a) * np.sin(latitude_b) - np.sin(latitude_a) * np.cos(
+        latitude_b
+    ) * np.cos(longitude_delta)
+    back_azimuth = (
+        np.arctan2(y, x) / (np.pi / np.radians(180)) + np.radians(360)
+    ) % np.radians(360)
+    # we reverse the back-azimuth to get the bearing
+    return back_azimuth - np.radians(180)
 
 
 if __name__ == '__main__':
@@ -190,8 +211,9 @@ if __name__ == '__main__':
     )
     print((np.rad2deg(latitude), np.rad2deg(longitude)))
 
+    # the angle from AAU canteen to Cassiopeia (the building)
     bearing = get_final_bearing(
-        (np.radians(57.012313), np.radians(9.991171)),
-        (np.radians(57.011549), np.radians(10.057820)),
+        (np.radians(57.015631), np.radians(9.977710)),
+        (np.radians(57.012674), np.radians(9.990636)),
     )
     print(np.rad2deg(bearing))
