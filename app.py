@@ -8,6 +8,8 @@ from algorithms.dp import douglas_peucker
 from algorithms.squish import squish
 from vessel_log import VesselLog
 from datetime import datetime
+from error_metrics.sed import sed_results
+from error_metrics.ped import ped_results
 
 app = Flask(__name__)
 
@@ -150,6 +152,12 @@ def get_data(
                     simplified_routes.append(temp)
                 response[alg] = routes_to_array(simplified_routes)
 
+    response['raw'] = routes_to_array(routes)
+
+    response['error_metrics'] = [get_error_metrics(routes, simplified_routes)]
+
+    return response
+
             # case 'SQUISH-E':
     temp = []
     for route in routes:
@@ -168,6 +176,12 @@ def routes_to_array(routes: list[list[VesselLog]]):
         routes_array.append(temp_array)
     return routes_array
 
+def get_error_metrics(raw_routes: list[VesselLog], simplified_routes):
+    error_metrics = []
+    ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
+    sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
+    error_metrics = [ped_avg, ped_max, sed_avg, sed_max]
+    return error_metrics
 
 @app.route('/')
 def index():

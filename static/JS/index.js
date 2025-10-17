@@ -2,6 +2,8 @@ const algorithms = document.querySelectorAll('.checkbox input');
 const slider = document.querySelector('#time_range');
 const start_date = document.querySelector('#start_date');
 const end_date = document.querySelector('#end_date');
+const show_errors = document.querySelector('#show_errors');
+const analytics_info = document.querySelector('#analytics_info');
 const play_btn = document.querySelector('#play_button');
 const forward_btn = document.querySelector('#forward');
 const rewind_btn = document.querySelector('#rewind');
@@ -68,7 +70,6 @@ function stop_pass_time() {
   clearInterval(interval);
 }
 
-
 // Event listeners 
 algorithms.forEach(algorithm => algorithm.addEventListener('change', () => {
   check_checked();
@@ -77,6 +78,15 @@ algorithms.forEach(algorithm => algorithm.addEventListener('change', () => {
 slider.addEventListener('input', request_if_checked);
 start_date.addEventListener('input', request_if_checked);
 end_date.addEventListener('input', request_if_checked);
+
+show_errors.addEventListener('click', () => {
+  show_errors.classList.toggle('active');
+  analytics_info.classList.toggle('active');
+  analytics_info.querySelector('table').remove();
+  table = create_table();
+  analytics_info.append(table);
+
+});
 
 play_btn.addEventListener('click',() => {
   play_btn.classList.toggle('play');
