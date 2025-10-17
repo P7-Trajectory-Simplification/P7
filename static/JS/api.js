@@ -10,21 +10,25 @@ async function algorithm_request() {
   try {
     algorithms.forEach(alg => {
       if (alg.checked) {
-        selected.push(alg.id)
+        selected.push(alg.id);
       }
     });
     time = new Date(slider.value * 1000).toISOString().split('T')[1].split('.')[0];
-    end_time = date_picker.value + " " + time;
+    start_time = start_date.value;
+    end_time = end_date.value + ' ' + time;
+    
 
-    const response = await fetch(`/algorithm?algs=${selected}&end_time=${end_time}`);
+    const response = await fetch(`/algorithm?algs=${selected}&start_time=${start_time}&end_time=${end_time}`);
     const data = await response.json();
-    dp_data = data.DP;
-    reckoning_data = data.DR;
-    raw_data = data.raw;
+    squish_data = data.SQUISH?data.SQUISH:[];
+    dp_data = data.DP?data.DP:[];
+    reckoning_data = data.DR?data.DR:[];
+    raw_data = data.raw?data.raw:[];
     clear_map();
-    plot_to_map(raw_data, 'blue');
-    //plot_to_map(dp_data, 'red');
-    plot_to_map(reckoning_data, 'red');
+    plot_to_map(squish_data, 'green');
+    //plot_to_map(raw_data, 'blue');
+    plot_to_map(dp_data, 'red');
+    plot_to_map(reckoning_data, 'yellow');
     console.log(data);
   } catch (error) {
     console.error('Error fetching algorithm data:', error);
