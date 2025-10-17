@@ -7,11 +7,13 @@ def douglas_peucker(points: list[VesselLog], epsilon: float) -> list[VesselLog]:
     '''
     Simplifies a given set of points using the Douglas-Peucker algorithm.
 
-    Parameters:
+    Parameters
+    ---------
     points (list of tuples): List of (lat, lon) coordinates representing the points.
     epsilon (float): The maximum distance threshold for simplification.
 
-    Returns:
+    Returns
+    ---------
     list of tuples: Simplified list of points.
     '''
     dmax = 0

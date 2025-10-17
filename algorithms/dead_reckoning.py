@@ -1,30 +1,28 @@
 from datetime import datetime
 import numpy as np
-from algorithms.great_circle_math import (
-    great_circle_distance,
-    predict_sphere_movement,
-    get_final_bearing,
-    EARTH_RADIUS_METERS,
-)
-import os, sys
-
-# need to import os and sys to get the placement of this file, so we can get its root folder and grab VesselLog from there
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from algorithms.great_circle_math import great_circle_distance, predict_sphere_movement, get_final_bearing, EARTH_RADIUS_METERS
 from vessel_log import VesselLog
 
 prediction_startpoint = None
 prediction_endpoint = None
 
 
-def dead_reckoning(
-    points: list[VesselLog],
-    tolerance: int = 100,
-    distance_formula=great_circle_distance,
-    prediction_formula=predict_sphere_movement,
-    bearing_formula=get_final_bearing,
-) -> list[VesselLog]:
-    global prediction_startpoint
-    global prediction_endpoint
+def dead_reckoning(points: list[VesselLog], tolerance: int = 100) -> list[VesselLog]:
+    '''
+    Simplifies a given set of points using the Dead-Reckoning algorithm.
+    
+    Parameters
+    ----------
+    points: A list of VesselLog's
+        The Datapoints that have to be simplified
+    tolerance: Int (default value = 100)
+        Max allowed distance from predicted point to received point in meters
+
+    Returns
+    ----------
+    A list of VesselLog's
+        The simplified set of points.
+    '''
 
     if len(points) < 2:
         return points
@@ -75,19 +73,3 @@ def dead_reckoning(
         # if the predicted point is close enough, we don't need the next newest point anymore and can safely exclude it
         del points[-2]
     return points
-
-
-if __name__ == '__main__':
-    test_points = [
-        VesselLog(57.020442, 10.016914, datetime(2020, 1, 1)),
-        VesselLog(57.021980, 10.017974, datetime(2020, 1, 2)),
-        VesselLog(57.023364, 10.018927, datetime(2020, 1, 3)),
-        VesselLog(57.024037, 10.020870, datetime(2020, 1, 4)),
-        VesselLog(57.023422, 10.023484, datetime(2020, 1, 5)),
-    ]
-    print(test_points)
-    simplified_points = []
-    for point in test_points:
-        simplified_points.append(point)
-        simplified_points = dead_reckoning(simplified_points, tolerance=2000)
-    print(simplified_points)
