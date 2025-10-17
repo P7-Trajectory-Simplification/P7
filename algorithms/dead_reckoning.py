@@ -22,7 +22,7 @@ def dead_reckoning(
     distance_formula=great_circle_distance,
     prediction_formula=predict_sphere_movement,
     bearing_formula=get_final_bearing,
-):
+) -> list[VesselLog]:
     global prediction_startpoint
     global prediction_endpoint
 
@@ -64,7 +64,9 @@ def dead_reckoning(
         radius=EARTH_RADIUS_METERS,
     )
     # compare difference between predicted next point and potential next point to tolerance
-    error = great_circle_distance(latlon_predicted, newest_point.get_coords(), radius=EARTH_RADIUS_METERS)
+    error = great_circle_distance(
+        latlon_predicted, newest_point.get_coords(), radius=EARTH_RADIUS_METERS
+    )
     if np.abs(error) > tolerance:
         # if the predicted point is further than we tolerate, reset prediction points
         prediction_startpoint = next_newest_point
@@ -75,7 +77,7 @@ def dead_reckoning(
     return points
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_points = [
         VesselLog(57.020442, 10.016914, datetime(2020, 1, 1)),
         VesselLog(57.021980, 10.017974, datetime(2020, 1, 2)),
