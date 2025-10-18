@@ -1,36 +1,35 @@
-let dp_data = [];
-let reckoning_data = [];
-let squish_data = [];
-let squish_e_data = [];
-let our_data = [];
-let raw_data = [];
+function algorithm_request(callback=null) {
+    const algorithms = get_enabled_algorithms();
+    const start_date = get_start_date();
+    const end_date = get_end_date();
 
-async function algorithm_request() {
-  selected = [];
-  try {
-    algorithms.forEach(alg => {
-      if (alg.checked) {
-        selected.push(alg.id);
-      }
-    });
-    time = new Date(slider.value * 1000).toISOString().split('T')[1].split('.')[0];
-    start_time = start_date.value;
-    end_time = end_date.value + ' ' + time;
+    if (algorithms.length < 1) return;
     
+    request('algorithm', {algorithms: algorithms.join(','), start_date: start_date, end_date: end_date}, (data) => {
+        let squish_data = data.SQUISH;
+        let dp_data = data.DP;
+        let dr_data = data.DR;
+        let raw_data = data.raw;
+        
+        clear_map();
+        plot_to_map(squish_data, 'green');
+        //plot_to_map(raw_data, 'blue');
+        plot_to_map(dp_data, 'red');
+        plot_to_map(dr_data, 'yellow');
+        if (callback) callback();
+    });
+}
 
-    const response = await fetch(`/algorithm?algs=${selected}&start_time=${start_time}&end_time=${end_time}`);
-    const data = await response.json();
-    squish_data = data.SQUISH?data.SQUISH:[];
-    dp_data = data.DP?data.DP:[];
-    reckoning_data = data.DR?data.DR:[];
-    raw_data = data.raw?data.raw:[];
-    clear_map();
-    plot_to_map(squish_data, 'green');
-    //plot_to_map(raw_data, 'blue');
-    plot_to_map(dp_data, 'red');
-    plot_to_map(reckoning_data, 'yellow');
-    console.log(data);
-  } catch (error) {
-    console.error('Error fetching algorithm data:', error);
-  }
-} 
+function request(path, params, callback) {
+    let parameters = '?';
+    for (const key in params) {
+        parameters += key + '=' + params[key] + '&';
+    }
+    parameters = parameters.slice(0, -1);
+    fetch('/'+path + parameters)
+        .then(response => response.json())
+        .then(data => callback(data))
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}

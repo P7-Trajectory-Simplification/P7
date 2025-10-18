@@ -1,4 +1,16 @@
-.title h1{
+* {
+    box-sizing: border-box;
+    font-family: montserrat;
+}
+
+body{
+    margin: 0;
+    padding: 100px 5% 120px 5%;
+    display: flex;
+    flex-direction: column;
+}
+
+h1{
     font-size: 48px;
     justify-self: center;
 }
@@ -6,28 +18,21 @@
 .body {
     display: flex;
     flex-direction: column;
-    flex-wrap: wrap;
-    align-content: center;
-    font-family: montserrat;
 }
 
 
 .algorithms {
     display: flex;
     flex-direction: row;
+    gap: 20px;
     margin-bottom: 10px;
     margin-top: 10px;
 }
 
 .checkbox {
-    border: none;
-    border-color: black;
+    display: flex;
     background: none;
-    margin-top: 5px;
-    margin-bottom: 10px;
     cursor: pointer;
-    padding-right: 10px;
-    padding-left: 10px;
 }
 .checkbox input[type="checkbox"] {
     display: none;
@@ -37,8 +42,7 @@
     font-size: 18px;
     padding: 5px 10px;
     border-radius: 5px;
-    border: solid;
-    border-color: black;
+    border: 2px solid black;
     cursor: pointer;
     user-select: none;
 }
@@ -48,19 +52,12 @@
     font-weight: bold;
 }
 
-.checkbox:first-child{
-    padding-left: 0;
-}
-.checkbox:last-child{
-    padding-right: 0;
-}
-
 
 
 
 #map {
-    border: solid;
-    width: 90%;
+    border: 2px solid black;
+    border-radius: 10px;
     height: 500px;
     justify-self: center;
 }
@@ -68,31 +65,39 @@
 input[type=range] {
   margin-top: 15px;
   margin-bottom: 15px;
-  width: 90%;
   cursor: pointer;
   -webkit-appearance: none;
+    appearance: none;
   height: 1rem;
   border-radius: 2rem;
   background: linear-gradient(to right, #d56c6c 50%, #c9c9c9 50%);
 }
 
-input[type="range"]::-webkit-slider-runnable-track {
+input[type="range"]::-webkit-slider-runnable-track,
+input[type="range"]::-moz-range-track,
+input[type="range"]::-ms-track {
   height: 1rem;
   border-radius: 1rem;
 }
 
-input[type="range"]::-webkit-slider-thumb { 
-    -webkit-appearance: none; /* Override default look */ 
-    margin-top: -8px; 
-    background-color: #d56c6c; 
-    border-radius: 0.5rem; 
-    height: 2rem; 
-    width: 1rem; 
+input[type="range"]::-webkit-slider-thumb,
+input[type="range"]::-moz-range-thumb,
+input[type="range"]::-ms-thumb {
+  -webkit-appearance: none;
+    appearance: none;
+  background-color: #d56c6c;
+  border: none;
+  border-radius: 0.5rem;
+  height: 2rem;
+  width: 1rem;
+  margin-top: -8px;
 }
 
-input[type="range"]:focus::-webkit-slider-thumb { 
-    outline: 3px solid #d56c6c; 
-    outline-offset: 0.125rem; 
+input[type="range"]:focus::-webkit-slider-thumb,
+input[type="range"]:focus::-moz-range-thumb,
+input[type="range"]:focus::-ms-thumb {
+  outline: 3px solid #d56c6c;
+  outline-offset: 0.125rem;
 }
 
 #date_box {
@@ -111,8 +116,7 @@ input[type="date"]{
     padding: 5px 10px;
     font-size: 18px;
     width: fit-content;
-    border: solid;
-    border-color: black;
+    border: 2px solid black;
     border-radius: 5px;
     cursor: pointer;
     position: relative;

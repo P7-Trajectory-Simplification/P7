@@ -1,7 +1,7 @@
-from datetime import datetime
 import numpy as np
 from algorithms.great_circle_math import great_circle_distance, predict_sphere_movement, get_final_bearing, EARTH_RADIUS_METERS
-from vessel_log import VesselLog
+from classes.route import Route
+from classes.vessel_log import VesselLog
 
 prediction_startpoint = None
 prediction_endpoint = None
@@ -73,3 +73,12 @@ def dead_reckoning(points: list[VesselLog], tolerance: int = 100) -> list[Vessel
         # if the predicted point is close enough, we don't need the next newest point anymore and can safely exclude it
         del points[-2]
     return points
+
+
+def run_dr(route: Route) -> Route:
+    simplified_trajectory = []
+    for vessel_log in route.trajectory:
+        simplified_trajectory.append(vessel_log)
+        simplified_trajectory = dead_reckoning(simplified_trajectory, tolerance=2000)
+
+    return Route(simplified_trajectory)

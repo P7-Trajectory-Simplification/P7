@@ -1,12 +1,12 @@
 
-var map = L.map('map').setView([57.04708, 9.924603], 6);
+let map = L.map('map').setView([57.04708, 9.924603], 6);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-var popup = L.popup();
+let popup = L.popup();
 
 function on_map_click(e) {
     popup

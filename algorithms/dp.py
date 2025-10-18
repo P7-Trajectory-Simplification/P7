@@ -1,5 +1,6 @@
-from algorithms.great_circle_math import point_to_great_circle, EARTH_RADIUS_METERS
-from vessel_log import VesselLog
+from algorithms.great_circle_math import point_to_great_circle
+from classes.route import Route
+from classes.vessel_log import VesselLog
 import numpy as np
 
 
@@ -34,3 +35,6 @@ def douglas_peucker(points: list[VesselLog], epsilon: float) -> list[VesselLog]:
     return [points[0], points[end]]
 
 
+def run_dp(route: Route) -> Route:
+    simplified_trajectory = douglas_peucker(route.trajectory, 0.001)
+    return Route(simplified_trajectory)
