@@ -64,4 +64,6 @@ def get_algorithms():
 
     vessel = get_all_vessels()[125] # Example vessel
 
+    print("Request for:", algorithms, start_time_dt, end_time_dt, vessel.name)
+
     return run_algorithms(algorithms, start_time_dt, end_time_dt, vessel)

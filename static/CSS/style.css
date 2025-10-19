@@ -101,8 +101,6 @@ input[type="range"]:focus::-ms-thumb {
 }
 
 #date_box {
-    flex: 1;
-    justify-content: flex-end;
     display: flex;
     gap: 5px;
 }
@@ -141,23 +139,27 @@ input[type="date"]::-webkit-datetime-edit {
 
 #settings {
     margin-top: 10px;
+    margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-#range_button_container {
-    flex: 1;
+#range_container {
     align-items: center;
     display: flex;
     gap: 5px;
 }
 
-#range_button_container button {
+#range_container button {
     width: 30px;
     height: 30px;
     cursor: pointer;
     position: relative;
+}
+
+#range_container input[type=range]{
+    flex: 1;
 }
 
 #play_button {
@@ -181,7 +183,7 @@ input[type="date"]::-webkit-datetime-edit {
     height: 60%;
 }
 
-#range_button_container button svg path {
+#range_container button svg path {
     fill: #d56c6c;
 }
 
@@ -195,17 +197,13 @@ input[type="date"]::-webkit-datetime-edit {
     display: block;
 }
 
-#forward, #rewind {
-    border: none;
-    background: white;
+#output_box{
+    display: flex;
+    justify-content: center;
 }
 
-#forward svg,
-#rewind svg {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    height: 100%;
-    width: 100%;
-    position: absolute;
+.angle-marker {
+    color: #d56c6c;
+    font-size: 14px;
+    transform: translate(-50%, -50%) rotate(0deg);
 }

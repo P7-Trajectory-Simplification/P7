@@ -26,7 +26,19 @@ function clear_map() {
 }
 
 function plot_to_map(data, color) {
-    L.polyline(data, {color: color}).addTo(map);
+    const line = L.polyline(data, { color, weight: 2 }).addTo(map);
+    L.polylineDecorator(line, {
+        patterns: [{
+            offset: '0',
+            repeat: '100km',
+            symbol: L.Symbol.arrowHead({
+              pixelSize: 10,
+              headAngle: 65,        // sharper angle
+              polygon: false,       // stroke only → “>” angle
+              pathOptions: { color, weight: 2, opacity: 1 }
+            })
+          }]
+    }).addTo(map);
 }
 
 

@@ -17,29 +17,14 @@
 <body>
 <div class='body'>
     <h1>Trajectory Simplification Map</h1>
-    <div class='algorithms'>
-        {% for alg in algorithms %}
-            <div class='checkbox'>
-                <input type='checkbox' id='{{alg}}' value='{{alg}}'>
-                <label for='{{alg}}'>{{alg}}</label><br>
-            </div>
-        {% endfor %}
-    </div>
-    <div id='map'></div>
     <div id='settings'>
-        <div id='range_button_container'>
-            <button id='play_button' class='play'>
-                <svg class='pause' xmlns='http://www.w3.org/2000/svg' id='Filled'
-                     viewBox='0 0 24 24' width='512' height='512'><path
-                        d='M6.5,0A3.5,3.5,0,0,0,3,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,6.5,0Z' /><path
-                        d='M17.5,0A3.5,3.5,0,0,0,14,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,17.5,0Z' /></svg>
-                <svg class='play' xmlns='http://www.w3.org/2000/svg' id='Filled'
-                     viewBox='0 0 24 24' width='512' height='512'><path
-                        d='M20.492,7.969,10.954.975A5,5,0,0,0,3,5.005V19a4.994,4.994,0,0,0,7.954,4.03l9.538-6.994a5,5,0,0,0,0-8.062Z' /></svg>
-            </button>
-        </div>
-        <div id='output_box'>
-            <output id='time_value'></output>
+        <div class='algorithms'>
+            {% for alg in algorithms %}
+                <div class='checkbox'>
+                    <input type='checkbox' id='{{alg}}' value='{{alg}}'>
+                    <label for='{{alg}}'>{{alg}}</label><br>
+                </div>
+            {% endfor %}
         </div>
         <div id='date_box'>
             <div class='date_subbox'>
@@ -50,17 +35,34 @@
             </div>
             <div class='date_subbox'>
                 <label for='end_date'>Current Date:</label>
-                <input type='date' id='end_date' value='2024-01-31' min='2024-01-01'
+                <input type='date' id='end_date' value='2024-01-17' min='2024-01-01'
                        max='2024-12-01'>
             </div>
         </div>
     </div>
-    <input type='range' min='0' max='86399' value='0' class='slider' step="3600" id='time_range' oninput='updateSlider(this)'>
+    <div id='map'></div>
+    <div id='range_container'>
+        <button id='play_button' class='play'>
+            <svg class='pause' xmlns='http://www.w3.org/2000/svg' id='Filled'
+                 viewBox='0 0 24 24' width='512' height='512'><path
+                    d='M6.5,0A3.5,3.5,0,0,0,3,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,6.5,0Z' /><path
+                    d='M17.5,0A3.5,3.5,0,0,0,14,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,17.5,0Z' /></svg>
+            <svg class='play' xmlns='http://www.w3.org/2000/svg' id='Filled'
+                 viewBox='0 0 24 24' width='512' height='512'><path
+                    d='M20.492,7.969,10.954.975A5,5,0,0,0,3,5.005V19a4.994,4.994,0,0,0,7.954,4.03l9.538-6.994a5,5,0,0,0,0-8.062Z' /></svg>
+        </button>
+        <input type='range' min='0' max='86399' value='0' class='slider' step="3600" id='time_range' oninput='updateSlider(this)'>
+    </div>
+    <div id='output_box'>
+        <output id='time_value'></output>
+    </div>
+
 </div>
 </body>
 <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
         integrity='sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo='
         crossorigin></script>
+<script src="{{url_for('static', filename='JS/leaflet.polylineDecorator.js')}}"></script>
 <script src="{{url_for('static', filename='JS/api.js')}}"></script>
 <script src="{{url_for('static', filename='JS/map.js')}}"></script>
 <script src="{{url_for('static', filename='JS/index.js')}}"></script>

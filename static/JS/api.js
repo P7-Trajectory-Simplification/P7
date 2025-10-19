@@ -16,7 +16,8 @@ function algorithm_request(callback=null) {
         //plot_to_map(raw_data, 'blue');
         plot_to_map(dp_data, 'red');
         plot_to_map(dr_data, 'yellow');
-        if (callback) callback();
+
+        if (callback && callback instanceof Function) callback();
     });
 }
 
