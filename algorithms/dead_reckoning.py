@@ -24,6 +24,9 @@ def dead_reckoning(points: list[VesselLog], tolerance: int = 100) -> list[Vessel
         The simplified set of points.
     '''
 
+    global prediction_startpoint
+    global prediction_endpoint
+
     if len(points) < 2:
         return points
     elif len(points) == 2:
