@@ -17,6 +17,7 @@ function create_table() {
         const td = document.createElement('td');
         tr.appendChild(td);
         td.textContent = algorithm;
+        console.log(all_error_metrics)
         const errors = all_error_metrics[i];
         console.log(errors);
         for (let j = 0; j < errors.length; j++) {

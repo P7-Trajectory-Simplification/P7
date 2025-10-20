@@ -42,7 +42,7 @@ def ped (point, start_seg, end_seg):
 
 def find_segment(point, trajectory):
     """Find the segment in the trajectory whose time interval is closest to the point's time."""
-    point_time = point[2]
+    point_time = point.ts
     #min_time_diff = float('inf')
     #closest_segment = None
 
@@ -82,15 +82,16 @@ def ped_results(raw_data_trajectory, simplified_trajectory):
     total_distance = 0
     count = 0
 
-    for point in raw_data_trajectory:
-        segment = find_segment(point, simplified_trajectory)
-        if segment is not None:
-            start_seg, end_seg = segment
-            distance = ped((point.lat.get_coords(), point.lon.get_coords()), (start_seg[0], start_seg[1]), (end_seg[0], end_seg[1]))
-            total_distance += distance
-            count += 1
-        if distance > max_distance:
-                max_distance = distance
+    for route in raw_data_trajectory:
+        for point in route['route']:
+            segment = find_segment(point, simplified_trajectory)
+            if segment is not None:
+                start_seg, end_seg = segment
+                distance = ped((point.lat.get_coords(), point.lon.get_coords()), (start_seg[0], start_seg[1]), (end_seg[0], end_seg[1]))
+                total_distance += distance
+                count += 1
+            if distance > max_distance:
+                    max_distance = distance
 
     if count == 0:
         return 0,0  # both average and max are zero

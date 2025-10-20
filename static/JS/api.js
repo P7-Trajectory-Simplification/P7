@@ -31,7 +31,7 @@ async function algorithm_request() {
     dp_data = data.DP?data.DP:[];
     reckoning_data = data.DR?data.DR:[];
     raw_data = data.raw?data.raw:[];
-    all_error_metrics = data.error_metrics;
+    all_error_metrics = data.error_metrics?data.error_metrics:[];
     clear_map();
     plot_to_map(squish_data, 'green');
     //plot_to_map(raw_data, 'blue');
