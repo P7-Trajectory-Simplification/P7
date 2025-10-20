@@ -42,34 +42,35 @@
       </div>
       <div id='map'></div>
       <div id='settings'>
-        <div id='range_button_container'>
-          <button id='play_button' class='play'>
-            <svg class='pause' xmlns='http://www.w3.org/2000/svg' id='Filled'
-              viewBox='0 0 24 24' width='512' height='512'><path
-                d='M6.5,0A3.5,3.5,0,0,0,3,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,6.5,0Z' /><path
-                d='M17.5,0A3.5,3.5,0,0,0,14,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,17.5,0Z' /></svg>
-            <svg class='play' xmlns='http://www.w3.org/2000/svg' id='Filled'
-              viewBox='0 0 24 24' width='512' height='512'><path
-                d='M20.492,7.969,10.954.975A5,5,0,0,0,3,5.005V19a4.994,4.994,0,0,0,7.954,4.03l9.538-6.994a5,5,0,0,0,0-8.062Z' /></svg>
-          </button>
-        </div>
         <div id='output_box'>
           <output id='time_value'></output>
         </div>
         <div id='date_box'>
-            <div class='date_subbox'>
-                <label for='start_date'>Start Date:</label>
-                <input type='date' id='start_date' value='2024-01-01'
-                       min='2024-01-01'
-                       max='2024-12-01'>
-            </div>
-            <div class='date_subbox'>
-                <label for='end_date'>Current Date:</label>
-                <input type='date' id='end_date' value='2024-01-17' min='2024-01-01'
-                       max='2024-12-01'>
-            </div>
+          <div class='date_subbox'>
+            <label for='start_date'>Start Date:</label>
+            <input type='date' id='start_date' value='2024-01-01'
+            min='2024-01-01'
+            max='2024-12-01'>
+          </div>
+          <div class='date_subbox'>
+            <label for='end_date'>Current Date:</label>
+            <input type='date' id='end_date' value='2024-01-17' min='2024-01-01'
+            max='2024-12-01'>
+          </div>
         </div>
-    </div>
+      </div>
+      <div id='range_container'>
+        <button id='play_button' class='play'>
+          <svg class='pause' xmlns='http://www.w3.org/2000/svg' id='Filled'
+            viewBox='0 0 24 24' width='512' height='512'><path
+              d='M6.5,0A3.5,3.5,0,0,0,3,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,6.5,0Z' /><path
+              d='M17.5,0A3.5,3.5,0,0,0,14,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,17.5,0Z' /></svg>
+          <svg class='play' xmlns='http://www.w3.org/2000/svg' id='Filled'
+            viewBox='0 0 24 24' width='512' height='512'><path
+              d='M20.492,7.969,10.954.975A5,5,0,0,0,3,5.005V19a4.994,4.994,0,0,0,7.954,4.03l9.538-6.994a5,5,0,0,0,0-8.062Z' /></svg>
+        </button>
+        <input type='range' id='time_range' class='slider' min='0' max='86399' value='0' oninput='updateSlider(this)'>
+      </div>
   </body>
   <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
     integrity='sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo='
