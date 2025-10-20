@@ -1,3 +1,7 @@
+body, h1, h2, h3, h4, h5, h6, p, span, div, button {
+    font-family: montserrat;
+}
+
 .title h1{
     font-size: 48px;
     justify-self: center;
@@ -8,9 +12,108 @@
     flex-direction: column;
     flex-wrap: wrap;
     align-content: center;
-    font-family: montserrat;
 }
 
+.body * {
+    box-sizing: border-box;
+}
+
+#buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+}
+
+#show_errors {
+    background: none;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    padding: 5px 5px 5px 10px;
+    border-radius: 5px;
+    border: solid;
+    border-color: black;
+    cursor: pointer;
+    transition: 0.3s;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+}
+
+#show_errors svg {
+    height: 25px;
+    width: 25px;
+    vertical-align: middle;
+}
+
+#show_errors.active {
+    background-color: #d56c6c;
+    font-weight: bold;
+}
+
+#show_errors svg.active {
+    display: none;
+}
+
+#show_errors.active svg.active {
+    display: block;
+}
+
+#show_errors svg.inactive {
+    display: block;
+}
+
+#show_errors.active svg.inactive {
+    display: none;
+}
+
+#analytics_info {
+    height: 0px;
+    transition: 0.3s;
+}
+
+#analytics_info.active {
+    border: solid;
+    border-color: black;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    width: 90%;
+    height: fit-content;
+    transition: 0.3s;
+}
+
+#analytics_info table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#analytics_info th {
+    font-weight: bold;
+}
+
+#analytics_info * > th, #analytics_info td {
+    border: 0px;
+    padding: 5px;
+    text-align: center;
+}
+
+#analytics_info tr {
+    display: table-row;
+    padding: 20px 5px;
+    text-align: center;
+    border-bottom: 1px  solid rgb(186, 186, 186);
+}
+
+#analytics_info tr > *:first-child {
+    font-weight: bold;
+}
+
+#analytics_info :last-child {
+    border-bottom: none;
+}
 
 .algorithms {
     display: flex;
@@ -140,6 +243,7 @@ input[type="date"]::-webkit-datetime-edit {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 90%;
 }
 
 #range_button_container {
