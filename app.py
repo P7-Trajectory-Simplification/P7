@@ -11,6 +11,8 @@ from classes.vessel import Vessel
 from datetime import datetime
 from data.vessel_cache import get_data_from_cache
 from typing import Callable
+from error_metrics.sed import sed_results
+from error_metrics.ped import ped_results
 
 app = Flask(__name__)
 
@@ -46,6 +48,12 @@ algorithms_mappings = {
     'SQUISH': run_squish,
 }
 
+def get_error_metrics(raw_routes: list[dict], simplified_routes):
+    error_metrics = []
+    ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
+    sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
+    error_metrics = [ped_avg, ped_max, sed_avg, sed_max]
+    return error_metrics
 
 @app.route('/')
 def index():

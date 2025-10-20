@@ -4,6 +4,8 @@ const start_date = document.getElementById('start_date');
 const end_date = document.getElementById('end_date');
 const play_btn = document.getElementById('play_button');
 const time_value = document.getElementById('time_value');
+const show_errors = document.getElementById('show_errors');
+const analytics_info = document.getElementById('analytics_info');
 let running = false;
 
 function get_enabled_algorithms() {
@@ -58,6 +60,15 @@ function start_pass_time() {
         if (running) setTimeout(start_pass_time, 1000);
     });
 }
+
+show_errors.addEventListener('click', () => {
+  show_errors.classList.toggle('active');
+  analytics_info.classList.toggle('active');
+  analytics_info.querySelector('table').remove();
+  table = create_table();
+  analytics_info.append(table);
+
+});
 
 play_btn.addEventListener('click',() => {
     play_btn.classList.toggle('play');

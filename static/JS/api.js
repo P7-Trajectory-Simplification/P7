@@ -10,6 +10,7 @@ function algorithm_request(callback=null) {
         let dp_data = data.DP;
         let dr_data = data.DR;
         let raw_data = data.raw;
+        let all_error_metrics = data.error_metrics;
         
         clear_map();
         plot_to_map(squish_data, 'green');
