@@ -67,24 +67,18 @@ input[type=range] {
   margin-bottom: 15px;
   cursor: pointer;
   -webkit-appearance: none;
-    appearance: none;
   height: 1rem;
   border-radius: 2rem;
   background: linear-gradient(to right, #d56c6c 50%, #c9c9c9 50%);
 }
 
-input[type="range"]::-webkit-slider-runnable-track,
-input[type="range"]::-moz-range-track,
-input[type="range"]::-ms-track {
+input[type="range"]::-webkit-slider-runnable-track{
   height: 1rem;
   border-radius: 1rem;
 }
 
-input[type="range"]::-webkit-slider-thumb,
-input[type="range"]::-moz-range-thumb,
-input[type="range"]::-ms-thumb {
+input[type="range"]::-webkit-slider-thumb{
   -webkit-appearance: none;
-    appearance: none;
   background-color: #d56c6c;
   border: none;
   border-radius: 0.5rem;
@@ -93,9 +87,7 @@ input[type="range"]::-ms-thumb {
   margin-top: -8px;
 }
 
-input[type="range"]:focus::-webkit-slider-thumb,
-input[type="range"]:focus::-moz-range-thumb,
-input[type="range"]:focus::-ms-thumb {
+input[type="range"]:focus::-webkit-slider-thumb{
   outline: 3px solid #d56c6c;
   outline-offset: 0.125rem;
 }
