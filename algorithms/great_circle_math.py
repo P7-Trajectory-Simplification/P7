@@ -56,7 +56,7 @@ def latlon_to_vector(latlon):
 # we multiply by the radius and we're done
 
 
-def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1, ignore_sign=True):
+def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=EARTH_RADIUS_METERS, ignore_sign=True):
     '''Given the latitude and longitudes of three points A, B, and C, where a great circle connects A and B,
 
     return the length of the geodesic from C to that great circle.
@@ -92,7 +92,7 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=1, ignore_sign=Tr
         return distance * radius
 
 
-def great_circle_distance(latlon_a, latlon_b, radius=1):
+def great_circle_distance(latlon_a, latlon_b, radius=EARTH_RADIUS_METERS):
     '''Given a pair of latitudes and longitudes describing points on a sphere A and B, computes the great circle-distance between those points
     i.e. the length of the geodesic connecting those points
 

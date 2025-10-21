@@ -36,5 +36,5 @@ def douglas_peucker(points: list[VesselLog], epsilon: float) -> list[VesselLog]:
 
 
 def run_dp(route: Route) -> Route:
-    simplified_trajectory = douglas_peucker(route.trajectory, 0.001)
+    simplified_trajectory = douglas_peucker(route.trajectory, 6000)
     return Route(simplified_trajectory)

@@ -1,15 +1,20 @@
-from algorithms.great_circle_math import point_to_great_circle, EARTH_RADIUS_METERS
+from algorithms.great_circle_math import great_circle_distance, point_to_great_circle, EARTH_RADIUS_METERS
 from classes.route import Route
 from classes.squish_point import SquishPoint
 from classes.vessel_log import VesselLog
 import numpy as np
 
 def update_sed(index: int, buff: list[SquishPoint]):
-    a_tuple = buff[index - 1].vessel_log.get_coords()
-    b_tuple = buff[index + 1].vessel_log.get_coords()
-    target_tuple = buff[index].vessel_log.get_coords()
-        
-    buff[index].sed = np.abs(point_to_great_circle(a_tuple, b_tuple, target_tuple, radius=EARTH_RADIUS_METERS))
+    a = buff[index - 1].vessel_log
+    b = buff[index + 1].vessel_log
+    target = buff[index].vessel_log
+    
+    if target.ts - a.ts < b.ts - target.ts:
+        # Closer to a
+        buff[index].sed = np.abs(great_circle_distance(a.get_coords(), target.get_coords()))
+    else:
+        # Closer to b
+        buff[index].sed = np.abs(great_circle_distance(b.get_coords(), target.get_coords()))
 
 
 def find_min_sed(buff: list[SquishPoint]) -> int:

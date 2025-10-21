@@ -1,5 +1,10 @@
 from datetime import datetime
 from math import sqrt
+import math
+
+from algorithms.great_circle_math import point_to_great_circle
+from classes.route import Route
+from classes.vessel_log import VesselLog
 
 def ped (point, start_seg, end_seg):
     """Point to segment Perpendicular Euclidean distance.
@@ -40,7 +45,7 @@ def ped (point, start_seg, end_seg):
     return distance
 
 
-def find_segment(point, trajectory):
+def find_segment(point: VesselLog, trajectory: list[VesselLog]) -> tuple[VesselLog, VesselLog] | None: 
     """Find the segment in the trajectory whose time interval is closest to the point's time."""
     point_time = point.ts
     #min_time_diff = float('inf')
@@ -50,8 +55,7 @@ def find_segment(point, trajectory):
         start = trajectory[i]
         end = trajectory[i + 1]
         # Find time difference between point_time and the segment's interval
-        if start[2] <= point_time <= end[2]:
-            print("DEBUG segment:", start, end)
+        if start.ts <= point_time <= end.ts:
             return (start, end)
         #The following code is commented out, since it considers edge cases where the point time is outside the segment time interval, which shouldn't be possible in our case.
         """else:
@@ -68,7 +72,7 @@ def find_segment(point, trajectory):
     print("Point time is outside the segment time interval.")
     return None
         
-def ped_results(raw_data_trajectory, simplified_trajectory):
+def ped_results(raw_data_routes: list[Route], simplified_routes: list[Route]) -> tuple[float, float]:
     """Calculate the average Point to segment Euclidean distance between two trajectories and the maximum Point to segment Euclidean distance between two trajectories.
 
     Args:
@@ -82,12 +86,13 @@ def ped_results(raw_data_trajectory, simplified_trajectory):
     total_distance = 0
     count = 0
 
-    for route in raw_data_trajectory:
-        for point in route['route']:
-            segment = find_segment(point, simplified_trajectory)
+    for i, raw_route in enumerate(raw_data_routes):
+        simplified_route = simplified_routes[i]
+        for point in raw_route.trajectory:
+            segment = find_segment(point, simplified_route.trajectory)
             if segment is not None:
                 start_seg, end_seg = segment
-                distance = ped((point.lat.get_coords(), point.lon.get_coords()), (start_seg[0], start_seg[1]), (end_seg[0], end_seg[1]))
+                distance = point_to_great_circle(start_seg.get_coords(), end_seg.get_coords(), point.get_coords()) #ped((point.lat.get_coords(), point.lon.get_coords()), (start_seg[0], start_seg[1]), (end_seg[0], end_seg[1]))
                 total_distance += distance
                 count += 1
             if distance > max_distance:
@@ -98,4 +103,4 @@ def ped_results(raw_data_trajectory, simplified_trajectory):
 
 
     avg_distance = total_distance / count
-    return avg_distance, max_distance
+    return round(avg_distance, 2), round(max_distance, 2)

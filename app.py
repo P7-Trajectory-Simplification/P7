@@ -25,16 +25,18 @@ def run_algorithm(routes: list[Route], func: Callable) -> list[Route]:
 def run_algorithms(algorithms: list, start_time: datetime, end_time: datetime, vessel: Vessel):
     vessel_logs = get_data_from_cache(vessel, start_time, end_time)
     routes = isolate_routes(vessel_logs)
-
-    response = {
-        alg: routes_to_list(run_algorithm(routes, func))
-        if alg in algorithms and func is not None
-        else []
-        for alg, func in algorithms_mappings.items()
-    }
+    response = {}
+    
+    for alg, func in algorithms_mappings.items():
+        if alg in algorithms and func is not None:
+            simplified_routes = run_algorithm(routes, func)
+            response[alg] = routes_to_list(simplified_routes)
+            response[alg + '_error_metrics'] = get_error_metrics(routes, simplified_routes)
+        else:
+            response[alg] = []
+            response[alg + '_error_metrics'] = []
 
     response['raw'] = routes_to_list(routes)
-
     return response
 
 
@@ -48,7 +50,7 @@ algorithms_mappings = {
     'SQUISH': run_squish,
 }
 
-def get_error_metrics(raw_routes: list[dict], simplified_routes):
+def get_error_metrics(raw_routes: list[Route], simplified_routes: list[Route]) -> list[float]:
     error_metrics = []
     ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
     sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
