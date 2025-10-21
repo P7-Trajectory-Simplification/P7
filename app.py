@@ -5,6 +5,7 @@ from algorithms.dead_reckoning import run_dr
 from algorithms.dp import run_dp
 from algorithms.isolate_routes import isolate_routes
 from algorithms.squish import run_squish
+from algorithms.squish_e import run_squish_e
 from classes.route import Route
 from data.database import get_all_vessels
 from classes.vessel import Vessel
@@ -46,6 +47,7 @@ algorithms_mappings = {
     'DR': run_dr,
     'DP': run_dp,
     'SQUISH': run_squish,
+    'SQUISH_E': run_squish_e
 }
 
 def get_error_metrics(raw_routes: list[dict], simplified_routes):
