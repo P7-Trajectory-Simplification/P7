@@ -1,3 +1,12 @@
+const algorithms = document.querySelectorAll('.algorithms .checkbox input');
+const slider = document.getElementById('time_range');
+const start_date = document.getElementById('start_date');
+const end_date = document.getElementById('end_date');
+const play_btn = document.getElementById('play_button');
+const time_value = document.getElementById('time_value');
+const show_errors = document.getElementById('show_errors');
+const analytics_info = document.getElementById('analytics_info');
+let running = false;
 
 function get_enabled_algorithms() {
     let enabled = [];
