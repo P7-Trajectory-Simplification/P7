@@ -1,3 +1,4 @@
+from concurrent.futures import ProcessPoolExecutor
 from flask import Flask, request
 from flask import render_template
 
@@ -22,19 +23,48 @@ def run_algorithm(routes: list[Route], func: Callable) -> list[Route]:
         simplified_trajectories.append(func(route))
     return simplified_trajectories
 
+# Called by the multiprocessing executor
+def multi_process_helper(multi_process_data: dict):
+    alg = multi_process_data['alg']
+    func = multi_process_data['func']
+    routes = multi_process_data['routes']
+    if func is not None and routes is not None:
+        simplified_routes = run_algorithm(routes, func)
+        alg_route = routes_to_list(simplified_routes)
+        error_metrics = get_error_metrics(routes, simplified_routes)
+    else:
+        alg_route = []
+        error_metrics = []
+    
+    return alg, alg_route, error_metrics
+
+# Combines data needed for multiprocessing into dict
+def build_multi_process_data(func: Callable, routes: list[Route], algorithms: list[str]) -> dict:
+    multithread_data = []
+    for alg, func in algorithms_mappings.items():
+        if alg in algorithms:
+            multithread_data.append(
+                {'func': func, 'alg': alg, 'routes': routes}
+            )
+        else:
+            multithread_data.append(
+                {'func': None, 'alg': alg, 'routes': None}
+            )
+
 def run_algorithms(algorithms: list, start_time: datetime, end_time: datetime, vessel: Vessel):
     vessel_logs = get_data_from_cache(vessel, start_time, end_time)
     routes = isolate_routes(vessel_logs)
     response = {}
+
+    multiprocess_data = build_multi_process_data(algorithms, routes, algorithms)
     
-    for alg, func in algorithms_mappings.items():
-        if alg in algorithms and func is not None:
-            simplified_routes = run_algorithm(routes, func)
-            response[alg] = routes_to_list(simplified_routes)
-            response[alg + '_error_metrics'] = get_error_metrics(routes, simplified_routes)
-        else:
-            response[alg] = []
-            response[alg + '_error_metrics'] = []
+    # Use ProcessPoolExecutor to run algorithms in parallel
+    with ProcessPoolExecutor() as executor:
+        results = list(executor.map(multi_process_helper, multiprocess_data))
+        for alg, alg_route, error_metrics in results:
+            response[alg] = alg_route
+            response[alg + '_error_metrics'] = error_metrics
+        
 
     response['raw'] = routes_to_list(routes)
     return response

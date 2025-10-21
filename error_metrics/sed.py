@@ -1,30 +1,8 @@
-
-from math import sqrt
-import math
-
 from algorithms.great_circle_math import great_circle_distance
 from classes.route import Route
+from classes.vessel_log import VesselLog
 
-'''
-def sed(point, simplified_point):
-    Synchronized Euclidean distance.
-
-    Parameters:
-        point (tuple): (x, y, t) coordinates of the original point.
-        simplified_point (tuple): (x, y, t) coordinates of the corresponding simplified point.
-
-    Returns:
-        float: The Euclidean distance between the original point and the simplified point.
-    
-    x, y, _ = point
-    x_s, y_s, _ = simplified_point
-    
-    # Calculates the Euclidean distance between the two points
-    distance = sqrt((x - x_s)**2 + (y - y_s)**2)
-    return distance
-'''
-
-def find_simplified_point(point, trajectory):
+def find_simplified_point(point: VesselLog, trajectory: list[VesselLog]) -> VesselLog:
     '''Find the point in the simplified trajectory whose time is closest to the point's time.'''
     point_time = point.ts
     min_time_diff = None
@@ -51,12 +29,8 @@ def sed_results(raw_data_routes: list[Route], simplified_routes: list[Route]) ->
     '''Calculate the average Point to simplified point Euclidean distance between two trajectories
     and the maximum Point to simplified point Euclidean distance between two trajectories.
 
-    Parameters:
-        trajectory1 (list): List of (x, y, timestamp) tuples for the raw data trajectory.
-        trajectory2 (list): List of (x, y, timestamp) tuples for the simplified trajectory.
-
     Returns:
-        float: The average SED between the two trajectories and the max distance.
+        tuple with floats: The average SED between the two trajectories and the max distance.
     '''
     max_distance = 0
     total_distance = 0

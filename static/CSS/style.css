@@ -79,7 +79,7 @@ h1{
     border: solid;
     border-color: black;
     border-radius: 5px;
-    padding: 10px;
+    padding: 10px 20px;
     margin-bottom: 10px;
     height: fit-content;
     transition: 0.3s;
@@ -87,6 +87,7 @@ h1{
 
 #analytics_info table {
     border-collapse: collapse;
+    width: 100%;
 }
 
 #analytics_info th {
