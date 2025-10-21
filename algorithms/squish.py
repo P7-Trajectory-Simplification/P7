@@ -1,4 +1,8 @@
-from algorithms.great_circle_math import point_to_great_circle, EARTH_RADIUS_METERS
+from algorithms.great_circle_math import (
+    point_to_great_circle,
+    great_circle_distance,
+    EARTH_RADIUS_METERS,
+)
 from classes.route import Route
 from classes.squish_point import SquishPoint
 from classes.vessel_log import VesselLog
@@ -10,11 +14,18 @@ def update_sed(index: int, buff: list[SquishPoint]):
     b_tuple = buff[index + 1].vessel_log.get_coords()
     target_tuple = buff[index].vessel_log.get_coords()
 
-    buff[index].sed = np.abs(
-        point_to_great_circle(
+    distance = None
+    if a_tuple == b_tuple:
+        # we can't make a great circle if the points are the same, so we just get the distance from one of the points to the target
+        distance = great_circle_distance(
+            a_tuple, target_tuple, radius=EARTH_RADIUS_METERS
+        )
+    else:
+        # if the points are not the same, we find the distance from the target to the circle formed by A and B
+        distance = point_to_great_circle(
             a_tuple, b_tuple, target_tuple, radius=EARTH_RADIUS_METERS
         )
-    )
+    buff[index].sed = distance
 
 
 def find_min_sed(buff: list[SquishPoint]) -> int:
