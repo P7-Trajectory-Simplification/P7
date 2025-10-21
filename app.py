@@ -6,6 +6,7 @@ from algorithms.dead_reckoning import run_dr
 from algorithms.dp import run_dp
 from algorithms.isolate_routes import isolate_routes
 from algorithms.squish import run_squish
+from algorithms.squish_reckoning import run_sr
 from algorithms.squish_e import run_squish_e
 from classes.route import Route
 from data.database import get_all_vessels
@@ -17,6 +18,7 @@ from error_metrics.sed import sed_results
 from error_metrics.ped import ped_results
 
 app = Flask(__name__)
+
 
 def run_algorithm(routes: list[Route], func: Callable) -> list[Route]:
     simplified_trajectories = []
@@ -80,7 +82,8 @@ algorithms_mappings = {
     'DR': run_dr,
     'DP': run_dp,
     'SQUISH': run_squish,
-    'SQUISH_E': run_squish_e
+    'SQUISH_E': run_squish_e,
+    'SQUISH_RECKONING': run_sr,
 }
 
 def get_error_metrics(raw_routes: list[Route], simplified_routes: list[Route]) -> list[float]:
@@ -89,6 +92,7 @@ def get_error_metrics(raw_routes: list[Route], simplified_routes: list[Route]) -
     sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
     error_metrics = [ped_avg, ped_max, sed_avg, sed_max]
     return error_metrics
+
 
 @app.route('/')
 def index():
@@ -105,7 +109,7 @@ def get_algorithms():
     start_time_dt = datetime.strptime(start_date_req, '%Y-%m-%d')
     end_time_dt = datetime.strptime(end_date_req, '%Y-%m-%d %H:%M:%S')
 
-    vessel = get_all_vessels()[125] # Example vessel
+    vessel = get_all_vessels()[125]  # Example vessel
 
     print("Request for:", algorithms, start_time_dt, end_time_dt, vessel.name)
 
