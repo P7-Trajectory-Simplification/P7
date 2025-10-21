@@ -1,5 +1,10 @@
 import numpy as np
-from algorithms.great_circle_math import great_circle_distance, predict_sphere_movement, get_final_bearing, EARTH_RADIUS_METERS
+from algorithms.great_circle_math import (
+    great_circle_distance,
+    predict_sphere_movement,
+    get_final_bearing,
+    EARTH_RADIUS_METERS,
+)
 from classes.route import Route
 from classes.vessel_log import VesselLog
 
@@ -10,7 +15,7 @@ prediction_endpoint = None
 def dead_reckoning(points: list[VesselLog], tolerance: int = 100) -> list[VesselLog]:
     '''
     Simplifies a given set of points using the Dead-Reckoning algorithm.
-    
+
     Parameters
     ----------
     points: A list of VesselLog's
@@ -85,3 +90,44 @@ def run_dr(route: Route) -> Route:
         simplified_trajectory = dead_reckoning(simplified_trajectory, tolerance=2000)
 
     return Route(simplified_trajectory)
+
+
+# Helper function for squish reckoning
+def reckon(point_a: VesselLog, point_b: VesselLog, point_c: VesselLog) -> float:
+    '''Given three points with latitude, longitude, and timestamp, return the distance between point c and point c as predicted by point a and b via dead reckoning
+
+    Parameters
+    ----------
+    point_a : _VesselLog_
+        The log representing the first point.
+    point_b : _VesselLog_
+        The log representing the second point. It is this point we attribute the returned value distance to.
+    point_c : _VesselLog_
+        The log representing the point to predict.
+    '''
+    latlon_a = point_a.get_coords()
+    latlon_b = point_b.get_coords()
+
+    # find distance from A to B
+    distance = great_circle_distance(latlon_a, latlon_b, radius=EARTH_RADIUS_METERS)
+    time_delta = (point_b.ts - point_a.ts).total_seconds()
+    velocity = 0  # velocity in m/s
+    if time_delta != 0:
+        # avoid dividing by 0 when the points have the same timestamp
+        velocity = distance / time_delta
+    # find bearing at B
+    prediction_bearing = get_final_bearing(latlon_a, latlon_b)
+    # find time difference between B and C and multiply by the velocity we found
+    prediction_time_delta = (point_c.ts - point_b.ts).total_seconds()
+    prediction_distance = velocity * prediction_time_delta
+    # now predict where C should be
+    c_predicted = predict_sphere_movement(
+        latlon_b,
+        prediction_distance,
+        prediction_bearing,
+        radius=EARTH_RADIUS_METERS,
+    )
+    # return distance from predicted C to actual C
+    return great_circle_distance(
+        c_predicted, point_c.get_coords(), radius=EARTH_RADIUS_METERS
+    )
