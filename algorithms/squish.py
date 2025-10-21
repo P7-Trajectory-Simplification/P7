@@ -10,22 +10,16 @@ import numpy as np
 
 
 def update_sed(index: int, buff: list[SquishPoint]):
-    a_tuple = buff[index - 1].vessel_log.get_coords()
-    b_tuple = buff[index + 1].vessel_log.get_coords()
-    target_tuple = buff[index].vessel_log.get_coords()
-
-    distance = None
-    if a_tuple == b_tuple:
-        # we can't make a great circle if the points are the same, so we just get the distance from one of the points to the target
-        distance = great_circle_distance(
-            a_tuple, target_tuple, radius=EARTH_RADIUS_METERS
-        )
+    a = buff[index - 1].vessel_log
+    b = buff[index + 1].vessel_log
+    target = buff[index].vessel_log
+    
+    if target.ts - a.ts < b.ts - target.ts:
+        # Closer to a
+        buff[index].sed = np.abs(great_circle_distance(a.get_coords(), target.get_coords()))
     else:
-        # if the points are not the same, we find the distance from the target to the circle formed by A and B
-        distance = point_to_great_circle(
-            a_tuple, b_tuple, target_tuple, radius=EARTH_RADIUS_METERS
-        )
-    buff[index].sed = distance
+        # Closer to b
+        buff[index].sed = np.abs(great_circle_distance(b.get_coords(), target.get_coords()))
 
 
 def find_min_sed(buff: list[SquishPoint]) -> int:

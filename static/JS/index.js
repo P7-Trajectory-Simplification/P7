@@ -61,16 +61,28 @@ function start_pass_time() {
     });
 }
 
+function toggle_buttons() {
+  if (get_enabled_algorithms().length === 0) {
+      show_errors.disabled = true;
+      play_btn.disabled = true;
+  } else {
+      show_errors.disabled = false;
+      play_btn.disabled = false;
+  }
+}
+
+algorithms.forEach(alg => {
+    alg.addEventListener('change', toggle_buttons);
+});
+
 show_errors.addEventListener('click', () => {
+  if (get_enabled_algorithms().length === 0) return;
   show_errors.classList.toggle('active');
   analytics_info.classList.toggle('active');
-  analytics_info.querySelector('table').remove();
-  table = create_table();
-  analytics_info.append(table);
-
 });
 
 play_btn.addEventListener('click',() => {
+    if (get_enabled_algorithms().length === 0) return;
     play_btn.classList.toggle('play');
     play_btn.classList.toggle('pause');
     if (play_btn.classList.contains('pause')) {
@@ -81,4 +93,5 @@ play_btn.addEventListener('click',() => {
     }
 })
 
+toggle_buttons();
 updateSlider(); // init
