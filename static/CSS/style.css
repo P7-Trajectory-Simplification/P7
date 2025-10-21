@@ -70,6 +70,11 @@ h1{
     display: none;
 }
 
+#show_errors:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
 #analytics_info {
     height: 0px;
     transition: 0.3s;
@@ -264,6 +269,11 @@ input[type="date"]::-webkit-datetime-edit {
     transform: translate(-50%, -50%);
     width: 60%;
     height: 60%;
+}
+
+#play_button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 #range_container button svg path {

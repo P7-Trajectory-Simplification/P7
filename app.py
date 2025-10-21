@@ -38,18 +38,19 @@ def multi_process_helper(multi_process_data: dict):
     
     return alg, alg_route, error_metrics
 
-# Combines data needed for multiprocessing into dict
-def build_multi_process_data(func: Callable, routes: list[Route], algorithms: list[str]) -> dict:
-    multithread_data = []
+# Combines data needed for multiprocessing into a list of dicts
+def build_multi_process_data(func: Callable, routes: list[Route], algorithms: list[str]) -> list[dict]:
+    multiprocess_data = []
     for alg, func in algorithms_mappings.items():
         if alg in algorithms:
-            multithread_data.append(
+            multiprocess_data.append(
                 {'func': func, 'alg': alg, 'routes': routes}
             )
         else:
-            multithread_data.append(
+            multiprocess_data.append(
                 {'func': None, 'alg': alg, 'routes': None}
             )
+    return multiprocess_data
 
 def run_algorithms(algorithms: list, start_time: datetime, end_time: datetime, vessel: Vessel):
     vessel_logs = get_data_from_cache(vessel, start_time, end_time)

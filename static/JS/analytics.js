@@ -1,6 +1,4 @@
-let all_error_metrics = [];
-
-function get_metrics(algorithm) {
+function get_metrics(algorithm, all_error_metrics) {
     switch(algorithm) {
         case 'DP':
             return all_error_metrics.DP;
@@ -13,7 +11,7 @@ function get_metrics(algorithm) {
     }
 }
 
-function create_table() {
+function create_table(all_error_metrics) {
     error_metrics = ['SED avg.', 'SED max', 'PED avg.', 'PED max']
     table = document.createElement('table');
     const tr = table.insertRow();
@@ -26,7 +24,7 @@ function create_table() {
     selected = get_enabled_algorithms();
     let i = 0
     selected.forEach(algorithm => {
-        const errors = get_metrics(algorithm);
+        const errors = get_metrics(algorithm, all_error_metrics);
         const tr = table.insertRow();
         const td = document.createElement('td');
         tr.appendChild(td);
@@ -38,7 +36,8 @@ function create_table() {
         }
         i++;
     });
-    return table;
+    analytics_info.querySelector('table').remove();
+    analytics_info.append(table);
 }
 
 
