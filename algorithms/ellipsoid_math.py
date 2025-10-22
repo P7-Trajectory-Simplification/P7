@@ -1,5 +1,6 @@
 import numpy as np
 from geographiclib.geodesic import Geodesic
+from geographiclib.constants import Constants
 
 # we use a model of the Earth as defined by WGS84: Earth is an ellipsoid of rotation
 # with a semi-major axis of 6378137.0 m and a semi-minor axis of approximately 6356752.314245 meters
@@ -26,11 +27,43 @@ def geodesic_final_bearing(latlon_a, latlon_b):
     return np.deg2rad(geodesic.Inverse(*latlons, outmask=geodesic.AZIMUTH)['azi2'])
 
 
-def point_to_geodesic(latlon_a, latlon_b, latlon_c, **_):
+def point_to_geodesic(latlon_a, latlon_b, latlon_p, **_):
     # NOTE: This is the hard one. we can't rely on just geographicLib to solve this one,
     # so we use the algorithm from this paper:
     # https://www.researchgate.net/publication/321358300_Intersection_and_point-to-line_solutions_for_geodesics_on_the_ellipsoid
-    pass
+
+    # we use the semimajor axis of the WGS84-ellipsoid as an approximation for the radius of a sphere later
+    R = Constants.WGS84_a
+    # we load our longitudes as degrees this time, to be compatible with geographicLib
+    latitude_a, longitude_a = np.degrees(latlon_a)
+    latitude_b, longitude_b = np.degrees(latlon_b)
+    latitude_p, longitude_p = np.degrees(latlon_p)
+
+    s_AX = np.inf
+    while s_AX > 1e-2:
+        # we start our iteration by finding some angles and distances we need later
+        AP_inverse = geodesic.Inverse(latitude_a, longitude_a, latitude_p, longitude_p)
+        s_AP = AP_inverse['s12']
+        azimuth_AP = AP_inverse['azi1']
+        AB_inverse = geodesic.Inverse(latitude_a, longitude_a, latitude_b, longitude_b)
+        azimuth_AB = AB_inverse['azi1']
+        angle_A = np.radians(azimuth_AP - azimuth_AB)
+        # we've got the essentials now, so let's find an approximation for the distance from point P to the closest point X on geodesic AB
+        s_PX = R * np.arcsin(np.sin((s_AP / R)) * np.sin((angle_A)))
+        # with s_PX, we can approximate the distance from A to X
+        y = np.sin(((np.pi / 2) + angle_A) / 2) * np.tan((s_AP - s_PX) / (2 * R))
+        x = np.sin(((np.pi / 2) - angle_A) / 2)
+        s_AX = np.arctan(y / x)
+        # now we replace our point A with a new point on geodesic AB that is a distance of s_AX away from A.
+        # We're essentially moving A towards point X while staying on the geodesic
+        AX_direct = geodesic.Direct(latitude_a, longitude_a, azimuth_AB, s_AX)
+        latitude_a = AX_direct['lat2']
+        longitude_a = AX_direct['lon2']
+
+    # once we have moved A close enough to X, we can return the distance from A to P as the minimum distance from P to geodesic AB
+    return geodesic.Inverse(
+        latitude_a, longitude_a, latitude_p, longitude_p, outmask=geodesic.DISTANCE
+    )['s12']
 
 
 if __name__ == '__main__':
@@ -56,3 +89,12 @@ if __name__ == '__main__':
         (np.deg2rad(57.012674), np.deg2rad(9.990636)),
     )
     print(np.rad2deg(bearing))
+
+    # how far from university to the border (defined by a geodesic)
+    print(
+        point_to_geodesic(
+            (np.radians(54.916584), np.radians(8.605293)),
+            (np.radians(54.818675), np.radians(9.446560)),
+            (np.radians(57.011476), np.radians(9.990813)),
+        )
+    )
