@@ -1,6 +1,5 @@
 import numpy as np
 from geographiclib.geodesic import Geodesic
-from geographiclib.constants import Constants
 
 # we use a model of the Earth as defined by WGS84: Earth is an ellipsoid of rotation
 # with a semi-major axis of 6378137.0 m and a semi-minor axis of approximately 6356752.314245 meters
@@ -33,14 +32,14 @@ def point_to_geodesic(latlon_a, latlon_b, latlon_p, **_):
     # https://www.researchgate.net/publication/321358300_Intersection_and_point-to-line_solutions_for_geodesics_on_the_ellipsoid
 
     # we use the semimajor axis of the WGS84-ellipsoid as an approximation for the radius of a sphere later
-    R = Constants.WGS84_a
+    R = geodesic.a
     # we load our longitudes as degrees this time, to be compatible with geographicLib
     latitude_a, longitude_a = np.degrees(latlon_a)
     latitude_b, longitude_b = np.degrees(latlon_b)
     latitude_p, longitude_p = np.degrees(latlon_p)
 
     s_AX = np.inf
-    while s_AX > 1e-2:
+    while np.abs(s_AX) > 1e-5:
         # we start our iteration by finding some angles and distances we need later
         AP_inverse = geodesic.Inverse(latitude_a, longitude_a, latitude_p, longitude_p)
         s_AP = AP_inverse['s12']
@@ -49,11 +48,11 @@ def point_to_geodesic(latlon_a, latlon_b, latlon_p, **_):
         azimuth_AB = AB_inverse['azi1']
         angle_A = np.radians(azimuth_AP - azimuth_AB)
         # we've got the essentials now, so let's find an approximation for the distance from point P to the closest point X on geodesic AB
-        s_PX = R * np.arcsin(np.sin((s_AP / R)) * np.sin((angle_A)))
+        s_PX = R * np.arcsin(np.sin(s_AP / R) * np.sin(angle_A))
         # with s_PX, we can approximate the distance from A to X
         y = np.sin(((np.pi / 2) + angle_A) / 2) * np.tan((s_AP - s_PX) / (2 * R))
         x = np.sin(((np.pi / 2) - angle_A) / 2)
-        s_AX = np.arctan(y / x)
+        s_AX = 2 * R * np.arctan(y / x)
         # now we replace our point A with a new point on geodesic AB that is a distance of s_AX away from A.
         # We're essentially moving A towards point X while staying on the geodesic
         AX_direct = geodesic.Direct(latitude_a, longitude_a, azimuth_AB, s_AX)
