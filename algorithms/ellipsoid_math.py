@@ -11,22 +11,70 @@ geodesic = Geodesic.WGS84
 
 # NOTE that we don't care about keyword arguments, but we still need to accept them for compatibility reasons, hence the **_
 def geodesic_length(latlon_a, latlon_b, **_):
+    '''Given the latitudes and longitudes of two points A and B on the WGS84-ellipsoid, return the minimum distance between them
+    i.e. the length of the geodesic AB. This is a partial solution to the inverse geodesic problem.
+
+    Parameters
+    ----------
+    latlon_a : _latitude and longitude-tuple_
+        The latitude and longitude of the first point on the geodesic AB.
+    latlon_b : _latitude and longitude-tuple_
+        The latitude and longitude of the second point on the geodesic AB.
+    '''
     latlons = np.rad2deg([*latlon_a, *latlon_b])
     return geodesic.Inverse(*latlons, outmask=geodesic.DISTANCE)['s12']
 
 
 def geodesic_prediction(latlon, distance, bearing, **_):
+    '''Given the latitude and longitude of a point on the WGS84-ellipsoid, a distance value, and a bearing,
+    return a tuple containing the latitude and longitude of the destination point.
+    This is a partial solution to the direct geodesic problem.
+
+    Parameters
+    ----------
+    latlon : _latitude and longitude-tuple_
+        The latitude and longitude of the point where movement begins.
+    distance : _type_
+        The distance travelled during the movement, measured in meters.
+    bearing : _type_
+        The direction of the movement, measured in radians clockwise from the North Pole.
+    '''
     degree_arguments = np.rad2deg([*latlon, bearing])
     geodesic_dict = geodesic.Direct(*degree_arguments, distance)
     return np.deg2rad(geodesic_dict['lat2']), np.deg2rad(geodesic_dict['lon2'])
 
 
 def geodesic_final_bearing(latlon_a, latlon_b):
+    '''Given the latitudes and longitudes of two points A and B on the WGS84-ellipsoid,
+    return the second azimuth of the geodesic AB i.e. the bearing from B to A.
+    This is a partial solution to the inverse geodesic problem.
+
+    Parameters
+    ----------
+    latlon_a : _latitude and longitude-tuple_
+        The latitude and longitude of the first point on the geodesic AB.
+    latlon_b : _latitude and longitude-tuple_
+        The latitude and longitude of the second point on the geodesic AB.
+    '''
     latlons = np.rad2deg([*latlon_a, *latlon_b])
     return np.deg2rad(geodesic.Inverse(*latlons, outmask=geodesic.AZIMUTH)['azi2'])
 
 
 def point_to_geodesic(latlon_a, latlon_b, latlon_p, **_):
+    '''Given the latitudes and longitudes of three points A, B, and P on the WGS84-ellipsoid,
+    return the length of the geodesic PX such that X is on the geodesic AB and forms a right angle between A and P.
+    In other words: The minimum distance from P to AB across the surface of the ellipsoid.
+    Note that the value returned by this function is an approximation, but still very precise.
+
+    Parameters
+    ----------
+    latlon_a : _latitude and longitude-tuple_
+        The latitude and longitude of the first point on the geodesic AB.
+    latlon_b : _latitude and longitude-tuple_
+        The latitude and longitude of the second point on the geodesic AB.
+    latlon_p : _latitude and longitude-tuple_
+        The latitude and longitude of the point whose minimum surface distance to AB we want to know.
+    '''
     # NOTE: This is the hard one. we can't rely on just geographicLib to solve this one,
     # so we use the algorithm from this paper:
     # https://www.researchgate.net/publication/321358300_Intersection_and_point-to-line_solutions_for_geodesics_on_the_ellipsoid
