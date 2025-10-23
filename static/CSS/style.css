@@ -300,3 +300,30 @@ input[type="date"]::-webkit-datetime-edit {
     font-size: 14px;
     transform: translate(-50%, -50%) rotate(0deg);
 }
+
+
+#alg_settings {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 0px 10px 0px;
+}
+
+#alg_params{
+    display: flex;
+    flex-direction: column;
+}
+input[type="number"] {
+    -webkit-appearance: none;
+    border-style: solid;
+    border-radius: 5px;
+    border-color: black;
+    width: fit-content;
+    width: 50%;
+}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

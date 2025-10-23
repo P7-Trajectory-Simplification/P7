@@ -16,14 +16,15 @@ from data.vessel_cache import get_data_from_cache
 from typing import Callable
 from error_metrics.sed import sed_results
 from error_metrics.ped import ped_results
+import json
 
 app = Flask(__name__)
 
 
-def run_algorithm(routes: list[Route], func: Callable) -> list[Route]:
+def run_algorithm(routes: list[Route], func: Callable, params: dict) -> list[Route]:
     simplified_trajectories = []
     for route in routes:
-        simplified_trajectories.append(func(route))
+        simplified_trajectories.append(func(route, params))
     return simplified_trajectories
 
 # Called by the multiprocessing executor
@@ -31,8 +32,9 @@ def multi_process_helper(multi_process_data: dict):
     alg = multi_process_data['alg']
     func = multi_process_data['func']
     routes = multi_process_data['routes']
+    params = multi_process_data['params']
     if func is not None and routes is not None:
-        simplified_routes = run_algorithm(routes, func)
+        simplified_routes = run_algorithm(routes, func, params)
         alg_route = routes_to_list(simplified_routes)
         error_metrics = get_error_metrics(routes, simplified_routes)
     else:
@@ -42,25 +44,25 @@ def multi_process_helper(multi_process_data: dict):
     return alg, alg_route, error_metrics
 
 # Combines data needed for multiprocessing into a list of dicts
-def build_multi_process_data(func: Callable, routes: list[Route], algorithms: list[str]) -> list[dict]:
+def build_multi_process_data(func: Callable, routes: list[Route], algorithms: list[str], params: dict) -> list[dict]:
     multiprocess_data = []
     for alg, func in algorithms_mappings.items():
         if alg in algorithms:
             multiprocess_data.append(
-                {'func': func, 'alg': alg, 'routes': routes}
+                {'func': func, 'alg': alg, 'routes': routes, 'params': params}
             )
         else:
             multiprocess_data.append(
-                {'func': None, 'alg': alg, 'routes': None}
+                {'func': None, 'alg': alg, 'routes': None, 'params': params}
             )
     return multiprocess_data
 
-def run_algorithms(algorithms: list, start_time: datetime, end_time: datetime, vessel: Vessel):
+def run_algorithms(algorithms: list, start_time: datetime, end_time: datetime, params: dict, vessel: Vessel):
     vessel_logs = get_data_from_cache(vessel, start_time, end_time)
     routes = isolate_routes(vessel_logs)
     response = {}
 
-    multiprocess_data = build_multi_process_data(algorithms, routes, algorithms)
+    multiprocess_data = build_multi_process_data(algorithms, routes, algorithms, params)
     
     # Use ProcessPoolExecutor to run algorithms in parallel
     with ProcessPoolExecutor() as executor:
@@ -104,6 +106,8 @@ def get_algorithms():
     algorithms_req = request.args.get('algorithms')
     start_date_req = request.args.get('start_date')
     end_date_req = request.args.get('end_date')
+    params_str = request.args.get('params')
+    params_req = json.loads(params_str)
 
     algorithms = algorithms_req.split(',')
     start_time_dt = datetime.strptime(start_date_req, '%Y-%m-%d')
@@ -111,6 +115,6 @@ def get_algorithms():
 
     vessel = get_all_vessels()[125]  # Example vessel
 
-    print("Request for:", algorithms, start_time_dt, end_time_dt, vessel.name)
+    print("Request for:", algorithms, start_time_dt, end_time_dt, params_req, vessel.name)
 
-    return run_algorithms(algorithms, start_time_dt, end_time_dt, vessel)
+    return run_algorithms(algorithms, start_time_dt, end_time_dt, params_req, vessel)

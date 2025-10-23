@@ -83,11 +83,11 @@ def dead_reckoning(points: list[VesselLog], tolerance: int = 100) -> list[Vessel
     return points
 
 
-def run_dr(route: Route) -> Route:
+def run_dr(route: Route, params: dict) -> Route:
     simplified_trajectory = []
     for vessel_log in route.trajectory:
         simplified_trajectory.append(vessel_log)
-        simplified_trajectory = dead_reckoning(simplified_trajectory, tolerance=2000)
+        simplified_trajectory = dead_reckoning(simplified_trajectory, int(params["DR Tolerance"]))
 
     return Route(simplified_trajectory)
 

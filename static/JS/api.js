@@ -2,10 +2,12 @@ function algorithm_request(callback = null) {
     const algorithms = get_enabled_algorithms();
     const start_date = get_start_date();
     const end_date = get_end_date();
+    const params = get_params_for_algs();
+
 
     if (algorithms.length < 1) return;
     
-    request("algorithm", {algorithms: algorithms.join(","), start_date: start_date, end_date: end_date}, (data) => {
+    request("algorithm", {algorithms: algorithms.join(","), start_date: start_date, end_date: end_date, params: JSON.stringify(params)}, (data) => {
         let squish_data = data.SQUISH;
         let squish_e_data = data.SQUISH_E;
         let dp_data = data.DP;
@@ -13,6 +15,7 @@ function algorithm_request(callback = null) {
         let squish_reckoning_data = data.SQUISH_RECKONING;
         let raw_data = data.raw;
         let all_error_metrics = {DP: data.DP_error_metrics, DR: data.DR_error_metrics, SQUISH: data.SQUISH_error_metrics};
+        console.log(data)
         create_table(all_error_metrics);
 
         clear_map();

@@ -6,6 +6,7 @@ const play_btn = document.getElementById('play_button');
 const time_value = document.getElementById('time_value');
 const show_errors = document.getElementById('show_errors');
 const analytics_info = document.getElementById('analytics_info');
+const parameter_inputs = document.querySelectorAll('.alg_param input')
 let running = false;
 
 function get_enabled_algorithms() {
@@ -25,6 +26,14 @@ function get_start_date() {
 function get_end_date() {
     const time = new Date(slider.value * 1000).toISOString().split('T')[1].split('.')[0];
     return end_date.value + ' ' + time;
+}
+
+function get_params_for_algs() {
+    let values = {};
+    parameter_inputs.forEach(input => {
+        values[input.name] = input.value;
+    });
+    return values;
 }
 
 function updateSlider() {
@@ -92,6 +101,8 @@ play_btn.addEventListener('click',() => {
         running = false;
     }
 })
+
+
 
 toggle_buttons();
 updateSlider(); // init

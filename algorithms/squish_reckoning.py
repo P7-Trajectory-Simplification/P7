@@ -50,10 +50,10 @@ def squish_reckoning(
     return points
 
 
-def run_sr(route: Route) -> Route:
+def run_sr(route: Route, params: dict) -> Route:
     simplified_trajectory = []
     for vessel_log in route.trajectory:
         simplified_trajectory.append(vessel_log)
-        simplified_trajectory = squish_reckoning(simplified_trajectory, buffer_size=100)
+        simplified_trajectory = squish_reckoning(simplified_trajectory, int(params["SQUISH Buffer Size"]))
 
     return Route(simplified_trajectory)
