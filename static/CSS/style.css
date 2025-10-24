@@ -305,11 +305,11 @@ input[type="date"]::-webkit-datetime-edit {
 #alg_settings {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     padding: 10px 0px 10px 0px;
+    gap: 10px;
 }
 
-#alg_params{
+.alg_params{
     display: flex;
     flex-direction: column;
 }
@@ -318,8 +318,7 @@ input[type="number"] {
     border-style: solid;
     border-radius: 5px;
     border-color: black;
-    width: fit-content;
-    width: 50%;
+    width: 100%
 }
 
 input[type=number]::-webkit-outer-spin-button,

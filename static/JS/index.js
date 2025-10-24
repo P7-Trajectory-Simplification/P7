@@ -6,7 +6,7 @@ const play_btn = document.getElementById('play_button');
 const time_value = document.getElementById('time_value');
 const show_errors = document.getElementById('show_errors');
 const analytics_info = document.getElementById('analytics_info');
-const parameter_inputs = document.querySelectorAll('.alg_param input')
+const parameter_inputs = document.querySelectorAll('.alg_params input')
 let running = false;
 
 function get_enabled_algorithms() {
