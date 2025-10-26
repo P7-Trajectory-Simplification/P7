@@ -14,6 +14,7 @@ from classes.vessel import Vessel
 from datetime import datetime
 from data.vessel_cache import get_data_from_cache
 from typing import Callable
+from error_metrics.comp_ratio import comp_ratio_results
 from error_metrics.sed import sed_results
 from error_metrics.ped import ped_results
 
@@ -90,7 +91,8 @@ def get_error_metrics(raw_routes: list[Route], simplified_routes: list[Route]) -
     error_metrics = []
     ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
     sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
-    error_metrics = [ped_avg, ped_max, sed_avg, sed_max]
+    comp_ratio = comp_ratio_results(raw_routes, simplified_routes)
+    error_metrics = [ped_avg, ped_max, sed_avg, sed_max, comp_ratio]
     return error_metrics
 
 
