@@ -33,9 +33,9 @@ def adjust_priority(point_id: int, point: VesselLog, trajectory: list[VesselLog]
         before = trajectory[pred[point_id]]
         after = trajectory[succ[point_id]]
         if point.ts - before.ts < after.ts - point.ts: #Find nearest point in time to compute sed (This is not entirely correct squish-e)
-            priority = max_neighbor[point_id] + np.abs(great_circle_distance(point.get_coords(), before.get_coords(), radius=EARTH_RADIUS_METERS))
+            priority = max_neighbor[point_id] + np.abs(great_circle_distance(point.get_coords(), before.get_coords()))
         else:
-            priority = max_neighbor[point_id] + np.abs(great_circle_distance(point.get_coords(), after.get_coords(), radius=EARTH_RADIUS_METERS))
+            priority = max_neighbor[point_id] + np.abs(great_circle_distance(point.get_coords(), after.get_coords()))
         heap.insert(point_id, point, priority)
         
 def reduce(trajectory: list[VesselLog], heap: PriorityQueue, pred: dict, succ: dict, max_neighbor: dict):

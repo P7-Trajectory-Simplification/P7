@@ -6,6 +6,8 @@ function get_metrics(algorithm, all_error_metrics) {
             return all_error_metrics.DR;
         case 'SQUISH':
             return all_error_metrics.SQUISH;
+        case 'SQUISH_E':
+            return all_error_metrics.SQUISH_E;
         default:
             return null;
     }

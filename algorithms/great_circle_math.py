@@ -76,16 +76,20 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=EARTH_RADIUS_METE
         This argument forces the result to be nonnegative. Defaults to True.
     '''
     # Implementation of method explained in https://math.stackexchange.com/questions/337055/compute-minimum-distance-between-point-and-great-arc-on-sphere
-      
-    # we transform the latlons into unit vectors coming from the center of the sphere
-    vector_a = latlon_to_vector(latlon_a)
-    vector_b = latlon_to_vector(latlon_b)
-    vector_c = latlon_to_vector(latlon_c)
+    
+    distance = 0
+    if latlon_a == latlon_b:
+        distance = great_circle_distance(latlon_a, latlon_b, radius=radius)
+    else:
+        # we transform the latlons into unit vectors coming from the center of the sphere
+        vector_a = latlon_to_vector(latlon_a)
+        vector_b = latlon_to_vector(latlon_b)
+        vector_c = latlon_to_vector(latlon_c)
 
-    distance = np.arcsin(
-        (vector_c.dot(np.cross(vector_a, vector_b)))
-        / magnitude(np.cross(vector_a, vector_b))
-    )
+        distance = np.arcsin(
+            (vector_c.dot(np.cross(vector_a, vector_b)))
+            / magnitude(np.cross(vector_a, vector_b))
+        )
     if ignore_sign:
         return np.abs(distance * radius)
     else:

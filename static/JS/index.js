@@ -38,9 +38,38 @@ function get_end_date() {
 function get_params_for_algs() {
     let values = {};
     parameter_inputs.forEach(input => {
+        if (input.hasAttribute("min") && input.min > input.value) {
+            input.value = input.min;
+        };
+        if (input.hasAttribute("max") && input.max < input.value) {
+            input.value = input.max;
+        };
         values[input.name] = input.value;
     });
     return values;
+}
+
+function show_help(desc) {
+    const existing = document.querySelector('.help-box');
+    if (existing) existing.remove();
+
+    // Create help box
+    const div = document.createElement('div');
+    div.className = 'help-box';
+    
+    const text = document.createElement('p');
+    text.textContent = desc;
+
+    // Create close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = `<svg viewBox="0 0 24 24"> <line x1="18" y1="6" x2="6" y2="18" /> <line x1="6" y1="6" x2="18" y2="18" /></svg>`;
+    closeBtn.onclick = () => div.remove();
+
+    // Append button and box to DOM
+    div.appendChild(text);
+    div.appendChild(closeBtn);
+    document.body.appendChild(div);
 }
 
 function updateSlider() {
@@ -122,6 +151,7 @@ play_btn.addEventListener('click',() => {
         running = false;
     }
 })
+
 
 
 
