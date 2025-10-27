@@ -5,7 +5,7 @@ function algorithm_request(callback = null) {
 
     if (algorithms.length < 1) return;
     
-    request("algorithm", {algorithms: JSON.stringify(algorithms), start_date: start_date, end_date: end_date}, (data) => {
+    request("algorithm", {algorithms: algorithms, start_date: start_date, end_date: end_date}, (data) => {
         create_table({
             DP: data.DP_error_metrics,
             DR: data.DR_error_metrics,
@@ -34,7 +34,7 @@ function request(path, params, callback) {
         headers: {
             "Content-Type": "application/json",
         },
-        body: body
+        body: JSON.stringify(body)
     })
         .then(response => response.json())
         .then(data => callback(data))
