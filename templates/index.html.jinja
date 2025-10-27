@@ -43,36 +43,37 @@
       <div id="alg_settings">
         {% set alg_params = {
         'DR': [
-        {'label': 'Tolerance', 'type': 'number', 'default': 2000, 'step': 1,
+        {'label': 'Tolerance', 'name': 'tolerance', 'type': 'number', 'default': 2000, 'step': 1,
         'min': 0}
         ],
         'DP': [
-        {'label': 'Epsilon', 'type': 'number', 'default': 6000, 'step': 1,
+        {'label': 'Epsilon', 'name': 'epsilon', 'type': 'number', 'default': 6000, 'step': 1,
         'min': 0}
         ],
         'SQUISH': [
-        {'label': 'Buffer Size', 'type': 'number', 'default': 100, 'min': 2}
+        {'label': 'Buffer Size', 'name': 'buff_size', 'type': 'number', 'default': 100, 'min': 2}
         ],
         'SQUISH_E': [
-        {'label': 'Max SED', 'type': 'number', 'default': 0.5, 'step': 0.01, 'min': 0, 'max': 1}
+        {'label': 'Max SED', 'name': 'max_sed', 'type': 'number', 'default': 0.5, 'step': 0.01, 'min': 0, 'max': 1}
         ],
         'SQUISH_E_2': [
-        {'label': 'Lowest Compression', 'type': 'number', 'default': 0.5, 'step': 0.01, 'min': 0.01, 'max': 1}
+        {'label': 'Lowest Compression', 'name': 'low_comp', 'type': 'number', 'default': 0.5, 'step': 0.01, 'min': 0.01, 'max': 1}
         ]
         } %}
         {% for alg, params in alg_params.items() %}
           <div class="alg_params">
           {% for param in params %}
-          <label for="{{ alg }}_setting{{ loop.index }}">{{ param.label
+          <label for="{{param.name}}">{{ param.label
             }}:</label>
           <input
-            id="{{ alg }}_setting{{ loop.index }}"
-            name="{{ alg }} {{param.label}}"
+            id="{{param.name}}"
+            name="{{param.name}}"
             type="{{ param.type }}"
             value="{{ param.default }}"
             {% if param.min is defined %}min="{{ param.min }}" {% endif %}
             {% if param.max is defined %}max="{{ param.max }}" {% endif %}
-            {% if param.step is defined %}step="{{ param.step }}" {% endif %}>
+            {% if param.step is defined %}step="{{ param.step }}" {% endif %}
+            disabled>
           {% endfor %}
           </div>
         {% endfor %}

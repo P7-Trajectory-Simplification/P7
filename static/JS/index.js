@@ -7,6 +7,13 @@ const time_value = document.getElementById('time_value');
 const show_errors = document.getElementById('show_errors');
 const analytics_info = document.getElementById('analytics_info');
 const parameter_inputs = document.querySelectorAll('.alg_params input')
+const alg_input_needed = {
+    "SQUISH":["buff_size"], 
+    "DP":["epsilon"], 
+    "DR":["tolerance"],
+    "SQUISH_E": ["low_comp", "max_sed"],
+    "SQUISH_RECKONING": ["buff_size"]
+};
 let running = false;
 
 function get_enabled_algorithms() {
@@ -71,13 +78,27 @@ function start_pass_time() {
 }
 
 function toggle_buttons() {
-  if (get_enabled_algorithms().length === 0) {
-      show_errors.disabled = true;
-      play_btn.disabled = true;
-  } else {
-      show_errors.disabled = false;
-      play_btn.disabled = false;
-  }
+    enabled = get_enabled_algorithms();
+    if (enabled.length === 0) {
+        show_errors.disabled = true;
+        play_btn.disabled = true;
+    } else {
+        show_errors.disabled = false;
+        play_btn.disabled = false;
+    }
+    toggle_params(enabled)
+}
+
+function toggle_params(enabled) {
+    parameter_inputs.forEach(input => {
+        input.disabled = true;
+    })
+    enabled.forEach(alg_id => {
+        params = alg_input_needed[alg_id];
+        params.forEach(param => {
+            document.getElementById(param).disabled = false;
+        })
+    });
 }
 
 algorithms.forEach(alg => {
