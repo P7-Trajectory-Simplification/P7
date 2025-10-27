@@ -99,11 +99,11 @@ def index():
     return render_template('index.html.jinja', algorithms=algorithms_mappings.keys())
 
 
-@app.route('/algorithm')
+@app.route('/algorithm', methods=['POST'])
 def get_algorithms():
-    algorithms_req = request.args.get('algorithms')
-    start_date_req = request.args.get('start_date')
-    end_date_req = request.args.get('end_date')
+    algorithms_req = request.form['algorithms']
+    start_date_req = request.form.get('start_date')
+    end_date_req = request.form.get('end_date')
 
     algorithms = algorithms_req.split(',')
     start_time_dt = datetime.strptime(start_date_req, '%Y-%m-%d')

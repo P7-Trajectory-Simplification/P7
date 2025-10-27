@@ -5,7 +5,7 @@ function algorithm_request(callback = null) {
 
     if (algorithms.length < 1) return;
     
-    request("algorithm", {algorithms: algorithms.join(","), start_date: start_date, end_date: end_date}, (data) => {
+    request("algorithm", {algorithms: JSON.stringify(algorithms), start_date: start_date, end_date: end_date}, (data) => {
         create_table({
             DP: data.DP_error_metrics,
             DR: data.DR_error_metrics,
@@ -25,17 +25,16 @@ function algorithm_request(callback = null) {
 }
 
 function request(path, params, callback) {
-    let parameters = "?";
+    let body = {};
     for (const key in params) {
-        parameters += key + "=" + params[key] + "&";
+        body[key] = params[key];
     }
-    parameters = parameters.slice(0, -1);
-    fetch("/"+path + parameters, {
-        method: "GET",
+    fetch("/"+path, {
+        method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body
+        body: body
     })
         .then(response => response.json())
         .then(data => callback(data))
