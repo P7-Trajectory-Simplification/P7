@@ -12,7 +12,8 @@ function algorithm_request(callback = null) {
             DP: data.DP_error_metrics,
             DR: data.DR_error_metrics,
             SQUISH: data.SQUISH_error_metrics,
-            SQUISH_E: data.SQUISH_E_error_metrics
+            SQUISH_E: data.SQUISH_E_error_metrics,
+            SQUISH_RECKONING: data.SQUISH_RECKONING_error_metrics
         });
 
         console.log(data)

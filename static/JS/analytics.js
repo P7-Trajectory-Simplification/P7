@@ -8,21 +8,23 @@ function get_metrics(algorithm, all_error_metrics) {
             return all_error_metrics.SQUISH;
         case 'SQUISH_E':
             return all_error_metrics.SQUISH_E;
+        case 'SQUISH_RECKONING':
+            return all_error_metrics.SQUISH_RECKONING;
         default:
             return null;
     }
 }
 
 function create_table(all_error_metrics) {
-    error_metrics = ['SED avg.', 'SED max', 'PED avg.', 'PED max', 'Compression Ratio'];
+    let error_metrics = ['SED avg.', 'SED max', 'PED avg.', 'PED max', 'Compression Ratio'];
     table = document.createElement('table');
     const tr = table.insertRow();
     const td = tr.insertCell();
-    for(let i = 0; i <= 4; i++) {
+    error_metrics.forEach(metric => {
         const th = document.createElement('th');
         tr.appendChild(th);
         th.textContent = error_metrics[i];
-    }
+    });
     selected = get_enabled_algorithms();
     let i = 0
     selected.forEach(algorithm => {
