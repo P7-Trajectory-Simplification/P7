@@ -2,21 +2,24 @@ function algorithm_request(callback = null) {
     const algorithms = get_enabled_algorithms();
     const start_date = get_start_date();
     const end_date = get_end_date();
+    const params = get_params_for_algs();
+
 
     if (algorithms.length < 1) return;
     
-    request("algorithm", {algorithms: algorithms, start_date: start_date, end_date: end_date}, (data) => {
+    request("algorithm", {algorithms: algorithms, start_date: start_date, end_date: end_date, params: params}, (data) => {
         create_table({
             DP: data.DP_error_metrics,
             DR: data.DR_error_metrics,
-            SQUISH: data.SQUISH_error_metrics
+            SQUISH: data.SQUISH_error_metrics,
+            SQUISH_E: data.SQUISH_E_error_metrics
         });
 
         clear_map();
+        plot_to_map(data.raw, "blue");
         plot_to_map(data.SQUISH, "green");
         plot_to_map(data.SQUISH_E, "cyan")
         plot_to_map(data.SQUISH_RECKONING, 'magenta')
-        plot_to_map(data.raw, "blue");
         plot_to_map(data.DP, "red");
         plot_to_map(data.DR, "yellow");
 

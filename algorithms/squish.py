@@ -44,6 +44,6 @@ def squish(trajectory: list[VesselLog], buff: list[SquishPoint], buff_size: int 
                 update_sed(index, buff)
 
 
-def run_squish(route: Route) -> Route:
-    squish(route.trajectory, route.squish_buff)
+def run_squish(route: Route, params: dict) -> Route:
+    squish(route.trajectory, route.squish_buff, int(params["buff_size"]))
     return Route(route.extract_squish_buffer())
