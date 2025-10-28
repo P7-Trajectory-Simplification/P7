@@ -8,7 +8,7 @@ from classes.squish_point import SquishPoint
 from classes.vessel_log import VesselLog
 import numpy as np
 
-
+# TODO: Set guards to prevent index errors
 def update_sed(index: int, buff: list[SquishPoint]):
     a = buff[index - 1].vessel_log
     b = buff[index + 1].vessel_log
@@ -34,7 +34,7 @@ def squish(trajectory: list[VesselLog], buff: list[SquishPoint], buff_size: int 
         buff_length = len(buff)
         if buff_length >= 3:
             update_sed(buff_length - 2, buff)
-        if buff_length == buff_size:
+        if buff_length == buff_size + 1:
             index = find_min_sed(buff)
             del buff[index]
             buff_length = len(buff)
