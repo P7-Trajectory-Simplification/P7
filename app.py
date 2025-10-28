@@ -1,3 +1,4 @@
+import json
 from concurrent.futures import ProcessPoolExecutor
 from flask import Flask, request
 from flask import render_template
@@ -14,6 +15,7 @@ from classes.vessel import Vessel
 from datetime import datetime
 from data.vessel_cache import get_data_from_cache
 from typing import Callable
+from error_metrics.comp_ratio import comp_ratio_results
 from error_metrics.sed import sed_results
 from error_metrics.ped import ped_results
 import json
@@ -92,7 +94,8 @@ def get_error_metrics(raw_routes: list[Route], simplified_routes: list[Route]) -
     error_metrics = []
     ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
     sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
-    error_metrics = [ped_avg, ped_max, sed_avg, sed_max]
+    comp_ratio = comp_ratio_results(raw_routes, simplified_routes)
+    error_metrics = [ped_avg, ped_max, sed_avg, sed_max, comp_ratio]
     return error_metrics
 
 
@@ -101,15 +104,18 @@ def index():
     return render_template('index.html.jinja', algorithms=algorithms_mappings.keys())
 
 
-@app.route('/algorithm')
+@app.route('/algorithm', methods=['POST'])
 def get_algorithms():
-    algorithms_req = request.args.get('algorithms')
-    start_date_req = request.args.get('start_date')
-    end_date_req = request.args.get('end_date')
-    params_str = request.args.get('params')
-    params_req = json.loads(params_str)
+    data = request.get_json(force=True)
 
-    algorithms = algorithms_req.split(',')
+    if not data:
+        return {"error": "Invalid JSON"}, 400
+
+    params_req = data['params']
+    start_date_req = data['start_date']
+    end_date_req = data['end_date']
+
+    algorithms = data['algorithms']
     start_time_dt = datetime.strptime(start_date_req, '%Y-%m-%d')
     end_time_dt = datetime.strptime(end_date_req, '%Y-%m-%d %H:%M:%S')
 
