@@ -1,3 +1,4 @@
+import json
 from concurrent.futures import ProcessPoolExecutor
 from flask import Flask, request
 from flask import render_template
@@ -99,13 +100,17 @@ def index():
     return render_template('index.html.jinja', algorithms=algorithms_mappings.keys())
 
 
-@app.route('/algorithm')
+@app.route('/algorithm', methods=['POST'])
 def get_algorithms():
-    algorithms_req = request.args.get('algorithms')
-    start_date_req = request.args.get('start_date')
-    end_date_req = request.args.get('end_date')
+    params = request.get_json(force=True)
 
-    algorithms = algorithms_req.split(',')
+    if not params:
+        return {"error": "Invalid JSON"}, 400
+
+    start_date_req = params['start_date']
+    end_date_req = params['end_date']
+
+    algorithms = params['algorithms']
     start_time_dt = datetime.strptime(start_date_req, '%Y-%m-%d')
     end_time_dt = datetime.strptime(end_date_req, '%Y-%m-%d %H:%M:%S')
 
