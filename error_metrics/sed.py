@@ -8,8 +8,7 @@ def find_simplified_point(point: VesselLog, trajectory: list[VesselLog]) -> Vess
     min_time_diff = None
     closest_point = None
 
-    for i in range(len(trajectory) - 1):
-        simplified_point = trajectory[i]
+    for simplified_point in trajectory:
         # Find time difference between point_time and the simplified point's time
         if simplified_point.ts == point_time:
             return (simplified_point)
@@ -38,8 +37,12 @@ def sed_results(raw_data_routes: list[Route], simplified_routes: list[Route]) ->
 
     for i, raw_route in enumerate(raw_data_routes):
         simplified_route = simplified_routes[i]
+        if len(simplified_route.trajectory) == 0:
+            continue
         for point in raw_route.trajectory:
             simplified_point = find_simplified_point(point, simplified_route.trajectory)
+            if simplified_point is None:
+                continue
             distance = great_circle_distance(point.get_coords(), simplified_point.get_coords())
             total_distance += distance
             count += 1
