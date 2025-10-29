@@ -17,7 +17,6 @@ class SquishTest(unittest.TestCase):
 
     def test_squish(self):
         squish(self.route.trajectory, self.route.squish_buff, buff_size=10)
-        squished_route = Route(self.route.extract_squish_buffer())
         self.assertEqual(len(squished_route.trajectory), 10, "Squished route should have 10 points")
         for i, squish_point in enumerate(self.route.squish_buff):
             if i == 0:
