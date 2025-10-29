@@ -38,13 +38,16 @@ function get_end_date() {
 function get_params_for_algs() {
     let values = {};
     parameter_inputs.forEach(input => {
-        if (input.hasAttribute("min") && input.min > input.value) {
+        const min = parseInt(input.min);
+        const max = parseInt(input.max);
+        const value = parseInt(input.value);
+        if (input.hasAttribute("min") && min > value) {
             input.value = input.min;
         };
-        if (input.hasAttribute("max") && input.max < input.value) {
+        if (input.hasAttribute("max") && max < value) {
             input.value = input.max;
         };
-        values[input.name] = input.value;
+        values[input.name] = parseInt(input.value);
     });
     return values;
 }
