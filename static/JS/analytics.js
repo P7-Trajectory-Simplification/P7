@@ -23,7 +23,7 @@ function create_table(all_error_metrics) {
     error_metrics.forEach(metric => {
         const th = document.createElement('th');
         tr.appendChild(th);
-        th.textContent = error_metrics[i];
+        th.textContent = metric;
     });
     selected = get_enabled_algorithms();
     let i = 0
