@@ -12,7 +12,6 @@ def find_segment(point: VesselLog, trajectory: list[VesselLog]) -> tuple[VesselL
             return (start, end)
     
     #Print to inform that the point is outside the segment time interval and a segment therefore hasn't been chosen.
-    print("Point time is outside the segment time interval.")
     return None
         
 def ped_results(raw_data_routes: list[Route], simplified_routes: list[Route]) -> tuple[float, float]:
@@ -34,8 +33,8 @@ def ped_results(raw_data_routes: list[Route], simplified_routes: list[Route]) ->
                 distance = point_to_great_circle(start_seg.get_coords(), end_seg.get_coords(), point.get_coords()) #ped((point.lat.get_coords(), point.lon.get_coords()), (start_seg[0], start_seg[1]), (end_seg[0], end_seg[1]))
                 total_distance += distance
                 count += 1
-            if distance > max_distance:
-                    max_distance = distance
+                if distance > max_distance:
+                        max_distance = distance
 
     if count == 0:
         return 0,0  # both average and max are zero

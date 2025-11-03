@@ -82,16 +82,6 @@ def dead_reckoning(points: list[VesselLog], tolerance: int = 100) -> list[Vessel
         del points[-2]
     return points
 
-
-def run_dr(route: Route, params: dict) -> Route:
-    simplified_trajectory = []
-    for vessel_log in route.trajectory:
-        simplified_trajectory.append(vessel_log)
-        simplified_trajectory = dead_reckoning(simplified_trajectory, int(params["tolerance"]))
-
-    return Route(simplified_trajectory)
-
-
 # Helper function for squish reckoning
 def reckon(point_a: VesselLog, point_b: VesselLog, point_c: VesselLog) -> float:
     '''Given three points with latitude, longitude, and timestamp, return the distance between point c and point c as predicted by point a and b via dead reckoning
@@ -131,3 +121,11 @@ def reckon(point_a: VesselLog, point_b: VesselLog, point_c: VesselLog) -> float:
     return great_circle_distance(
         c_predicted, point_c.get_coords(), radius=EARTH_RADIUS_METERS
     )
+
+def run_dr(route: Route, params: dict) -> Route:
+    simplified_trajectory = []
+    for vessel_log in route.trajectory:
+        simplified_trajectory.append(vessel_log)
+        simplified_trajectory = dead_reckoning(simplified_trajectory, params["tolerance"])
+
+    return Route(simplified_trajectory)

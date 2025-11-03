@@ -8,6 +8,8 @@ function get_metrics(algorithm, all_error_metrics) {
             return all_error_metrics.SQUISH;
         case 'SQUISH_E':
             return all_error_metrics.SQUISH_E;
+        case 'UNIFORM_SAMPLING':
+            return all_error_metrics.UNIFORM_SAMPLING;
         case 'SQUISH_RECKONING':
             return all_error_metrics.SQUISH_RECKONING;
         default:
@@ -23,7 +25,7 @@ function create_table(all_error_metrics) {
     error_metrics.forEach(metric => {
         const th = document.createElement('th');
         tr.appendChild(th);
-        th.textContent = error_metrics[i];
+        th.textContent = metric;
     });
     selected = get_enabled_algorithms();
     let i = 0

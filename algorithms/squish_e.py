@@ -123,5 +123,5 @@ def squish_e (trajectory: list[VesselLog], buff: list[VesselLog], low_comp_rate:
 
 
 def run_squish_e(route: Route, params: dict) -> Route:
-    squish_e(route.trajectory, route.squish_e_buff, float(params["low_comp"]), float(params["max_sed"]), 4)
+    squish_e(route.trajectory, route.squish_e_buff, params["low_comp"], params["max_sed"], 4)
     return Route(route.squish_e_buff)

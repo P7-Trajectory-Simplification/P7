@@ -54,6 +54,6 @@ def run_sr(route: Route, params: dict) -> Route:
     simplified_trajectory = []
     for vessel_log in route.trajectory:
         simplified_trajectory.append(vessel_log)
-        simplified_trajectory = squish_reckoning(simplified_trajectory, int(params["buff_size"]))
+        simplified_trajectory = squish_reckoning(simplified_trajectory, params["buff_size"])
 
     return Route(simplified_trajectory)
