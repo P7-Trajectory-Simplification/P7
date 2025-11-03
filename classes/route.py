@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from classes.squish_point import SquishPoint
 from classes.vessel_log import VesselLog
 
 
