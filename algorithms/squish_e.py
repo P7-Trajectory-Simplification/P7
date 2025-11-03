@@ -1,3 +1,5 @@
+import math
+
 from algorithms.great_circle_math import great_circle_distance, EARTH_RADIUS_METERS
 from classes.route import Route
 from classes.squish_point import SquishPoint
@@ -70,7 +72,7 @@ def reduce(trajectory: list[VesselLog], heap: PriorityQueue, pred: dict, succ: d
     adjust_priority(succ[id], trajectory[succ[id]], trajectory, heap, pred, succ, max_neighbor)
 
     #Garbage Collection
-    del pred[id]; del succ[id]; del max_neighbor[id] 
+    del pred[id]; del succ[id]; del max_neighbor[id]
 
 def squish_e (trajectory: list[VesselLog], buff: list[VesselLog], low_comp_rate: float, up_bound_sed: float, buff_size: int = 4):
     """
@@ -95,10 +97,8 @@ def squish_e (trajectory: list[VesselLog], buff: list[VesselLog], low_comp_rate:
     max_neighbor = {}
 
     for i in range(0, len(trajectory)):
+        buff_size = max(4, math.floor((i+1) / low_comp_rate) + 1)
 
-        if i/low_comp_rate >= buff_size: #increase buff_size based on lower bound compression rate
-            buff_size += 1
-        
         heap.insert(i, trajectory[i], float('inf')) #Insert point with priority = inf
         max_neighbor[i] = 0
 
@@ -106,8 +106,8 @@ def squish_e (trajectory: list[VesselLog], buff: list[VesselLog], low_comp_rate:
             succ[i - 1] = i
             pred[i] = i - 1
             adjust_priority(i-1, trajectory[i-1], trajectory, heap, pred, succ, max_neighbor) #update priority
-
-        if len(heap.heap) == buff_size: #Reduce buffer when full
+        #TODO: Use Peter's function for size instead
+        if len(heap.entry_finder) == buff_size: #Reduce buffer when full
             reduce(trajectory, heap, pred, succ, max_neighbor)
     
     #After finishing looping through, keep reducing heap until all points satisfies upper bound on SED
