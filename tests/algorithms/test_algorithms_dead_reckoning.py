@@ -35,7 +35,9 @@ class DeadReckoningTest(unittest.TestCase):
         c = VesselLog(lat=base_lat + (2_000 / 111_000), lon=base_lon + (6_000 / (111_000 * np.cos(np.deg2rad(base_lat)))), ts=t0 + timedelta(seconds=120))
 
         trajectory = [a,b,c]
-        simplified = dead_reckoning(trajectory, {"tolerance": 2000})
+        for point in trajectory:
+            simplified.append(point)
+            simplified = dead_reckoning(simplified, 2000)
         self.assertEqual(len(simplified), 3, "Trajectory should not drop any point since error > tolerance")
 
 
@@ -46,7 +48,10 @@ class DeadReckoningTest(unittest.TestCase):
             ts=t0 + timedelta(seconds=120)
         )
         trajectory = [a,b,c]
-        simplified = dead_reckoning(trajectory, {"tolerance": 2000})
+
+        for point in trajectory:
+            simplified.append(point)
+            simplified = dead_reckoning(simplified, 2000)
         self.assertEqual(len(simplified), 2, "Trajectory should drop the middle point, since error < tolerance")
         self.assertEqual(trajectory[0], simplified[0])
         self.assertEqual(trajectory[-1], simplified[-1])
