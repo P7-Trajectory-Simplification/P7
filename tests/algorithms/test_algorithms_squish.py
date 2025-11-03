@@ -1,9 +1,8 @@
 import unittest
 
 from classes.route import Route
-from classes.squish_point import SquishPoint
 from tests.test_mock_vessel_logs import mock_vessel_logs
-from algorithms.squish import run_squish, squish, find_min_sed, update_sed
+from algorithms.squish import run_squish, squish, update_sed
 
 
 class SquishTest(unittest.TestCase):
@@ -17,7 +16,7 @@ class SquishTest(unittest.TestCase):
 
     def test_squish(self):
         squish(self.route.trajectory, self.route.squish_buff, buff_size=10)
-        self.assertEqual(len(squished_route.trajectory), 10, "Squished route should have 10 points")
+        self.assertEqual(len(self.route.squish_buff.trajectory), 10, "Squished route should have 10 points")
         for i, squish_point in enumerate(self.route.squish_buff):
             if i == 0:
                 self.assertEqual(squish_point.vessel_log, self.route.trajectory[0], "First point should match")

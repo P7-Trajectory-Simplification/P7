@@ -32,6 +32,10 @@ class UniformSamplingTest(unittest.TestCase):
             "Simplified route should have correct number of points"
         )
 
+        original = {p.get_coords() for p in self.route.trajectory}
+        simplified = {p.get_coords() for p in simplified_route.trajectory}
+        self.assertTrue(simplified.issubset(original), "Simplified trajectory must contain only original points.")
+
     def test_uniform_sampling(self):
         sampling_rate = 100
         simplified_trajectory = uniform_sampling(self.route.trajectory, sampling_rate=sampling_rate)
