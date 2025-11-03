@@ -47,3 +47,6 @@ class PriorityQueue:
         entry = self.entry_finder.pop(point_id, None)
         if entry is not None:
             entry[2] = self.REMOVED
+
+    def size(self):
+        return len(self.entry_finder)
