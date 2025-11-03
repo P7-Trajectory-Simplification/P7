@@ -3,7 +3,7 @@ from classes.route import Route
 from classes.vessel_log import VesselLog
 
 
-def uniform_sampling(points: list[VesselLog], sampling_rate: float) -> list[VesselLog]:
+def uniform_sampling(points: list[VesselLog], sampling_rate: int) -> list[VesselLog]:
     '''
     Simplifies a given set of points using uniform sampling.
 
