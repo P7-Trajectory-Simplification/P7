@@ -95,6 +95,27 @@
         <table>
         </table>
       </div>
+      <div id="colors">
+          {% set alg_colors = {
+          'RAW': 'blue',
+          'DP': 'red',
+            'DR': 'yellow',
+            'SQUISH': 'green',
+            'SQUISH_E': 'cyan',
+            'UNIFORM_SAMPLING': 'orange',
+            'SQUISH_RECKONING': 'magenta'
+        } %}
+        {% for alg, color in alg_colors.items() %}
+        <div class="color_box">
+          <div class="color_sample {{ color }}"></div>
+          <label>{{ alg }}</label>
+        </div>
+        {% endfor %}
+
+
+
+
+      </div>
       <div id='map'></div>
       <div id='settings'>
         <div id='output_box'>
