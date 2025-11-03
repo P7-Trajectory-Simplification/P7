@@ -22,7 +22,7 @@ class DeadReckoningTest(unittest.TestCase):
         self.assertEqual(simplified_route.trajectory[-1], self.route.trajectory[-1], "Last point should remain the same")
 
         original = {p.get_coords() for p in self.route.trajectory}
-        simplified = {p.get_coords() for p in self.simplified_route.trajectory}
+        simplified = {p.get_coords() for p in simplified_route.trajectory}
         self.assertTrue(simplified.issubset(original), "Simplified trajectory must contain only original points.")
 
     def test_dead_reckoning(self):
@@ -34,6 +34,7 @@ class DeadReckoningTest(unittest.TestCase):
         # C is ~6 km east of the expected path.
         c = VesselLog(lat=base_lat + (2_000 / 111_000), lon=base_lon + (6_000 / (111_000 * np.cos(np.deg2rad(base_lat)))), ts=t0 + timedelta(seconds=120))
 
+        simplified = []
         trajectory = [a,b,c]
         for point in trajectory:
             simplified.append(point)
@@ -48,7 +49,7 @@ class DeadReckoningTest(unittest.TestCase):
             ts=t0 + timedelta(seconds=120)
         )
         trajectory = [a,b,c]
-
+        simplified = []
         for point in trajectory:
             simplified.append(point)
             simplified = dead_reckoning(simplified, 2000)
