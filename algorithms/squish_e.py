@@ -1,8 +1,7 @@
 import math
 
-from algorithms.great_circle_math import great_circle_distance, EARTH_RADIUS_METERS
+from algorithms.great_circle_math import great_circle_distance
 from classes.route import Route
-from classes.squish_point import SquishPoint
 from classes.vessel_log import VesselLog
 from classes.priority_queue import PriorityQueue
 import numpy as np
@@ -106,8 +105,8 @@ def squish_e (trajectory: list[VesselLog], buff: list[VesselLog], low_comp_rate:
             succ[i - 1] = i
             pred[i] = i - 1
             adjust_priority(i-1, trajectory[i-1], trajectory, heap, pred, succ, max_neighbor) #update priority
-        #TODO: Use Peter's function for size instead
-        if len(heap.entry_finder) == buff_size: #Reduce buffer when full
+
+        if heap.size() == buff_size: #Reduce buffer when full
             reduce(trajectory, heap, pred, succ, max_neighbor)
     
     #After finishing looping through, keep reducing heap until all points satisfies upper bound on SED
