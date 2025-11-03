@@ -9,6 +9,7 @@ from algorithms.isolate_routes import isolate_routes
 from algorithms.squish import run_squish
 from algorithms.squish_reckoning import run_sr
 from algorithms.squish_e import run_squish_e
+from algorithms.uniform_sampling import run_uniform_sampling
 from classes.route import Route
 from data.database import get_all_vessels
 from classes.vessel import Vessel
@@ -87,6 +88,7 @@ algorithms_mappings = {
     'DP': run_dp,
     'SQUISH': run_squish,
     'SQUISH_E': run_squish_e,
+    'UNIFORM_SAMPLING': run_uniform_sampling,
     'SQUISH_RECKONING': run_sr,
 }
 

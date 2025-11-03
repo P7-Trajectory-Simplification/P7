@@ -61,6 +61,10 @@
         'SQUISH_E_2': [
         {'label': 'Lowest Compression', 'name': 'low_comp', 'type': 'number',
         'default': 2, 'step': 1, 'min': 1, 'desc': 'The lower bound compression rate. If = 1, SQUISH-E only simplifies based on SED error. Minimum value = 1 and all points can be kept in the buffer. If = 2, compresses the data to around +- 50%.'}
+        ],
+        'UNIFORM_SAMPLING': [
+        {'label': 'Sampling Rate', 'name': 'sampling_rate', 'type': 'number',
+        'default': 10, 'step': 1, 'min': 1, 'desc': 'The rate at which to sample points from the trajectory. A sampling rate of 10 means that every 10th point will be kept. Minimum value = 1.'}
         ]
         } %}
         {% for alg, params in alg_params.items() %}

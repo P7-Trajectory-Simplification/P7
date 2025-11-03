@@ -13,17 +13,20 @@ function algorithm_request(callback = null) {
             DR: data.DR_error_metrics,
             SQUISH: data.SQUISH_error_metrics,
             SQUISH_E: data.SQUISH_E_error_metrics,
+            UNIFORM_SAMPLING: data.UNIFORM_SAMPLING_error_metrics,
             SQUISH_RECKONING: data.SQUISH_RECKONING_error_metrics
         });
 
         console.log(data)
         clear_map();
         plot_to_map(data.raw, "blue");
-        plot_to_map(data.SQUISH, "green");
-        plot_to_map(data.SQUISH_E, "cyan")
-        plot_to_map(data.SQUISH_RECKONING, 'magenta')
         plot_to_map(data.DP, "red");
         plot_to_map(data.DR, "yellow");
+        plot_to_map(data.SQUISH, "green");
+        plot_to_map(data.SQUISH_E, "cyan")
+        plot_to_map(data.UNIFORM_SAMPLING, "orange")
+        plot_to_map(data.SQUISH_RECKONING, 'magenta')
+
 
         if (callback && callback instanceof Function) callback();
     });
