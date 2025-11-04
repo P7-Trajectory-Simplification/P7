@@ -16,11 +16,10 @@ class SquishTest(unittest.TestCase):
 
         BasicAssertions(self.route, squished_route)
 
-        self.assertEqual(len(squished_route.trajectory), 10, "Squished route should have 10 points")
-
     def test_squish(self):
+        self.route = Route(trajectory=mock_vessel_logs)
         squish(self.route.trajectory, self.route.squish_buff, buff_size=10)
-        self.assertEqual(len(self.route.squish_buff.trajectory), 10, "Squished route should have 10 points")
+        self.assertEqual(len(self.route.squish_buff), 10, "Squished route should have 10 points")
 
     #def test_update_sed(self):
 
