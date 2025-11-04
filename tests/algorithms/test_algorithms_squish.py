@@ -3,7 +3,7 @@ import unittest
 from classes.route import Route
 from tests.algorithms.routes_basic_assertions import BasicAssertions
 from tests.test_mock_vessel_logs import mock_vessel_logs
-from algorithms.squish import run_squish, squish, update_sed
+from algorithms.squish import run_squish, squish
 
 
 class SquishTest(unittest.TestCase):

@@ -1,10 +1,7 @@
 from algorithms.great_circle_math import (
-    point_to_great_circle,
-    great_circle_distance,
-    EARTH_RADIUS_METERS,
+    great_circle_distance
 )
 from classes.route import Route
-from classes.squish_point import SquishPoint
 from classes.vessel_log import VesselLog
 from classes.priority_queue import PriorityQueue
 import numpy as np
