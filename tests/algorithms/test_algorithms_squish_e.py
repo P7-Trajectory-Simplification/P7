@@ -1,6 +1,7 @@
 import unittest
 
 from classes.route import Route
+from tests.algorithms.routes_basic_assertions import BasicAssertions
 from tests.test_mock_vessel_logs import mock_vessel_logs
 from algorithms.squish_e import run_squish_e, squish_e, adjust_priority, reduce
 from classes.priority_queue import PriorityQueue
@@ -14,7 +15,8 @@ class SquishETest(unittest.TestCase):
     def test_run_squish_e(self):
         self.route = Route(trajectory=mock_vessel_logs)
         squished_e_route = run_squish_e(self.route, {"low_comp": 2, "max_sed": 100})
-        self.assertLessEqual(len(squished_e_route.trajectory), len(self.route.trajectory), "Squished route should have fewer points than original route")
+
+        BasicAssertions(self.route, squished_e_route)
 
     def test_squish_e(self):
         for low_comp_rate in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
@@ -23,14 +25,7 @@ class SquishETest(unittest.TestCase):
 
             self.assertEqual(len(self.route.trajectory)/len(self.route.squish_e_buff) >= low_comp_rate, True, "Compression rate should fulfill the equation")
 
-            self.assertLessEqual(
-                len(self.route.squish_e_buff),
-                len(self.route.trajectory),
-                "Squished route should have fewer or the same amount of points than original route"
-            )
-
-            self.assertEqual(self.route.squish_e_buff[0], self.route.trajectory[0], "First point should match")
-            self.assertEqual(self.route.squish_e_buff[-1], self.route.trajectory[-1], "Last point should match")
+            BasicAssertions(self.route, Route(self.route.squish_e_buff))
 
     def test_adjust_priority(self):
         self.route = Route(trajectory=mock_vessel_logs)

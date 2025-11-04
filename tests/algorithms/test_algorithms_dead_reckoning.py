@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from classes.route import Route
 from classes.vessel_log import VesselLog
+from tests.algorithms.routes_basic_assertions import BasicAssertions
 from tests.test_mock_vessel_logs import mock_vessel_logs
 from algorithms.dead_reckoning import run_dr, dead_reckoning, reckon
 
@@ -17,13 +18,7 @@ class DeadReckoningTest(unittest.TestCase):
     def test_run_dr(self):
         simplified_route = run_dr(self.route, {"tolerance": 2000})
         
-        self.assertLess(len(simplified_route.trajectory), len(self.route.trajectory), "Simplified route should have fewer points")
-        self.assertEqual(simplified_route.trajectory[0], self.route.trajectory[0], "First point should remain the same")
-        self.assertEqual(simplified_route.trajectory[-1], self.route.trajectory[-1], "Last point should remain the same")
-
-        original = {p.get_coords() for p in self.route.trajectory}
-        simplified = {p.get_coords() for p in simplified_route.trajectory}
-        self.assertTrue(simplified.issubset(original), "Simplified trajectory must contain only original points.")
+        BasicAssertions(self.route, simplified_route)
 
     def test_dead_reckoning(self):
         base_lat, base_lon = 55.0, 12.0
