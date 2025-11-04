@@ -1,0 +1,15 @@
+In order to conduct experiments on the trajectory simplification, choices regarding the number of 
+trajectories and which error metrics should be reviewed have to be made. Regarding the amount of 
+trajectories, we have evaluated that 200 trajectories should be analyzed, in order to ensure 
+qualitative results. In the SQUISH paper, they analyzed 1300 trajectories, however, we evaluated that
+200 trajectories would be sufficient, since any higher amount will only show small improvements
+in the results. 
+
+We have decided that the results should not be displayed as a table, since it will contain
+a large amount of rows, and instead we will represent the results using graphs, with the
+compression rate on the x-axis. The results which should be displayed in the report should be:
+- The average PED and SED for each trajectory
+- The compression ratio and how different compression ratios effect the PED and SED
+- The computation time per point in a trajectory
+- We have discussed looking at the memory usage when running an algorithm, however, these results
+  might be hard to get and may not be of much importance.
