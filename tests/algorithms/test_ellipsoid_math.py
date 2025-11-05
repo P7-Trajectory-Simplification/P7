@@ -4,7 +4,7 @@ import numpy as np
 
 from algorithms.ellipsoid_math import geodesic_length, geodesic_prediction, geodesic_final_bearing, point_to_geodesic
 
-class GreatCircleMathTest(unittest.TestCase):
+class EllipsoidMathTest(unittest.TestCase):
     def setUp(self):
         print(
             geodesic_length(

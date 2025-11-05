@@ -7,3 +7,4 @@
 tests/__pycache__/*
 tests/algorithms/__pycache__/*
 tests/classes/__pycache__/*
+.coverage
