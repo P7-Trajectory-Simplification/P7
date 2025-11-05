@@ -41,3 +41,6 @@ class SquishReckoningTest (unittest.TestCase):
 
 
         self.assertTrue(len(scores) > 0, "Scores dictionary should be populated after reckoning.")
+
+if __name__ == '__main__':
+    unittest.main()
