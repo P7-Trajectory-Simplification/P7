@@ -11,7 +11,7 @@ EARTH_RADIUS_METERS = 6371e3
 # NOTE: ALL FUNCTIONS THAT USE LATITUDE AND LONGITUDE EXPECT THEM TO BE EXPRESSED IN RADIANS!
 
 
-def magnitude(vector):
+def magnitude(vector: np.ndarray) -> float:
     '''Given a vector, return its magnitude.
 
     Parameters
@@ -22,9 +22,9 @@ def magnitude(vector):
     return np.sqrt(vector.dot(vector))
 
 
-def latlon_to_vector(latlon):
+def latlon_to_vector(latlon: tuple[float, float]) -> np.ndarray:
     '''Given a latitude and longitude-pair, return a numpy array-representation of a 3D unit vector that corresponds to that latitude and longitude.
-    Floating-point errors may occur, but from testing them seem very very small.
+    Floating-point errors may occur, but from testing them seem very, very small.
 
     Parameters
     ----------
@@ -56,7 +56,7 @@ def latlon_to_vector(latlon):
 # we multiply by the radius and we're done
 
 
-def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=EARTH_RADIUS_METERS, ignore_sign=True):
+def point_to_great_circle(latlon_a: tuple[float, float], latlon_b: tuple[float, float], latlon_c: tuple[float, float], radius: float=EARTH_RADIUS_METERS, ignore_sign: bool=True):
     '''Given the latitude and longitudes of three points A, B, and C, where a great circle connects A and B,
 
     return the length of the geodesic from C to that great circle.
@@ -76,8 +76,7 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=EARTH_RADIUS_METE
         This argument forces the result to be nonnegative. Defaults to True.
     '''
     # Implementation of method explained in https://math.stackexchange.com/questions/337055/compute-minimum-distance-between-point-and-great-arc-on-sphere
-    
-    distance = 0
+
     if latlon_a == latlon_b:
         distance = great_circle_distance(latlon_a, latlon_b, radius=radius)
     else:
@@ -96,7 +95,7 @@ def point_to_great_circle(latlon_a, latlon_b, latlon_c, radius=EARTH_RADIUS_METE
         return distance * radius
 
 
-def great_circle_distance(latlon_a, latlon_b, radius=EARTH_RADIUS_METERS):
+def great_circle_distance(latlon_a: tuple[float, float], latlon_b: tuple[float, float], radius: float=EARTH_RADIUS_METERS) -> float:
     '''Given a pair of latitudes and longitudes describing points on a sphere A and B, computes the great circle-distance between those points
     i.e. the length of the geodesic connecting those points
 
@@ -129,7 +128,7 @@ def great_circle_distance(latlon_a, latlon_b, radius=EARTH_RADIUS_METERS):
     return angular_difference * radius
 
 
-def predict_sphere_movement(latlon, distance, bearing, radius=1):
+def predict_sphere_movement(latlon: tuple[float, float], distance: float, bearing: float, radius: float=EARTH_RADIUS_METERS) -> tuple[float, float]:
     '''Given a position on a sphere described by latitude and longitude, a distance value, and a bearing,
     return a tuple containing the latitude and longitude of the destination point.
 
@@ -154,10 +153,10 @@ def predict_sphere_movement(latlon, distance, bearing, radius=1):
     final_latitude = np.radians(90) - BN
     angle_BNA = np.arcsin((np.sin(angle_NAB) * np.sin(AB)) / np.sin(BN))
     final_longitude = angle_BNA + longitude
-    return (final_latitude, final_longitude)
+    return final_latitude, final_longitude
 
 
-def get_final_bearing(latlon_a, latlon_b):
+def get_final_bearing(latlon_a: tuple[float, float], latlon_b: tuple[float, float]) -> float:
     '''Given a pair of latitudes and longitudes describing points on a sphere A and B,
     computes the direction of the geodesic from A to B at point B i.e. the bearing of some hypothetical vehicle at point B.
     Note that bearing is measured clockwise from the north-direction, so 90 degrees corresponds to East and -90 degrees corresponds to West.
