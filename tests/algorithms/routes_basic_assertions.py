@@ -17,6 +17,7 @@ class BasicAssertions(unittest.TestCase):
         original = {p.get_coords() for p in trajectory}
         simplified = {p.get_coords() for p in simplified_trajectory}
         self.assertTrue(simplified.issubset(original), "Simplified trajectory must contain only original points.")
+        self.assertIsInstance(simplified_route, Route, "Simplified route should return a Route instance.")
 
 
 if __name__ == '__main__':

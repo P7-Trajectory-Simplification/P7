@@ -1,10 +1,3 @@
-import numpy as np
-from algorithms.great_circle_math import (
-    great_circle_distance,
-    predict_sphere_movement,
-    get_final_bearing,
-    EARTH_RADIUS_METERS,
-)
 from algorithms.dead_reckoning import reckon
 from classes.route import Route
 from classes.vessel_log import VesselLog
