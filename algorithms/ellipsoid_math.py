@@ -1,6 +1,7 @@
 
 import numpy as np
 from geographiclib.geodesic import Geodesic
+#TODO: Maybe use this instead? from geokernels.geodesics import geodesic_vincenty, supports radians and is MUCH faster: https://pypi.org/project/geodistpy/
 
 # we use a model of the Earth as defined by WGS84: Earth is an ellipsoid of rotation
 # with a semi-major axis of 6378137.0 m and a semi-minor axis of approximately 6356752.314245 meters
@@ -116,37 +117,3 @@ def point_to_geodesic(latlon_a, latlon_b, latlon_p, approximation_error=1e-5, **
     return geodesic.Inverse(
         latitude_a, longitude_a, latitude_p, longitude_p, outmask=geodesic.DISTANCE
     )['s12']
-
-
-if __name__ == '__main__':
-    # how far from university to Klarup
-    print(
-        geodesic_length(
-            (np.deg2rad(57.011257), np.deg2rad(10.063530)),
-            (np.deg2rad(57.012349), np.deg2rad(9.990929)),
-        )
-    )
-
-    # from the university and 4500 meters East
-    latitude, longitude = geodesic_prediction(
-        (np.deg2rad(57.012313), np.deg2rad(9.991171)),
-        4500,
-        np.deg2rad(90),
-    )
-    print((np.rad2deg(latitude), np.rad2deg(longitude)))
-
-    # the angle from AAU canteen to Cassiopeia (the building)
-    bearing = geodesic_final_bearing(
-        (np.deg2rad(57.015631), np.deg2rad(9.977710)),
-        (np.deg2rad(57.012674), np.deg2rad(9.990636)),
-    )
-    print(np.rad2deg(bearing))
-
-    # how far from university to the border (defined by a geodesic)
-    print(
-        point_to_geodesic(
-            (np.radians(54.916584), np.radians(8.605293)),
-            (np.radians(54.818675), np.radians(9.446560)),
-            (np.radians(57.011476), np.radians(9.990813)),
-        )
-    )
