@@ -13,7 +13,7 @@ class VesselLog:
         return np.radians(self.lat), np.radians(self.lon)
 
     def strip_imo(self):
-        """Delete the IMO from the VesselLog and free up the memory space."""
+        '''Delete the IMO from the VesselLog and free up the memory space.'''
         del self.imo
 
     def __repr__(self):
