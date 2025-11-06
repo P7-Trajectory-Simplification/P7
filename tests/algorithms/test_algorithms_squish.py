@@ -8,7 +8,7 @@ from algorithms.squish import run_squish, squish
 
 class SquishTest(unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
+    def setUp(cls):
         cls.route = Route(trajectory=mock_vessel_logs)
 
     def test_run_squish(self):
@@ -17,7 +17,6 @@ class SquishTest(unittest.TestCase):
         BasicAssertions(self.route, squished_route)
 
     def test_squish(self):
-        self.route = Route(trajectory=mock_vessel_logs)
         squish(self.route.trajectory, self.route.squish_buff, buff_size=10)
         self.assertEqual(len(self.route.squish_buff), 10, "Squished route should have 10 points")
 
