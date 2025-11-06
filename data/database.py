@@ -62,12 +62,7 @@ def get_vessel_logs(imo: int, start_ts: datetime, end_ts: datetime) -> list[Vess
 
 
 def hydrate_vessel_logs(raw_logs: Sequence[Row]) -> list[VesselLog]:
-    return [VesselLog(lat, lon, ts) for _, lat, lon, ts in raw_logs]
-
-
-# creates and packs VesselLogs into pairs where the first entry is the imo of the vessel the log came from
-def pack_vessel_logs(raw_logs: Sequence[Row]) -> list[tuple[int, VesselLog]]:
-    return [(imo, VesselLog(lat, lon, ts)) for imo, lat, lon, ts in raw_logs]
+    return [VesselLog(lat, lon, ts, imo) for imo, lat, lon, ts in raw_logs]
 
 
 def hydrate_vessels(raw_vessel: Sequence[Row]) -> list[Vessel]:

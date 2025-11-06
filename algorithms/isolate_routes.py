@@ -42,8 +42,8 @@ route_count = 0  # counts how many routes exist
 
 
 def assign_routes(
-    packed_logs: list[tuple[int, VesselLog]], threshold: int | float = 86400 * 2
-) -> dict[int, Route]:
+    logs: list[VesselLog], threshold: int | float = 86400 * 2
+) -> dict[int, list[VesselLog]]:
     '''Online implementation of isolate_routes.
     Places the points from the given list into routes and ensures all routes have a unique ID.
     Assigns a new route to a vessel if enough time has passed since the last point was recorded.
@@ -63,7 +63,8 @@ def assign_routes(
     in the order they should be considered for the routes they are part of.
     '''
     routes = {}
-    for imo, log in packed_logs:
+    for log in logs:
+        imo = log.imo
         if (
             imo not in current_route
             or (log.ts - last_time[imo]).total_seconds() > threshold
