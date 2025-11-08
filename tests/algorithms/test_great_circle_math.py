@@ -1,131 +1,69 @@
-import math
 import unittest
-
 import numpy as np
-from pyproj import Geod
+import math
 
-from algorithms.great_circle_math import magnitude, great_circle_distance, predict_sphere_movement, latlon_to_vector, point_to_great_circle, get_final_bearing
-from tests.test_mock_vessel_logs import mock_vessel_logs
-from geokernels.geodesics import geodesic_vincenty
+from algorithms.great_circle_math import (
+    magnitude,
+    latlon_to_vector,
+    great_circle_distance,
+    predict_sphere_movement,
+    point_to_great_circle,
+    get_final_bearing, EARTH_RADIUS_METERS,
+)
 
-class GreatCircleMathTest(unittest.TestCase):
+class GreatCircleMathUnitTest(unittest.TestCase):
+
     def setUp(self):
-        self.lat1, self.lon1 = mock_vessel_logs[0].get_coords()
-        self.lat2, self.lon2 = mock_vessel_logs[1].get_coords()
-        self.lat3, self.lon3 = mock_vessel_logs[2].get_coords()
-        self.vector = np.array(
-            [
-                np.cos(self.lat1) * np.cos(self.lon1),
-                np.cos(self.lat1) * np.sin(self.lon1),
-                np.sin(self.lat1),
-            ]
-        )
-
-
-
-
-
-    def point_line_distance(self, point: tuple[float, float], segPoint1: tuple[float, float], segPoint2: tuple[float, float]) -> float:
-        geod = Geod(ellps="WGS84")
-        lat_p, lon_p = point
-        lat1, lon1 = segPoint1
-        lat2, lon2 = segPoint2
-        # Forward azimuths and distance from start->end
-        azi1, azi2, dist12 = geod.inv(lon1, lat1, lon2, lat2)
-
-        # Project the point onto the line
-        _, _, s13 = geod.inv(lon1, lat1, lon_p, lat_p)
-        lonp_proj, latp_proj, _ = geod.fwd(lon1, lat1, azi1,
-                                           s13 * np.cos(np.deg2rad(azi1 - geod.inv(lon1, lat1, lon_p, lat_p)[0])))
-
-        # Compute cross-track distance (orthogonal)
-        azi13, _, dist13 = geod.inv(lon1, lat1, lon_p, lat_p)
-        xtd = np.arcsin(np.sin(dist13 / geod.a) * np.sin(np.deg2rad(azi13 - azi1))) * geod.a
-
-        return abs(xtd)
-
+        self.e0 = (math.radians(0), math.radians(0)) # Equator, 0°E
+        self.e45 = (math.radians(0), math.radians(45))  # Equator, 45°E
+        self.e90 = (math.radians(0), math.radians(90)) # Equator, 90°E
+        self.n0 = (math.radians(90), math.radians(0)) # North Pole
 
     def test_magnitude(self):
-        #Mag on latlon vector
-        self.assertEqual(
-            magnitude(self.vector),
-            math.sqrt(self.vector[0] ** 2 + self.vector[1] ** 2 + self.vector[2] ** 2),
-            "Magnitude function should fulfill the Pythagorean theorem on 3D vectors",
-        )
+        v = np.array([3.0, 4.0, 0.0])
+        self.assertEqual(magnitude(v), 5.0)
+        self.assertAlmostEqual(magnitude(np.zeros(3)), 0.0)
 
-        #Mag on known vector
-        self.assertEqual(
-            magnitude(np.array([2, 2, 2])),
-            math.sqrt(2**2 + 2**2 + 2**2),
-            "Magnitude function should fulfill the Pythagorean theorem on 3D vectors",
-        )
-
-    def test_latlon_to_vector(self):
+    def test_latlon_to_vector_known_points(self):
         np.testing.assert_array_almost_equal(
-            latlon_to_vector((self.lat1, self.lon1)),
-            self.vector,
-            decimal=6,
-            err_msg="latlon_to_vector should convert latitude and longitude to 3D unit vector correctly",
+            latlon_to_vector(self.e0), np.array([1.0, 0.0, 0.0]), decimal=6
         )
 
-    def test_point_to_great_circle(self):
-        distance_gc = point_to_great_circle((self.lat1, self.lon1), (self.lat2, self.lon2), (self.lat3, self.lon3))
-        distance_compare = self.point_line_distance((self.lat3, self.lon3), (self.lat1, self.lon1), (self.lat2, self.lon2))
+        np.testing.assert_array_almost_equal(
+            latlon_to_vector(self.e90), np.array([0.0, 1.0, 0.0]), decimal=6
+        )
+
+        np.testing.assert_array_almost_equal(
+            latlon_to_vector(self.n0), np.array([0.0, 0.0, 1.0]), decimal=6
+        )
+
+    def test_great_circle_distance_quarter_circumference(self):
+        d = great_circle_distance(self.e0, self.e90)
+        self.assertAlmostEqual(d, math.radians(90) * EARTH_RADIUS_METERS, delta=10)
+
+    def test_predict_sphere_movement_equator(self):
+        dist = math.pi * EARTH_RADIUS_METERS / 2
+        bearing = math.radians(90)
+        new_lat, new_lon = predict_sphere_movement(self.e0, dist, bearing)
+        self.assertAlmostEqual(math.degrees(new_lat), 0, delta=0.1)
+        self.assertAlmostEqual(math.degrees(new_lon), 90, delta=0.1)
+
+    def test_point_to_great_circle_known_case(self):
+        d = point_to_great_circle(self.e0, self.e90, self.e45)
+        self.assertAlmostEqual(d, 0.0, delta=1e-6)
+
+    def test_get_final_bearing_simple_case(self):
         self.assertAlmostEqual(
-            distance_gc,
-            distance_compare,
-            delta=1,
-            msg="point_to_great_circle should closely match geodesic cross-track distance results",
+            math.degrees(get_final_bearing(self.n0, self.e90)) % 360,
+            180,
+            delta=1
         )
 
-    def test_great_circle_distance(self):
-        #Compare to geodesic vincenty
-        distance_gc = great_circle_distance((self.lat1, self.lon1), (self.lat2, self.lon2))
-        distance_vincenty = np.float64(geodesic_vincenty((self.lat1, self.lon1), (self.lat2, self.lon2)))
         self.assertAlmostEqual(
-            distance_gc,
-            distance_vincenty,
-            delta=1,
-            msg="great_circle_distance should closely match geodesic_vincenty results",
+            math.degrees(get_final_bearing(self.e45, self.n0)) % 360,
+            315,
+            delta=1
         )
 
-    def test_predict_sphere_movement(self):
-        geod = Geod(ellps="WGS84")
-        distance = 10000  # 10 km
-        bearing = np.radians(90)  # east
-
-        gc_lat_pred, gc_lon_pred = predict_sphere_movement((self.lat1, self.lon1), distance, bearing)
-        ref_lat_pred, ref_lon_pred, _ = geod.fwd(self.lat1, self.lon1, bearing, distance, radians=True)
-
-        ref_lat_pred = np.radians(ref_lat_pred)
-        ref_lon_pred = np.radians(ref_lon_pred)
-
-        self.assertLess(
-            abs(gc_lat_pred - ref_lat_pred),
-            np.float64(1),
-            msg="predict_sphere_movement latitude should closely match Geod.fwd results",
-        )
-        self.assertLess(
-            abs(gc_lon_pred - ref_lon_pred),
-            np.float64(1),
-            msg="predict_sphere_movement longitude should closely match Geod.fwd results",
-        )
-
-    def test_get_final_bearing(self):
-        geod = Geod(ellps="WGS84")
-        final_bearing_gc = get_final_bearing((self.lat1, self.lon1), (self.lat2, self.lon2))
-
-        fwd_azimuth, back_azimuth, _ = geod.inv(self.lat1, self.lon1,
-                                                self.lat2, self.lon2,
-                                                radians=True)
-
-        bearing_ref = np.radians(back_azimuth - 180) % (2 * np.pi)
-
-        self.assertLess(
-            abs(((final_bearing_gc - bearing_ref + np.pi) % (2 * np.pi)) - np.pi),
-            np.float64(1),
-            msg="get_final_bearing should closely match Geod.inv back azimuth results",
-        )
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
