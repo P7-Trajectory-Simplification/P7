@@ -1,4 +1,3 @@
-import json
 from concurrent.futures import ProcessPoolExecutor
 from flask import Flask, request
 from flask import render_template
@@ -9,6 +8,7 @@ from algorithms.isolate_routes import isolate_routes
 from algorithms.squish import run_squish
 from algorithms.squish_reckoning import run_sr
 from algorithms.squish_e import run_squish_e
+from algorithms.uniform_sampling import run_uniform_sampling
 from classes.route import Route
 from data.database import get_all_vessels
 from classes.vessel import Vessel
@@ -18,7 +18,6 @@ from typing import Callable
 from error_metrics.comp_ratio import comp_ratio_results
 from error_metrics.sed import sed_results
 from error_metrics.ped import ped_results
-import json
 
 app = Flask(__name__)
 
@@ -87,6 +86,7 @@ algorithms_mappings = {
     'DP': run_dp,
     'SQUISH': run_squish,
     'SQUISH_E': run_squish_e,
+    'UNIFORM_SAMPLING': run_uniform_sampling,
     'SQUISH_RECKONING': run_sr,
 }
 

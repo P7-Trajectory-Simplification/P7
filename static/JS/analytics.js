@@ -8,6 +8,8 @@ function get_metrics(algorithm, all_error_metrics) {
             return all_error_metrics.SQUISH;
         case 'SQUISH_E':
             return all_error_metrics.SQUISH_E;
+        case 'UNIFORM_SAMPLING':
+            return all_error_metrics.UNIFORM_SAMPLING;
         case 'SQUISH_RECKONING':
             return all_error_metrics.SQUISH_RECKONING;
         default:

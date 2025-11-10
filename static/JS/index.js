@@ -12,6 +12,7 @@ const alg_input_needed = {
     "DP":["epsilon"], 
     "DR":["tolerance"],
     "SQUISH_E": ["low_comp", "max_sed"],
+    "UNIFORM_SAMPLING": ["sampling_rate"],
     "SQUISH_RECKONING": ["buff_size"]
 };
 let running = false;
