@@ -12,13 +12,13 @@ prediction_startpoint = None
 prediction_endpoint = None
 
 
-def dead_reckoning(points: list[VesselLog], tolerance: int = 100) -> list[VesselLog]:
+def dead_reckoning(trajectory: list[VesselLog], tolerance: int = 100) -> list[VesselLog]:
     '''
     Simplifies a given set of points using the Dead-Reckoning algorithm.
 
     Parameters
     ----------
-    points: A list of VesselLog's
+    trajectory: A list of VesselLog's
         The Datapoints that have to be simplified
     tolerance: Int (default value = 100)
         Max allowed distance from predicted point to received point in meters
@@ -32,55 +32,26 @@ def dead_reckoning(points: list[VesselLog], tolerance: int = 100) -> list[Vessel
     global prediction_startpoint
     global prediction_endpoint
 
-    if len(points) < 2:
-        return points
-    elif len(points) == 2:
-        prediction_startpoint = points[-2]
-        prediction_endpoint = points[-1]
-        return points
+    if len(trajectory) < 2:
+        return trajectory
+    elif len(trajectory) == 2:
+        prediction_startpoint = trajectory[-2]
+        prediction_endpoint = trajectory[-1]
+        return trajectory
 
-    next_newest_point = points[-2]
-    newest_point = points[-1]
+    next_newest_point = trajectory[-2]
+    newest_point = trajectory[-1]
 
-    # (L1) find initial geodesic
-    distance = great_circle_distance(
-        prediction_startpoint.get_coords(),
-        prediction_endpoint.get_coords(),
-        radius=EARTH_RADIUS_METERS,
-    )
-    time_delta = (prediction_endpoint.ts - prediction_startpoint.ts).total_seconds()
-    velocity = 0  # velocity in m/s
-    if time_delta != 0:
-        # avoid dividing by 0 when the points have the same timestamp
-        velocity = distance / time_delta
+    error = reckon(prediction_startpoint, prediction_endpoint, newest_point)
 
-    # find starting point for reckoning (end of initial geodesic)
-    latlon_startpoint = prediction_startpoint.get_coords()
-    latlon_endpoint = prediction_endpoint.get_coords()
-    # find bearing
-    prediction_bearing = get_final_bearing(latlon_startpoint, latlon_endpoint)
-    # find time difference between starting point and next potential point and multiply by the velocity we found
-    prediction_time_delta = (newest_point.ts - prediction_endpoint.ts).total_seconds()
-    prediction_distance = velocity * prediction_time_delta
-    # now predict where the next point should be
-    latlon_predicted = predict_sphere_movement(
-        latlon_endpoint,
-        prediction_distance,
-        prediction_bearing,
-        radius=EARTH_RADIUS_METERS,
-    )
-    # compare difference between predicted next point and potential next point to tolerance
-    error = great_circle_distance(
-        latlon_predicted, newest_point.get_coords(), radius=EARTH_RADIUS_METERS
-    )
     if np.abs(error) > tolerance:
         # if the predicted point is further than we tolerate, reset prediction points
         prediction_startpoint = next_newest_point
         prediction_endpoint = newest_point
     else:
         # if the predicted point is close enough, we don't need the next newest point anymore and can safely exclude it
-        del points[-2]
-    return points
+        del trajectory[-2]
+    return trajectory
 
 # Helper function for squish reckoning
 def reckon(point_a: VesselLog, point_b: VesselLog, point_c: VesselLog) -> float:

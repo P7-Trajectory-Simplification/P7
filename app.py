@@ -1,4 +1,3 @@
-import json
 from concurrent.futures import ProcessPoolExecutor
 from flask import Flask, request
 from flask import render_template
@@ -19,7 +18,6 @@ from typing import Callable
 from error_metrics.comp_ratio import comp_ratio_results
 from error_metrics.sed import sed_results
 from error_metrics.ped import ped_results
-import json
 
 app = Flask(__name__)
 
