@@ -32,7 +32,6 @@ class UniformSampling(Simplifier):
         Parameters
         ---------
         points (list of VesselLog): List of VesselLog objects representing the points.
-        sampling_rate (float): The sampling_rate (e.g., every nth point).
 
         Returns
         ---------

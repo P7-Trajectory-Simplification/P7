@@ -40,38 +40,13 @@ class DeadReckoning(Simplifier):
             self.prediction_endpoint = trajectory[-1]
             return trajectory
 
+        reckon(self.prediction_startpoint, self.prediction_endpoint, trajectory[-1])
+
         next_newest_point = trajectory[-2]
         newest_point = trajectory[-1]
 
-        # (L1) find initial geodesic
-        distance = great_circle_distance(
-            self.prediction_startpoint.get_coords(),
-            self.prediction_endpoint.get_coords()
-        )
-        time_delta = (self.prediction_endpoint.ts - self.prediction_startpoint.ts).total_seconds()
-        velocity = 0  # velocity in m/s
-        if time_delta != 0:
-            # avoid dividing by 0 when the points have the same timestamp
-            velocity = distance / time_delta
+        error = reckon(self.prediction_startpoint, self.prediction_endpoint, newest_point)
 
-        # find starting point for reckoning (end of initial geodesic)
-        latlon_startpoint = self.prediction_startpoint.get_coords()
-        latlon_endpoint = self.prediction_endpoint.get_coords()
-        # find bearing
-        prediction_bearing = get_final_bearing(latlon_startpoint, latlon_endpoint)
-        # find time difference between starting point and next potential point and multiply by the velocity we found
-        prediction_time_delta = (newest_point.ts - self.prediction_endpoint.ts).total_seconds()
-        prediction_distance = velocity * prediction_time_delta
-        # now predict where the next point should be
-        latlon_predicted = predict_sphere_movement(
-            latlon_endpoint,
-            prediction_distance,
-            prediction_bearing,
-        )
-        # compare difference between predicted next point and potential next point to tolerance
-        error = great_circle_distance(
-            latlon_predicted, newest_point.get_coords()
-        )
         if np.abs(error) > self.tolerance:
             # if the predicted point is further than we tolerate, reset prediction points
             self.prediction_startpoint = next_newest_point
