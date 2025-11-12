@@ -7,6 +7,7 @@ import numpy as np
 
 singleton = None
 
+
 def run_squish(route: Route, params: dict) -> Route:
     global singleton
     if singleton is None:
@@ -18,7 +19,12 @@ def run_squish(route: Route, params: dict) -> Route:
         squish.simplify()
     return Route(squish.trajectory)
 
+
 class Squish(Simplifier):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["buff_size"])
+
     def __init__(self, buffer_size: int = 100):
         super().__init__()
         self.buffer_size = buffer_size
@@ -49,29 +55,31 @@ class Squish(Simplifier):
         for i in range(len(trajectory)):
             self.heap.insert(i, trajectory[i], float('inf'))
 
-            if i > 0: #After the first point
+            if i > 0:  # After the first point
                 self.successor[i - 1] = i
                 self.predecessor[i] = i - 1
 
             if self.heap.size() >= 3:
-                self.update_sed(i-1)
-
+                self.update_sed(i - 1)
 
             if self.heap.size() == self.buffer_size + 1:
                 index, _, _ = self.heap.remove_min()
 
                 self.successor[self.predecessor[index]] = self.successor[index]
                 self.predecessor[self.successor[index]] = self.predecessor[index]
-                del self.predecessor[index]; del self.successor[index]
+                del self.predecessor[index]
+                del self.successor[index]
 
                 if index in self.predecessor and index in self.successor:
                     self.update_sed(self.predecessor[index])
                     self.update_sed(self.successor[index])
 
-        #The first point is the one with 0 predecessors
-        start = next((pid for pid in self.predecessor if self.predecessor[pid] is None), 0)
+        # The first point is the one with 0 predecessors
+        start = next(
+            (pid for pid in self.predecessor if self.predecessor[pid] is None), 0
+        )
         curr = start
-        while curr is not None: #Add each point in order
+        while curr is not None:  # Add each point in order
             self.buffer.append(trajectory[curr])
             curr = self.successor.get(curr)
 

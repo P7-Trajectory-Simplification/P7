@@ -12,6 +12,11 @@ class Simplifier(ABC):  # "ABC" means it's an abstract class
         Must be overridden by derived classes."""
         raise NotImplementedError
 
+    @classmethod
+    def from_params(cls, params: dict[str, int]):
+        """Create an instance of a derived class"""
+        raise NotImplementedError
+
 
 # The description needs to be as compact as possible, since we need to send one for each request for each route.
 # Conceptual description example:

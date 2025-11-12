@@ -10,6 +10,7 @@ from classes.vessel_log import VesselLog
 
 singleton = None
 
+
 def run_dr(route: Route, params: dict) -> Route:
     global singleton
     if singleton is None:
@@ -22,7 +23,12 @@ def run_dr(route: Route, params: dict) -> Route:
 
     return Route(dr.trajectory)
 
+
 class DeadReckoning(Simplifier):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["tolerance"])
+
     def __init__(self, tolerance: int = 100):
         super().__init__()
         self.tolerance = tolerance
@@ -45,7 +51,9 @@ class DeadReckoning(Simplifier):
         next_newest_point = trajectory[-2]
         newest_point = trajectory[-1]
 
-        error = reckon(self.prediction_startpoint, self.prediction_endpoint, newest_point)
+        error = reckon(
+            self.prediction_startpoint, self.prediction_endpoint, newest_point
+        )
 
         if np.abs(error) > self.tolerance:
             # if the predicted point is further than we tolerate, reset prediction points
@@ -55,7 +63,6 @@ class DeadReckoning(Simplifier):
             # if the predicted point is close enough, we don't need the next newest point anymore and can safely exclude it
             del trajectory[-2]
         return trajectory
-
 
 
 # Helper function for squish reckoning
@@ -88,11 +95,7 @@ def reckon(point_a: VesselLog, point_b: VesselLog, point_c: VesselLog) -> float:
     prediction_distance = velocity * prediction_time_delta
     # now predict where C should be
     c_predicted = predict_sphere_movement(
-        latlon_b,
-        prediction_distance,
-        prediction_bearing
+        latlon_b, prediction_distance, prediction_bearing
     )
     # return distance from predicted C to actual C
-    return great_circle_distance(
-        c_predicted, point_c.get_coords()
-    )
+    return great_circle_distance(c_predicted, point_c.get_coords())

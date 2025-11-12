@@ -7,6 +7,7 @@ import numpy as np
 
 singleton = None
 
+
 def run_squish_e(route: Route, params: dict) -> Route:
     global singleton
     if singleton is None:
@@ -18,8 +19,15 @@ def run_squish_e(route: Route, params: dict) -> Route:
         squish_e.simplify()
     return Route(squish_e.trajectory)
 
+
 class SquishE(Simplifier):
-    def __init__(self, lower_compression_rate: float = 2.0, upper_bound_sed: float = 100.0):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["low_comp"], params["max_sed"])
+
+    def __init__(
+        self, lower_compression_rate: float = 2.0, upper_bound_sed: float = 100.0
+    ):
         super().__init__()
         self.lower_compression_rate = lower_compression_rate
         self.upper_bound_sed = upper_bound_sed
@@ -40,11 +48,19 @@ class SquishE(Simplifier):
 
         id, _, priority = self.heap.remove_min()
 
-        self.max_neighbor[self.successor[id]] = max(priority, self.max_neighbor[self.successor[id]])
-        self.max_neighbor[self.predecessor[id]] = max(priority, self.max_neighbor[self.predecessor[id]])
+        self.max_neighbor[self.successor[id]] = max(
+            priority, self.max_neighbor[self.successor[id]]
+        )
+        self.max_neighbor[self.predecessor[id]] = max(
+            priority, self.max_neighbor[self.predecessor[id]]
+        )
 
-        self.successor[self.predecessor[id]] = self.successor[id]  # register succ[Pj] as the closest successor of pred[Pj]
-        self.predecessor[self.successor[id]] = self.predecessor[id]  # register pred[Pj] as the closest predecessor of succ[Pj]
+        self.successor[self.predecessor[id]] = self.successor[
+            id
+        ]  # register succ[Pj] as the closest successor of pred[Pj]
+        self.predecessor[self.successor[id]] = self.predecessor[
+            id
+        ]  # register pred[Pj] as the closest predecessor of succ[Pj]
 
         # Adjust neighboring points
         self.adjust_priority(self.predecessor[id])
@@ -65,15 +81,21 @@ class SquishE(Simplifier):
             The ID of the point that has to be updated
         """
         point = self.trajectory[point_id]
-        if point_id in self.predecessor and point_id in self.successor:  # Check if first or last point
+        if (
+            point_id in self.predecessor and point_id in self.successor
+        ):  # Check if first or last point
             before = self.trajectory[self.predecessor[point_id]]
             after = self.trajectory[self.successor[point_id]]
-            if point.ts - before.ts < after.ts - point.ts:  # Find nearest point in time to compute sed (This is not entirely correct squish-e)
+            if (
+                point.ts - before.ts < after.ts - point.ts
+            ):  # Find nearest point in time to compute sed (This is not entirely correct squish-e)
                 priority = self.max_neighbor[point_id] + np.abs(
-                    great_circle_distance(point.get_coords(), before.get_coords()))
+                    great_circle_distance(point.get_coords(), before.get_coords())
+                )
             else:
                 priority = self.max_neighbor[point_id] + np.abs(
-                    great_circle_distance(point.get_coords(), after.get_coords()))
+                    great_circle_distance(point.get_coords(), after.get_coords())
+                )
             self.heap.insert(point_id, point, priority)
 
     def squish_e(self, trajectory: list[VesselLog]) -> list[VesselLog]:
@@ -89,10 +111,14 @@ class SquishE(Simplifier):
 
         for i in range(0, len(trajectory)):
 
-            if i / self.lower_compression_rate >= self.buffer_size:  # increase buff_size based on lower bound compression rate
+            if (
+                i / self.lower_compression_rate >= self.buffer_size
+            ):  # increase buff_size based on lower bound compression rate
                 self.buffer_size += 1
 
-            self.heap.insert(i, trajectory[i], float('inf'))  # Insert point with priority = inf
+            self.heap.insert(
+                i, trajectory[i], float('inf')
+            )  # Insert point with priority = inf
             self.max_neighbor[i] = 0
 
             if i > 0:  # After the first point
@@ -108,7 +134,9 @@ class SquishE(Simplifier):
             self.reduce()
 
         # The first point is the one with 0 predecessors
-        start = next((pid for pid in self.predecessor if self.predecessor[pid] is None), 0)
+        start = next(
+            (pid for pid in self.predecessor if self.predecessor[pid] is None), 0
+        )
         curr = start
         while curr is not None:  # Add each point in order
             self.buffer.append(trajectory[curr])

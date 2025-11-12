@@ -4,6 +4,7 @@ from classes.vessel_log import VesselLog
 
 singleton = None
 
+
 def run_uniform_sampling(route: Route, params: dict) -> Route:
     global singleton
     if singleton is None:
@@ -15,7 +16,12 @@ def run_uniform_sampling(route: Route, params: dict) -> Route:
 
     return Route(uniform_sampling.trajectory)
 
+
 class UniformSampling(Simplifier):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["sampling_rate"])
+
     def __init__(self, sampling_rate: int = 10):
         super().__init__()
         self.sampling_rate = sampling_rate
