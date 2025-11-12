@@ -24,16 +24,14 @@ class Squish(Simplifier):
         self.buffer_size = buffer_size
         self.buffer: list[VesselLog] = []
         self.heap = PriorityQueue()
-        self.successor = {}
-        self.predecessor = {}
 
     def simplify(self):
         self.trajectory = self.squish(self.trajectory)
 
     def update_sed(self, index: int):
-        if index in self.predecessor and index in self.successor:
-            a = self.trajectory[self.predecessor[index]]
-            b = self.trajectory[self.successor[index]]
+        if index in self.heap.predecessor and index in self.heap.successor:
+            a = self.trajectory[self.heap.predecessor[index]]
+            b = self.trajectory[self.heap.successor[index]]
             target = self.trajectory[index]
 
             if target.ts - a.ts < b.ts - target.ts:
@@ -49,30 +47,15 @@ class Squish(Simplifier):
         for i in range(len(trajectory)):
             self.heap.insert(i, trajectory[i], float('inf'))
 
-            if i > 0: #After the first point
-                self.successor[i - 1] = i
-                self.predecessor[i] = i - 1
-
             if self.heap.size() >= 3:
                 self.update_sed(i-1)
-
 
             if self.heap.size() == self.buffer_size + 1:
                 index, _, _ = self.heap.remove_min()
 
-                self.successor[self.predecessor[index]] = self.successor[index]
-                self.predecessor[self.successor[index]] = self.predecessor[index]
-                del self.predecessor[index]; del self.successor[index]
+                if index in self.heap.predecessor and index in self.heap.successor:
+                    self.update_sed(self.heap.predecessor[index])
+                    self.update_sed(self.heap.successor[index])
 
-                if index in self.predecessor and index in self.successor:
-                    self.update_sed(self.predecessor[index])
-                    self.update_sed(self.successor[index])
-
-        #The first point is the one with 0 predecessors
-        start = next((pid for pid in self.predecessor if self.predecessor[pid] is None), 0)
-        curr = start
-        while curr is not None: #Add each point in order
-            self.buffer.append(trajectory[curr])
-            curr = self.successor.get(curr)
-
+        self.buffer = self.heap.get_points(trajectory)
         return self.buffer

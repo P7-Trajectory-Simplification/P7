@@ -26,8 +26,6 @@ class SquishE(Simplifier):
         self.buffer_size = 4
         self.buffer: list[VesselLog] = []
         self.heap = PriorityQueue()
-        self.predecessor = {}
-        self.successor = {}
         self.max_neighbor = {}
 
     def simplify(self):
@@ -40,19 +38,14 @@ class SquishE(Simplifier):
 
         id, _, priority = self.heap.remove_min()
 
-        self.max_neighbor[self.successor[id]] = max(priority, self.max_neighbor[self.successor[id]])
-        self.max_neighbor[self.predecessor[id]] = max(priority, self.max_neighbor[self.predecessor[id]])
-
-        self.successor[self.predecessor[id]] = self.successor[id]  # register succ[Pj] as the closest successor of pred[Pj]
-        self.predecessor[self.successor[id]] = self.predecessor[id]  # register pred[Pj] as the closest predecessor of succ[Pj]
+        self.max_neighbor[self.heap.successor[id]] = max(priority, self.max_neighbor[self.heap.successor[id]])
+        self.max_neighbor[self.heap.predecessor[id]] = max(priority, self.max_neighbor[self.heap.predecessor[id]])
 
         # Adjust neighboring points
-        self.adjust_priority(self.predecessor[id])
-        self.adjust_priority(self.successor[id])
+        self.adjust_priority(self.heap.predecessor[id])
+        self.adjust_priority(self.heap.successor[id])
 
         # Garbage Collection
-        del self.predecessor[id]
-        del self.successor[id]
         del self.max_neighbor[id]
 
     def adjust_priority(self, point_id: int):
@@ -65,9 +58,9 @@ class SquishE(Simplifier):
             The ID of the point that has to be updated
         """
         point = self.trajectory[point_id]
-        if point_id in self.predecessor and point_id in self.successor:  # Check if first or last point
-            before = self.trajectory[self.predecessor[point_id]]
-            after = self.trajectory[self.successor[point_id]]
+        if point_id in self.heap.predecessor and point_id in self.heap.successor:  # Check if first or last point
+            before = self.trajectory[self.heap.predecessor[point_id]]
+            after = self.trajectory[self.heap.successor[point_id]]
             if point.ts - before.ts < after.ts - point.ts:  # Find nearest point in time to compute sed (This is not entirely correct squish-e)
                 priority = self.max_neighbor[point_id] + np.abs(
                     great_circle_distance(point.get_coords(), before.get_coords()))
@@ -96,8 +89,6 @@ class SquishE(Simplifier):
             self.max_neighbor[i] = 0
 
             if i > 0:  # After the first point
-                self.successor[i - 1] = i
-                self.predecessor[i] = i - 1
                 self.adjust_priority(i - 1)  # update priority
 
             if len(self.heap.heap) == self.buffer_size:  # Reduce buffer when full
@@ -107,11 +98,5 @@ class SquishE(Simplifier):
         while self.heap.min_priority() <= self.upper_bound_sed:
             self.reduce()
 
-        # The first point is the one with 0 predecessors
-        start = next((pid for pid in self.predecessor if self.predecessor[pid] is None), 0)
-        curr = start
-        while curr is not None:  # Add each point in order
-            self.buffer.append(trajectory[curr])
-            curr = self.successor.get(curr)
-
+        self.buffer = self.heap.get_points(trajectory)
         return self.buffer
