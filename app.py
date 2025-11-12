@@ -1,6 +1,7 @@
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from flask import Flask, request
 from flask import render_template
+import numpy as np
 
 from algorithms.dead_reckoning import run_dr
 from algorithms.dp import run_dp
@@ -91,12 +92,22 @@ algorithms_mappings = {
 }
 
 def get_error_metrics(raw_routes: list[Route], simplified_routes: list[Route]) -> list[float]:
-    error_metrics = []
-    ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
-    sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
-    comp_ratio = comp_ratio_results(raw_routes, simplified_routes)
-    error_metrics = [ped_avg, ped_max, sed_avg, sed_max, comp_ratio]
-    return error_metrics
+    tasks = {
+        'ped': (ped_results, (raw_routes, simplified_routes)),
+        'sed': (sed_results, (raw_routes, simplified_routes)),
+        'comp_ratio': (comp_ratio_results, (raw_routes, simplified_routes)),
+    }
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {name: executor.submit(func, *args) for name, (func, args) in tasks.items()}
+        results = {}
+        for name, future in futures.items():
+            results[name] = future.result()
+
+    ped_avg, ped_max = results['ped']
+    sed_avg, sed_max = results['sed']
+    comp_ratio = results['comp_ratio']
+    return [ped_avg, ped_max, sed_avg, sed_max, comp_ratio]
 
 
 @app.route('/')
