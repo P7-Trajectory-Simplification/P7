@@ -26,6 +26,10 @@ class DouglasPeucker(Simplifier):
     def from_params(cls, params):
         return cls(params["epsilon"])
 
+    @property
+    def name(self):
+        return "DP"
+
     def __init__(self, epsilon: float):
         super().__init__()
         self.epsilon = epsilon

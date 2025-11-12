@@ -29,6 +29,10 @@ class DeadReckoning(Simplifier):
     def from_params(cls, params):
         return cls(params["tolerance"])
 
+    @property
+    def name(self):
+        return "DR"
+
     def __init__(self, tolerance: int = 100):
         super().__init__()
         self.tolerance = tolerance

@@ -22,6 +22,10 @@ class UniformSampling(Simplifier):
     def from_params(cls, params):
         return cls(params["sampling_rate"])
 
+    @property
+    def name(self):
+        return "UNIFORM_SAMPLING"
+
     def __init__(self, sampling_rate: int = 10):
         super().__init__()
         self.sampling_rate = sampling_rate

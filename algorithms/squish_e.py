@@ -25,6 +25,10 @@ class SquishE(Simplifier):
     def from_params(cls, params):
         return cls(params["low_comp"], params["max_sed"])
 
+    @property
+    def name(self):
+        return "SQUISH_E"
+
     def __init__(
         self, lower_compression_rate: float = 2.0, upper_bound_sed: float = 100.0
     ):

@@ -2,13 +2,13 @@ from concurrent.futures import ProcessPoolExecutor
 from flask import Flask, request
 from flask import render_template
 
-from algorithms.dead_reckoning import run_dr
-from algorithms.dp import run_dp
+from algorithms.dead_reckoning import DeadReckoning, run_dr
+from algorithms.dp import DouglasPeucker, run_dp
 from algorithms.isolate_routes import assign_routes, isolate_routes
-from algorithms.squish import run_squish
-from algorithms.squish_reckoning import run_sr
-from algorithms.squish_e import run_squish_e
-from algorithms.uniform_sampling import run_uniform_sampling
+from algorithms.squish import Squish, run_squish
+from algorithms.squish_reckoning import SquishReckoning, run_sr
+from algorithms.squish_e import SquishE, run_squish_e
+from algorithms.uniform_sampling import UniformSampling, run_uniform_sampling
 from classes.route import Route
 from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
@@ -65,7 +65,7 @@ def build_multi_process_data(
     return multiprocess_data
 
 
-def run_algorithms(
+'''def run_algorithms(
     algorithms: list,
     start_time: datetime,
     end_time: datetime,
@@ -87,7 +87,7 @@ def run_algorithms(
             response[alg + '_error_metrics'] = error_metrics
 
     response['raw'] = routes_to_list(routes)
-    return response
+    return response'''
 
 
 def routes_to_list(routes: list[Route]) -> list[list[tuple[float, float, datetime]]]:
@@ -151,12 +151,7 @@ last_end_time = datetime(0, 0, 0)
 
 # TODO ensure the database does not fetch logs at the start time, only those between the start and end time and at the end time
 
-"""
-
-# SECTION new run_algorithms stuff
-simplifiers = {}  # type: dict[int, list[Simplifier]]
-
-
+'''
 def prepare_processing(
     routes: dict[int, list[VesselLog]],
     algorithms: list[str],
@@ -189,9 +184,35 @@ def finalize_response(
     return {
         k: {s.name: s.trajectory} for k, ss in results for s in ss
     }  # TODO add error metrics and a name field for simplifiers
-"""
+'''
+
+# SECTION new run_algorithms stuff
+simplifiers = {}  # type: dict[int, list[Simplifier]]
+
+simplifier_classes = {
+    'DR': DeadReckoning,
+    'DP': DouglasPeucker,
+    'SQUISH': Squish,
+    'SQUISH_E': SquishE,
+    'UNIFORM_SAMPLING': UniformSampling,
+    'SQUISH_RECKONING': SquishReckoning,
+}
 
 
+def process_trajectories(routes: dict[int, list[VesselLog]], algorithm_names, params):
+    '''Create the necessary simplifiers according to the given params and append the given logs to them, simplifying each time.'''
+    for route_id, logs in routes.items():
+        if route_id not in simplifiers:
+            simplifiers[route_id] = [
+                simplifier_classes[name].from_params(params) for name in algorithm_names
+            ]
+        for simplifier in simplifiers[route_id]:
+            for log in logs:
+                simplifier.trajectory.append[log]
+                simplifier.simplify()
+
+
+'''
 def simplifiers_to_list(
     # given a dict mapping integers to lists of simplifiers,
     # return a list of lists of tuples describing the trajectories of the simplifiers
@@ -203,4 +224,43 @@ def simplifiers_to_list(
         for simplifier_list in simplifiers.values()
         for simplifier in simplifier_list
     ]
-    # TODO this should probably differentiate between routes
+    # TODO this should probably differentiate between routes, but the website would have to accomodate the new response format
+'''
+
+
+def run_algorithms(
+    algorithm_names: list,
+    start_time: datetime,
+    end_time: datetime,
+    params: dict,
+    vessel: Vessel,
+):
+    '''Run the selected algorithms and return the resulting trajectories.'''
+    vessel_logs = get_data_from_cache(vessel, start_time, end_time)
+    routes = assign_routes(vessel_logs)
+    response = {}
+
+    # NOTE no multiprocessing for now
+    # REVIEW how many calls to simplify() are needed to justify multiprocessing?
+    process_trajectories(routes, algorithm_names, params)
+
+    # SECTION
+    # NOTE this is extremely temporary: We know there's only one vessel, so there will only ever be one active route.
+    # Therefore we can simply attribute any trajectory from a given simplifier to that vessel.
+    error_metrics_placeholder = [0, 0, 0, 0, 0]
+    for simplifier_list in simplifiers.values():
+        for simplifier in simplifier_list:
+            if simplifier.name not in response:
+                response[simplifier.name] = []
+                # append all trajectories simplified by this algorithm to the same part of the response
+            response[simplifier.name].append(
+                [(log.lat, log.lon, log.ts) for log in simplifier.trajectory]
+            )
+            response[simplifier.name + '_error_metrics'] = error_metrics_placeholder
+    response['raw'] = [
+        [(log.lat, log.lon, log.ts) for log in logs] for logs in routes.items()
+    ]
+    #!SECTION
+    return response
+    # TODO the trajectories given in the response should be identified by both a route ID and an algorithm name
+    # and the frontend should be able to handle that
