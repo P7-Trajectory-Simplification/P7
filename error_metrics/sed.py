@@ -64,9 +64,7 @@ def sed_results(raw_data_routes: list[Route], simplified_routes: list[Route]) ->
     Returns:
         tuple with floats: The average SED between the two trajectories and the max distance.
     '''
-    #Use multiprocessing to compute SED for each route in parallel
-    with ProcessPoolExecutor() as executor:
-        results = list(executor.map(sed_single_route_vectorized, raw_data_routes, simplified_routes))
+    results = list(map(sed_single_route_vectorized, raw_data_routes, simplified_routes))
 
     #Calculate average and max from results
     total_distance = sum(avg * count for avg, _, count in results)
