@@ -3,11 +3,12 @@ import numpy as np
 
 
 class VesselLog:
-    def __init__(self, lat: float, lon: float, ts: datetime, imo: int):
+    def __init__(self, lat: float, lon: float, ts: datetime, imo: int, id: int):
         self.lat = lat
         self.lon = lon
         self.ts = ts
         self.imo = imo
+        self.id = id # Id of the log in the database
 
     def get_coords(self) -> tuple[float, float]:
         return np.radians(self.lat), np.radians(self.lon)

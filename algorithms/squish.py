@@ -22,40 +22,42 @@ class Squish(Simplifier):
     def __init__(self, buffer_size: int = 100):
         super().__init__()
         self.buffer_size = buffer_size
-        self.buffer: list[VesselLog] = []
-        self.heap = PriorityQueue()
+        self.buffer = PriorityQueue()
 
     def simplify(self):
         self.trajectory = self.squish(self.trajectory)
 
-    def update_sed(self, index: int):
-        if index in self.heap.predecessor and index in self.heap.successor:
-            a = self.trajectory[self.heap.predecessor[index]]
-            b = self.trajectory[self.heap.successor[index]]
-            target = self.trajectory[index]
+    def update_sed(self, target: VesselLog):
+        if target.id in self.buffer.pred and target.id in self.buffer.succ:
+            predecessor = self.buffer.pred[target.id]
+            successor = self.buffer.succ[target.id]
 
-            if target.ts - a.ts < b.ts - target.ts:
+            if target.ts - predecessor.ts < successor.ts - target.ts:
                 # Closer to a
-                sed = np.abs(great_circle_distance(a.get_coords(), target.get_coords()))
+                sed = np.abs(great_circle_distance(predecessor.get_coords(), target.get_coords()))
             else:
                 # Closer to b
-                sed = np.abs(great_circle_distance(b.get_coords(), target.get_coords()))
-
-            self.heap.insert(index, target, sed)
+                sed = np.abs(great_circle_distance(successor.get_coords(), target.get_coords()))
+            self.buffer.insert(target, sed)
 
     def squish(self, trajectory: list[VesselLog]):
-        for i in range(len(trajectory)):
-            self.heap.insert(i, trajectory[i], float('inf'))
+        new_point = trajectory[-1]
+        self.buffer.insert(new_point)
 
-            if self.heap.size() >= 3:
-                self.update_sed(i-1)
+        if self.buffer.size() > 1:  # After the first point
+            predecessor = trajectory[-2]
+            self.buffer.succ[predecessor.id] = new_point
+            self.buffer.pred[new_point.id] = predecessor
 
-            if self.heap.size() == self.buffer_size + 1:
-                index, _, _ = self.heap.remove_min()
+            if self.buffer.size() >= 3:
+                self.update_sed(predecessor)
 
-                if index in self.heap.predecessor and index in self.heap.successor:
-                    self.update_sed(self.heap.predecessor[index])
-                    self.update_sed(self.heap.successor[index])
+        if self.buffer.size() == self.buffer_size + 1:
+            point, _ = self.buffer.remove_min()
+            trajectory.remove(point)
 
-        self.buffer = self.heap.get_points(trajectory)
-        return self.buffer
+            if point.id in self.buffer.pred or point.id in self.buffer.succ:
+                self.update_sed(self.buffer.pred[point.id])
+                self.update_sed(self.buffer.succ[point.id])
+
+        return trajectory

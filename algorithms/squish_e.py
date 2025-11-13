@@ -24,9 +24,8 @@ class SquishE(Simplifier):
         self.lower_compression_rate = lower_compression_rate
         self.upper_bound_sed = upper_bound_sed
         self.buffer_size = 4
-        self.buffer: list[VesselLog] = []
-        self.heap = PriorityQueue()
-        self.max_neighbor = {}
+        self.buffer = PriorityQueue()
+        self.max_neighbor: dict[int, float] = {}
 
     def simplify(self):
         self.trajectory = self.squish_e(self.trajectory)
@@ -35,39 +34,33 @@ class SquishE(Simplifier):
         """
         Describes how the heap is reduced when the buffer size is full
         """
+        point, priority = self.buffer.remove_min()
+        self.trajectory.remove(point)
+        if point.id in self.buffer.pred or point.id in self.buffer.succ:
+            self.max_neighbor[self.buffer.succ[point.id].id] = max(priority, self.max_neighbor[self.buffer.succ[point.id].id])
+            self.max_neighbor[self.buffer.pred[point.id].id] = max(priority, self.max_neighbor[self.buffer.pred[point.id].id])
 
-        id, _, priority = self.heap.remove_min()
-
-        self.max_neighbor[self.heap.successor[id]] = max(priority, self.max_neighbor[self.heap.successor[id]])
-        self.max_neighbor[self.heap.predecessor[id]] = max(priority, self.max_neighbor[self.heap.predecessor[id]])
-
-        # Adjust neighboring points
-        self.adjust_priority(self.heap.predecessor[id])
-        self.adjust_priority(self.heap.successor[id])
+            # Adjust neighboring points
+            self.adjust_priority(self.buffer.pred[point.id])
+            self.adjust_priority(self.buffer.succ[point.id])
 
         # Garbage Collection
-        del self.max_neighbor[id]
+        del self.max_neighbor[point.id]
 
-    def adjust_priority(self, point_id: int):
+    def adjust_priority(self, point: VesselLog):
         """
         Called when inserting and removing points and updates the priority (sed) of all the neighboring points
-
-        Parameters
-        ---------
-        point_id: int
-            The ID of the point that has to be updated
         """
-        point = self.trajectory[point_id]
-        if point_id in self.heap.predecessor and point_id in self.heap.successor:  # Check if first or last point
-            before = self.trajectory[self.heap.predecessor[point_id]]
-            after = self.trajectory[self.heap.successor[point_id]]
-            if point.ts - before.ts < after.ts - point.ts:  # Find nearest point in time to compute sed (This is not entirely correct squish-e)
-                priority = self.max_neighbor[point_id] + np.abs(
-                    great_circle_distance(point.get_coords(), before.get_coords()))
+        if point.id in self.buffer.pred and point.id in self.buffer.succ:  # Check if first or last point
+            predecessor = self.buffer.pred[point.id]
+            successor = self.buffer.succ[point.id]
+            if point.ts - predecessor.ts < successor.ts - point.ts:  # Find nearest point in time to compute sed (This is not entirely correct squish-e)
+                priority = self.max_neighbor[point.id] + np.abs(
+                    great_circle_distance(point.get_coords(), predecessor.get_coords()))
             else:
-                priority = self.max_neighbor[point_id] + np.abs(
-                    great_circle_distance(point.get_coords(), after.get_coords()))
-            self.heap.insert(point_id, point, priority)
+                priority = self.max_neighbor[point.id] + np.abs(
+                    great_circle_distance(point.get_coords(), successor.get_coords()))
+            self.buffer.insert(point, priority)
 
     def squish_e(self, trajectory: list[VesselLog]) -> list[VesselLog]:
         """
@@ -79,24 +72,23 @@ class SquishE(Simplifier):
         trajectory: list[VesselLog]
             A list of all the raw data points that needs to be compressed
         """
+        if self.buffer.size() / self.lower_compression_rate >= self.buffer_size:  # increase buff_size based on lower bound compression rate
+            self.buffer_size += 1
 
-        for i in range(0, len(trajectory)):
+        new_point = trajectory[-1]
+        self.buffer.insert(new_point, float('inf'))  # Insert point with priority = inf
+        self.max_neighbor[new_point.id] = 0
+        if self.buffer.size() > 1:  # After the first point
+            predecessor = trajectory[-2]
+            self.buffer.succ[predecessor.id] = new_point
+            self.buffer.pred[new_point.id] = predecessor
+            self.adjust_priority(predecessor)  # update priority
 
-            if i / self.lower_compression_rate >= self.buffer_size:  # increase buff_size based on lower bound compression rate
-                self.buffer_size += 1
-
-            self.heap.insert(i, trajectory[i], float('inf'))  # Insert point with priority = inf
-            self.max_neighbor[i] = 0
-
-            if i > 0:  # After the first point
-                self.adjust_priority(i - 1)  # update priority
-
-            if len(self.heap.heap) == self.buffer_size:  # Reduce buffer when full
-                self.reduce()
-
-        # After finishing looping through, keep reducing heap until all points satisfies upper bound on SED
-        while self.heap.min_priority() <= self.upper_bound_sed:
+        if self.buffer.size() == self.buffer_size + 1:  # Reduce buffer when full
             self.reduce()
 
-        self.buffer = self.heap.get_points(trajectory)
-        return self.buffer
+        # After finishing looping through, keep reducing heap until all points satisfies upper bound on SED
+        while self.buffer.min_priority() <= self.upper_bound_sed:
+            self.reduce()
+
+        return trajectory
