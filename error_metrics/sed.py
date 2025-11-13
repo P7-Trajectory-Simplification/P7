@@ -64,7 +64,7 @@ def sed_results(raw_data_routes: list[Route], simplified_routes: list[Route]) ->
     Returns:
         tuple with floats: The average SED between the two trajectories and the max distance.
     '''
-    results = list(map(sed_single_route_vectorized, raw_data_routes, simplified_routes))
+    results = [sed_single_route_vectorized(r, s) for r, s in zip(raw_data_routes, simplified_routes)]
 
     #Calculate average and max from results
     total_distance = sum(avg * count for avg, _, count in results)

@@ -45,7 +45,7 @@ def ped_results(raw_data_routes: list[Route], simplified_routes: list[Route]) ->
     Returns:
         tuple of floats: The average PED between the two trajectories and the max distance.
     """
-    results = list(map(ped_single_route_vectorized, raw_data_routes, simplified_routes))
+    results = [ped_single_route_vectorized(r, s) for r, s in zip(raw_data_routes, simplified_routes)]
 
     #Calculate average and max from results
     total_distance = sum(avg * count for avg, _, count in results)
