@@ -147,10 +147,10 @@ def get_algorithms():
 # the last end time we received (beginning at epoch just to have something)
 # we will use this value as the start_time when retrieving from the database
 # unless the start_time received from the website changes, at which point we will use that instead
-last_end_time = datetime(0, 0, 0)
+last_end_time = datetime.fromtimestamp(0)
 
 # TODO ensure the database does not fetch logs at the start time, only those between the start and end time and at the end time
-last_start_time = datetime(0, 0, 0)
+last_start_time = datetime.fromtimestamp(0)
 '''
 def prepare_processing(
     routes: dict[int, list[VesselLog]],
@@ -208,7 +208,7 @@ def process_trajectories(routes: dict[int, list[VesselLog]], algorithm_names, pa
             ]
         for simplifier in simplifiers[route_id]:
             for log in logs:
-                simplifier.trajectory.append[log]
+                simplifier.trajectory.append(log)
                 simplifier.simplify()
 
 
@@ -248,18 +248,21 @@ def run_algorithms(
         # REVIEW how to handle parameters changing? How to handle algorithms being enabled after some points have already been processed?
         last_start_time = start_time
     last_end_time = end_time
-
+    print('Fetching logs...')
     vessel_logs = get_data_from_cache(vessel, start_time, end_time)
+    print('Assigning routes...')
     routes = assign_routes(vessel_logs)
     response = {}
 
     # NOTE no multiprocessing for now
     # REVIEW how many calls to simplify() are needed to justify multiprocessing?
+    print('Processing...')
     process_trajectories(routes, algorithm_names, params)
 
     # SECTION
     # NOTE this is extremely temporary: We know there's only one vessel, so there will only ever be one active route.
     # Therefore we can simply attribute any trajectory from a given simplifier to that vessel.
+    print('Writing response...')
     error_metrics_placeholder = [0, 0, 0, 0, 0]
     for simplifier_list in simplifiers.values():
         for simplifier in simplifier_list:
@@ -271,9 +274,14 @@ def run_algorithms(
             )
             response[simplifier.name + '_error_metrics'] = error_metrics_placeholder
     response['raw'] = [
-        [(log.lat, log.lon, log.ts) for log in logs] for logs in routes.items()
+        [(log.lat, log.lon, log.ts) for log in logs] for logs in routes.values()
     ]
+    for name in simplifier_classes.keys():
+        if name not in response:
+            response[name] = []
+
     #!SECTION
+    print('Responding...')
     return response
     # TODO the trajectories given in the response should be identified by both a route ID and an algorithm name
     # and the frontend should be able to handle that
