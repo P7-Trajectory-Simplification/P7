@@ -53,7 +53,7 @@ def get_vessel_logs(imo: int, start_ts: datetime, end_ts: datetime) -> list[Vess
     end_time = end_ts.strftime('%Y-%m-%d %H:%M:%S')
     conn = open_connection()
     statement = text(
-        'SELECT imo, lat, lon, ts FROM vessel_logs WHERE imo = :imo AND ts >= :start_ts AND ts <= :end_ts ORDER BY ts;'
+        'SELECT imo, lat, lon, ts FROM vessel_logs WHERE imo = :imo AND ts > :start_ts AND ts <= :end_ts ORDER BY ts;'
     )
     result = conn.execute(
         statement, {'imo': imo, 'start_ts': start_time, 'end_ts': end_time}

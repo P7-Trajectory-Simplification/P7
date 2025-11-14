@@ -150,7 +150,7 @@ def get_algorithms():
 last_end_time = datetime(0, 0, 0)
 
 # TODO ensure the database does not fetch logs at the start time, only those between the start and end time and at the end time
-
+last_start_time = datetime(0, 0, 0)
 '''
 def prepare_processing(
     routes: dict[int, list[VesselLog]],
@@ -236,6 +236,19 @@ def run_algorithms(
     vessel: Vessel,
 ):
     '''Run the selected algorithms and return the resulting trajectories.'''
+    global last_start_time
+    global last_end_time
+    if start_time == last_start_time:
+        # If the requested start time is the same as it was last request,
+        # just get the points between the last end time and the current end time.
+        # This ensures that we don't grab points we've already processed.
+        start_time = last_end_time
+    else:
+        # TODO if the start time has changed, we'll probably need to reset our simplifiers and error metrics.
+        # REVIEW how to handle parameters changing? How to handle algorithms being enabled after some points have already been processed?
+        last_start_time = start_time
+    last_end_time = end_time
+
     vessel_logs = get_data_from_cache(vessel, start_time, end_time)
     routes = assign_routes(vessel_logs)
     response = {}
