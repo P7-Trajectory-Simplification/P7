@@ -18,7 +18,7 @@ function get_metrics(algorithm, all_error_metrics) {
 }
 
 function create_table(all_error_metrics) {
-    let error_metrics = ['SED avg.', 'SED max', 'PED avg.', 'PED max', 'Compression Ratio'];
+    let error_metrics = ['PED avg.', 'PED max', 'SED avg.', 'SED max', 'Compression Ratio'];
     table = document.createElement('table');
     const tr = table.insertRow();
     const td = tr.insertCell();

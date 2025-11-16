@@ -3,6 +3,77 @@ import numpy as np
 from algorithms.great_circle_math import great_circle_distance
 from classes.route import Route
 from classes.vessel_log import VesselLog
+
+def slerp(p0, p1, t):
+    """
+    Spherical linear interpolation between two points on a sphere.
+
+    p0, p1: (lat, lon) in radians
+    t: interpolation factor in [0,1]
+    """
+    lat0, lon0 = p0
+    lat1, lon1 = p1
+
+    # Convert to 3D Cartesian
+    def to_cart(lat, lon):
+        return np.array([
+            np.cos(lat) * np.cos(lon),
+            np.cos(lat) * np.sin(lon),
+            np.sin(lat)
+        ])
+
+    v0 = to_cart(lat0, lon0)
+    v1 = to_cart(lat1, lon1)
+
+    dot = np.dot(v0, v1)
+    dot = np.clip(dot, -1.0, 1.0)
+
+    omega = np.arccos(dot)
+
+    if omega < 1e-12:  # almost identical
+        return p0
+
+    s0 = np.sin((1 - t) * omega) / np.sin(omega)
+    s1 = np.sin(t * omega) / np.sin(omega)
+
+    v = s0 * v0 + s1 * v1  # interpolated Cartesian
+
+    # Convert back to (lat, lon)
+    lat = np.arctan2(v[2], np.sqrt(v[0]**2 + v[1]**2))
+    lon = np.arctan2(v[1], v[0])
+
+    return np.array([lat, lon])
+
+def interpolate_simplified_points_vectorized(raw_times, simp_times, simp_latlon):
+    """
+    For each raw timestamp, return the spherical interpolated point
+    on the simplified trajectory at that timestamp.
+    """
+
+    # Find segment index k such that simp_times[k] <= raw < simp_times[k+1]
+    idx = np.searchsorted(simp_times, raw_times, side="right") - 1
+
+    # Clamp indices to valid range
+    idx = np.clip(idx, 0, len(simp_times) - 2)
+
+    t0 = simp_times[idx]
+    t1 = simp_times[idx + 1]
+
+    # Interpolation factor α
+    alpha = (raw_times - t0) / (t1 - t0)
+    alpha = np.clip(alpha, 0.0, 1.0)
+
+    # Allocate result
+    result = np.zeros((len(raw_times), 2))
+
+    # Interpolate each point with SLERP
+    for i in range(len(raw_times)):
+        p0 = simp_latlon[idx[i]]
+        p1 = simp_latlon[idx[i] + 1]
+        result[i] = slerp(p0, p1, alpha[i])
+
+    return result
+
         
 def find_simplified_point_vectorized(raw_times: np.ndarray, simplified_times: np.ndarray) -> np.ndarray:
     '''Find which point of the simplified route each raw point belongs to (vectorized).
@@ -44,17 +115,15 @@ def sed_single_route_vectorized(raw_route: Route, simplified_route: Route) -> tu
     simplified_times = np.array([p.ts.timestamp() for p in simplified_route.trajectory])
 
     #Gets an array of simplified point indices for each raw point
-    point_idx = find_simplified_point_vectorized(raw_times, simplified_times)
-    simplified_point = simplified_latlon[point_idx]
+    interp_points = interpolate_simplified_points_vectorized(raw_times, simplified_times, simplified_latlon)
 
     #Compute distances using great_circle_distance
     #Could potentially eliminate the loop, if great_circle_distance is vectorized (could accept arrays)
     distances = np.array([
-        great_circle_distance(simplified_point[i], raw_latlon[i])
-        
-
+        great_circle_distance(interp_points[i], raw_latlon[i])
         for i in range(len(raw_latlon))
     ])
+
     return np.mean(distances), np.max(distances), len(distances)
 
 def sed_results(raw_data_routes: list[Route], simplified_routes: list[Route]) -> tuple[float, float]:
