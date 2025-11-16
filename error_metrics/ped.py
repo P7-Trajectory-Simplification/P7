@@ -1,7 +1,7 @@
 from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
-from algorithms.great_circle_math import point_to_great_circle
+from algorithms.great_circle_math import great_circle_distance, point_to_great_circle
 from classes.route import Route
 from classes.vessel_log import VesselLog
         
@@ -16,28 +16,50 @@ def find_segments_vectorized(raw_times: np.ndarray, simplified_times: np.ndarray
     idx = np.clip(idx, 0, len(simplified_times) - 2)  
     return idx
 
-def ped_single_route_vectorized(raw_route: Route, simplified_route: Route) -> tuple[float, float, int]:
-    '''Compute the PED for all points in a single route — 
-    using vectorized segment lookup and parallel great-circle distance computation.
-    And return average distance, max distance, and lenght of the simplified route'''
+def ped_single_route_vectorized(raw_route: Route, simplified_route: Route):
+    """
+    Nearest-neighbor PED: for each raw point, find the simplified point 
+    with the closest timestamp and compute the great-circle distance.
+    Returns: (mean_distance, max_distance, count)
+    """
 
-    #Convert to numpy arrays for vectorized operations
+    if len(raw_route.trajectory) == 0 or len(simplified_route.trajectory) == 0:
+        return 0.0, 0.0, 0
+
+    # --- Convert raw and simplified to arrays ---
     raw_latlon = np.array([p.get_coords() for p in raw_route.trajectory])
-    simplified_latlon = np.array([p.get_coords() for p in simplified_route.trajectory])
+    simp_latlon = np.array([p.get_coords() for p in simplified_route.trajectory])
+
     raw_times = np.array([p.ts.timestamp() for p in raw_route.trajectory])
-    simplified_times = np.array([p.ts.timestamp() for p in simplified_route.trajectory])
+    simp_times = np.array([p.ts.timestamp() for p in simplified_route.trajectory])
 
-    #Gets an array of segment start indices for each raw point and creates start and end point arrays
-    seg_idx = find_segments_vectorized(raw_times, simplified_times)
-    starts = simplified_latlon[seg_idx]
-    ends = simplified_latlon[seg_idx + 1]
+    # --- For each raw time, find nearest simplified timestamp ---
+    # searchsorted gives insertion position
+    idx = np.searchsorted(simp_times, raw_times)
 
-    #Compute distances using point_to_great_circle
+    # clamp to valid range
+    idx = np.clip(idx, 1, len(simp_times) - 1)
+
+    # neighbor indices
+    left = idx - 1
+    right = idx
+
+    # determine which neighbor is closer
+    choose_right = (np.abs(raw_times - simp_times[right])
+                    < np.abs(raw_times - simp_times[left]))
+
+    nearest_idx = np.where(choose_right, right, left)
+
+    # --- Collect nearest neighbor coords ---
+    nearest_points = simp_latlon[nearest_idx]
+
+    # --- Vectorized great-circle distances over all pairs ---
     distances = np.array([
-        point_to_great_circle(starts[i], ends[i], raw_latlon[i])
+        great_circle_distance(raw_latlon[i], nearest_points[i])
         for i in range(len(raw_latlon))
     ])
-    return np.mean(distances), np.max(distances), len(distances)
+
+    return float(np.mean(distances)), float(np.max(distances)), len(distances)
 
 def ped_results(raw_data_routes: list[Route], simplified_routes: list[Route]) -> tuple[float, float]:
     """Calculate the average Point to segment Euclidean distance between two trajectories and the maximum Point to segment Euclidean distance between two trajectories.
@@ -45,7 +67,9 @@ def ped_results(raw_data_routes: list[Route], simplified_routes: list[Route]) ->
     Returns:
         tuple of floats: The average PED between the two trajectories and the max distance.
     """
+    #Use multiprocessing to compute PED for each route in parallel
     results = [ped_single_route_vectorized(r, s) for r, s in zip(raw_data_routes, simplified_routes)]
+
 
     #Calculate average and max from results
     total_distance = sum(avg * count for avg, _, count in results)
