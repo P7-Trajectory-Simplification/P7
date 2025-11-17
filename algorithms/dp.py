@@ -5,7 +5,6 @@ import numpy as np
 from classes.route import Route
 from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
-
 singleton = None
 
 
@@ -15,8 +14,9 @@ def run_dp(route: Route, params: dict) -> Route:
         singleton = DouglasPeucker(params["epsilon"])
     dp = singleton
 
-    dp.trajectory = route.trajectory
-    dp.simplify()
+    for vessel_log in route.trajectory:
+        dp.append_point(vessel_log)
+        dp.simplify()
 
     return Route(dp.trajectory)
 
@@ -33,9 +33,13 @@ class DouglasPeucker(Simplifier):
     def __init__(self, epsilon: float):
         super().__init__()
         self.epsilon = epsilon
+        self.original_trajectory = []
+
+    def append_point(self, point):
+        self.original_trajectory.append(point)
 
     def simplify(self):
-        self.trajectory = self.douglas_peucker(self.trajectory)
+        self.trajectory = self.douglas_peucker(self.original_trajectory)
 
     def douglas_peucker(self, trajectory: list[VesselLog]) -> list[VesselLog]:
         '''

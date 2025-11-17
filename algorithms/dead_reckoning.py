@@ -18,7 +18,7 @@ def run_dr(route: Route, params: dict) -> Route:
     dr = singleton
 
     for vessel_log in route.trajectory:
-        dr.trajectory.append(vessel_log)
+        dr.append_point(vessel_log)
         dr.simplify()
 
     return Route(dr.trajectory)

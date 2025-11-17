@@ -15,7 +15,7 @@ def run_squish(route: Route, params: dict) -> Route:
     squish = singleton
 
     for vessel_log in route.trajectory:
-        squish.trajectory.append(vessel_log)
+        squish.append_point(vessel_log)
         squish.simplify()
     return Route(squish.trajectory)
 

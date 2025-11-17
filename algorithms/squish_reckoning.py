@@ -31,7 +31,7 @@ def run_sr(route: Route, params: dict) -> Route:
         singleton = SquishReckoning(params['buff_size'])
     sr = singleton
     for vessel_log in route.trajectory:
-        sr.trajectory.append(vessel_log)
+        sr.append_point(vessel_log)
         sr.simplify()
     return Route(sr.trajectory)
 
