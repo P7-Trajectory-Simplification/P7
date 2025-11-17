@@ -3,7 +3,7 @@ import unittest
 from classes.route import Route
 from tests.algorithms.routes_basic_assertions import BasicAssertions
 from tests.test_mock_vessel_logs import mock_vessel_logs
-from algorithms.squish import run_squish, squish
+from algorithms.squish import run_squish, Squish
 
 
 class SquishTest(unittest.TestCase):
@@ -16,9 +16,14 @@ class SquishTest(unittest.TestCase):
 
         BasicAssertions(self.route, squished_route)
 
-    def test_squish(self):
-        squish(self.route.trajectory, self.route.squish_buff, buff_size=10)
-        self.assertEqual(len(self.route.squish_buff), 10, "Squished route should have 10 points")
+    def test_Squish(self):
+        squish_alg = Squish(buffer_size=10)
+
+        for vessel_log in self.route.trajectory:
+            squish_alg.trajectory.append(vessel_log)
+            squish_alg.simplify()
+
+        self.assertEqual(10, len(squish_alg.trajectory), "Squished route should have 10 points")
 
     #def test_update_sed(self):
 

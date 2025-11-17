@@ -1,4 +1,5 @@
 from algorithms.dead_reckoning import reckon
+from classes.priority_queue import PriorityQueue
 from classes.route import Route
 from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
@@ -36,47 +37,64 @@ def run_sr(route: Route, params: dict) -> Route:
 
 
 class SquishReckoning(Simplifier):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["buff_size"])
+
+    @property
+    def name(self):
+        return "SQUISH_RECKONING"
+
     def __init__(self, buffer_size: int = 100):
         super().__init__()
         self.buffer_size = buffer_size
-        # memoization of VesselLogs' scores. Remember to delete logs that aren't in the buffer!
-        self.scores = {}
+        self.buffer = PriorityQueue()
 
     def simplify(self):
         self.trajectory = self.squish_reckoning(self.trajectory)
 
-    def squish_reckoning(self, points: list[VesselLog]) -> list[VesselLog]:
-        if len(points) < 3:
-            # nothing to do, and buffer size shouldn't be considered since we always want the first and last point
-            return points
+    def squish_reckoning(self, trajectory: list[VesselLog]) -> list[VesselLog]:
+        new_point = trajectory[-1]
+        self.buffer.insert(new_point, float('inf'))
 
-        if (next_newest_point := points[-2]) not in self.scores:
-            # if we don't have a score for the next newest point, i.e. a new point was added since last time,
-            # we need to find one via reckoning, so we compute how well we can predict the newest point
-            self.scores[next_newest_point] = reckon(
-                points[-3], next_newest_point, points[-1]
+        if self.buffer.size() > 1:  # After the first point
+            predecessor = trajectory[-2]
+            self.buffer.succ[predecessor.id] = new_point
+            self.buffer.pred[new_point.id] = predecessor
+
+
+        if self.buffer.size() > 2: # After the second point
+            predecessor = trajectory[-2]
+            score = reckon(
+                self.buffer.pred[predecessor.id],
+                predecessor,
+                self.buffer.succ[predecessor.id]
             )
+            self.buffer.insert(predecessor, score)
 
-        if len(points) <= self.buffer_size:
-            # if we haven't exceeded the buffer size, we're done for now
-            # NOTE that we do this after potentially finding the score, so we get the scores even when we're below the size threshold
-            return points
+        if self.buffer.size() == self.buffer_size + 1:
+            point, _ = self.buffer.remove_min()
+            trajectory.remove(point)
 
-        # now we need to find the point with the lowest score, not counting the first or last point since those don't have scores
-        index_min = min(range(1, len(points) - 1), key=lambda i: self.scores[points[i]])
+            if point.id in self.buffer.pred:
+                predecessor = self.buffer.pred[point.id]
+                self.buffer.insert(
+                    predecessor,
+                    reckon(
+                        self.buffer.pred[predecessor.id],
+                        predecessor,
+                        self.buffer.succ[predecessor.id]
+                    )
+                )
 
-        # delete the element at the index we found and recompute scores for the affected points
-        # NOTE pop removes AND returns the value, so we use it to remove the point's score as well
-        del self.scores[points.pop(index_min)]
-        if index_min != (len(points) - 1):
-            # compute score for the new point at the chosen index if it's not the last
-            self.scores[points[index_min]] = reckon(
-                points[index_min - 1], points[index_min], points[index_min + 1]
-            )
-        if (index_min - 1) != 0:
-            # compute score for the point at the preceding index if it's not the first
-            self.scores[points[index_min - 1]] = reckon(
-                points[index_min - 2], points[index_min - 1], points[index_min]
-            )
-        # the buffer should be the correct size again, and we've updated all the scores we need to update
-        return points
+            if point.id in self.buffer.succ:
+                successor = self.buffer.succ[point.id]
+                self.buffer.insert(
+                    successor,
+                    reckon(
+                        self.buffer.pred[successor.id],
+                        successor,
+                        self.buffer.succ[successor.id]
+                    )
+                )
+        return trajectory

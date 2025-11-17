@@ -62,6 +62,7 @@ def assign_routes(
     A dictionary mapping route IDs to lists of VesselLogs
     in the order they should be considered for the routes they are part of.
     '''
+    global route_count
     routes = {}
     for log in logs:
         imo = log.imo
