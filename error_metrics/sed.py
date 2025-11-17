@@ -1,28 +1,105 @@
+from concurrent.futures import ProcessPoolExecutor
+import numpy as np
 from algorithms.great_circle_math import great_circle_distance
 from classes.route import Route
 from classes.vessel_log import VesselLog
 
-def find_simplified_point(point: VesselLog, trajectory: list[VesselLog]) -> VesselLog:
-    '''Find the point in the simplified trajectory whose time is closest to the point's time.'''
-    point_time = point.ts
-    min_time_diff = None
-    closest_point = None
+ #Convert to 3D Cartesian
+def to_cart(lat, lon):
+        return np.array([
+            np.cos(lat) * np.cos(lon),
+            np.cos(lat) * np.sin(lon),
+            np.sin(lat)
+        ])
 
-    for simplified_point in trajectory:
-        # Find time difference between point_time and the simplified point's time
-        if simplified_point.ts == point_time:
-            return (simplified_point)
-        else:
-            # If outside, compute how far the point_time is from the simplified point's time
-            time_diff = abs((point_time - simplified_point.ts).total_seconds())
-            if min_time_diff is None:
-                min_time_diff = time_diff
-                closest_point = simplified_point
-            elif time_diff < min_time_diff:
-                min_time_diff = time_diff
-                closest_point = simplified_point
+def slerp(p0, p1, t):
+    '''Spherical linear interpolation between two points on a sphere.
 
-    return closest_point
+    p0, p1: (lat, lon) in radians
+    t: interpolation factor in [0,1]
+    '''
+    lat0, lon0 = p0
+    lat1, lon1 = p1
+
+    #Convert to 3D Cartesian coordinates
+    v0 = to_cart(lat0, lon0)
+    v1 = to_cart(lat1, lon1)
+
+    #Compute the angle between v0 and v1 and clip in case of floating point errors
+    dot = np.dot(v0, v1)
+    dot = np.clip(dot, -1.0, 1.0)
+
+    #Great-circle angular distance in radians.
+    omega = np.arccos(dot)
+
+    if omega < 1e-12:  #Almost identical
+        return p0
+
+    s0 = np.sin((1 - t) * omega) / np.sin(omega)
+    s1 = np.sin(t * omega) / np.sin(omega)
+
+    v = s0 * v0 + s1 * v1  #Interpolated Cartesian
+
+    #Convert back to (lat, lon)
+    lat = np.arctan2(v[2], np.sqrt(v[0]**2 + v[1]**2))
+    lon = np.arctan2(v[1], v[0])
+
+    return np.array([lat, lon])
+
+def interpolate_simplified_points_vectorized(raw_times, simp_times, simp_latlon):
+    '''For each raw timestamp, return the spherical interpolated point
+    on the simplified trajectory at that timestamp.
+    '''
+
+    #Find segment index k such that simp_times[k] <= raw < simp_times[k+1]
+    idx = np.searchsorted(simp_times, raw_times, side="right") - 1
+
+    #Clamp indices to valid range
+    idx = np.clip(idx, 0, len(simp_times) - 2)
+
+    t0 = simp_times[idx]
+    t1 = simp_times[idx + 1]
+
+    #Interpolation factor α
+    alpha = (raw_times - t0) / (t1 - t0)
+    alpha = np.clip(alpha, 0.0, 1.0)
+
+    #Allocate result
+    result = np.zeros((len(raw_times), 2))
+
+    #Interpolate each point with SLERP
+    for i in range(len(raw_times)):
+        p0 = simp_latlon[idx[i]]
+        p1 = simp_latlon[idx[i] + 1]
+        result[i] = slerp(p0, p1, alpha[i])
+
+    return result
+
+def sed_single_route_vectorized(raw_route: Route, simplified_route: Route) -> tuple[float, float, int]:
+    '''Compute SED for a single route (vectorized).
+    Using vectorized simplified point lookup and great-circle distance computation.
+    Returns average distance, max distance, and count of points.'''
+
+    #Return average distance, max distance, count as 0, if either route is empty.
+    if len(raw_route.trajectory) == 0 or len(simplified_route.trajectory) == 0:
+        return 0.0, 0.0, 0
+    
+    #Convert to numpy arrays for vectorized operations
+    raw_latlon = np.array([p.get_coords() for p in raw_route.trajectory])
+    simplified_latlon = np.array([p.get_coords() for p in simplified_route.trajectory])
+    raw_times = np.array([p.ts.timestamp() for p in raw_route.trajectory])
+    simplified_times = np.array([p.ts.timestamp() for p in simplified_route.trajectory])
+
+    #Gets an array of simplified point indices for each raw point
+    interp_points = interpolate_simplified_points_vectorized(raw_times, simplified_times, simplified_latlon)
+
+    #Compute distances using great_circle_distance
+    distances = np.array([
+        great_circle_distance(interp_points[i], raw_latlon[i])
+        for i in range(len(raw_latlon))
+    ])
+
+    return np.mean(distances), np.max(distances), len(distances)
 
 def sed_results(raw_data_routes: list[Route], simplified_routes: list[Route]) -> tuple[float, float]:
     '''Calculate the average Point to simplified point Euclidean distance between two trajectories
@@ -31,24 +108,12 @@ def sed_results(raw_data_routes: list[Route], simplified_routes: list[Route]) ->
     Returns:
         tuple with floats: The average SED between the two trajectories and the max distance.
     '''
-    max_distance = 0
-    total_distance = 0
-    count = 0
+    results = [sed_single_route_vectorized(r, s) for r, s in zip(raw_data_routes, simplified_routes)]
 
-    for i, raw_route in enumerate(raw_data_routes):
-        simplified_route = simplified_routes[i]
-        if len(simplified_route.trajectory) == 0:
-            continue
-        for point in raw_route.trajectory:
-            simplified_point = find_simplified_point(point, simplified_route.trajectory)
-            if simplified_point is None:
-                continue
-            distance = great_circle_distance(point.get_coords(), simplified_point.get_coords())
-            total_distance += distance
-            count += 1
-            if distance > max_distance:
-                    max_distance = distance
-    if count == 0:
-        return 0, 0  # both average and max are zero 
-    avg_distance = total_distance / count
+    #Calculate average and max from results
+    total_distance = sum(avg * count for avg, _, count in results)
+    total_points = sum(count for _, _, count in results)
+    max_distance = max(max_d for _, max_d, _ in results)
+
+    avg_distance = total_distance / total_points if total_points > 0 else 0
     return round(avg_distance, 2), round(max_distance, 2)

@@ -1,6 +1,7 @@
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from flask import Flask, request
 from flask import render_template
+import numpy as np
 
 from algorithms.dead_reckoning import DeadReckoning, run_dr
 from algorithms.dp import DouglasPeucker, run_dp
@@ -103,16 +104,11 @@ algorithms_mappings = {
     'SQUISH_RECKONING': run_sr,
 }
 
-
-def get_error_metrics(
-    raw_routes: list[Route], simplified_routes: list[Route]
-) -> list[float]:
-    error_metrics = []
+def get_error_metrics(raw_routes: list[Route], simplified_routes: list[Route]) -> list[float]:
     ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
     sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
     comp_ratio = comp_ratio_results(raw_routes, simplified_routes)
-    error_metrics = [ped_avg, ped_max, sed_avg, sed_max, comp_ratio]
-    return error_metrics
+    return [ped_avg, ped_max, sed_avg, sed_max, comp_ratio]
 
 
 @app.route('/')

@@ -77,7 +77,7 @@ def point_to_great_circle(latlon_a: tuple[float, float], latlon_b: tuple[float, 
     '''
     # Implementation of method explained in https://math.stackexchange.com/questions/337055/compute-minimum-distance-between-point-and-great-arc-on-sphere
 
-    if latlon_a == latlon_b:
+    if equal_latlon(latlon_a, latlon_b):
         distance = great_circle_distance(latlon_a, latlon_b, radius=radius)
     else:
         # we transform the latlons into unit vectors coming from the center of the sphere
@@ -183,3 +183,10 @@ def get_final_bearing(latlon_a: tuple[float, float], latlon_b: tuple[float, floa
     ) % np.radians(360)
     # we reverse the back-azimuth to get the bearing
     return back_azimuth - np.radians(180)
+
+def equal_latlon(a, b):
+    """Safe equality check for tuple or numpy latlon pairs.
+    Helper function for vectorized operations in error metrics."""
+    if isinstance(a, np.ndarray) or isinstance(b, np.ndarray):
+        return np.allclose(a, b)
+    return a == b

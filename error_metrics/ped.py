@@ -1,44 +1,79 @@
+from concurrent.futures import ProcessPoolExecutor
+import numpy as np
 from algorithms.great_circle_math import point_to_great_circle
 from classes.route import Route
 from classes.vessel_log import VesselLog
 
-def find_segment(point: VesselLog, trajectory: list[VesselLog]) -> tuple[VesselLog, VesselLog] | None: 
-    """Find the segment in the trajectory whose time interval is closest to the point's time."""
-    for i in range(len(trajectory) - 1):
-        start = trajectory[i]
-        end = trajectory[i + 1]
-        # Find time difference between point_time and the segment's interval
-        if start.ts <= point.ts <= end.ts:
-            return (start, end)
-    
-    #Print to inform that the point is outside the segment time interval and a segment therefore hasn't been chosen.
-    return None
-        
+
+
+def find_nearest_simplified_idx_vectorized(raw_times: np.ndarray, simp_times: np.ndarray) -> np.ndarray:
+    '''Given raw timestamps and simplified timestamps (sorted),
+    return for each raw time the index of the previous simplified timestamp.
+    '''
+    #For each raw timestamp find the index where it would be inserted in the simplified timestamps
+    idx = np.searchsorted(simp_times, raw_times)
+
+    #Clamp raw timestamps to valid interval [1, len-1]
+    idx = np.clip(idx, 1, len(simp_times) - 1)
+
+    #Get the index of the previous simplified timestamp
+    left = idx - 1
+
+    nearest_idx = left
+
+    return nearest_idx
+
+def ped_single_route_vectorized(raw_route: Route, simplified_route: Route) -> tuple[float, float, int]:
+    '''PED: for each raw point, find the simplified point 
+    with the closest previous timestamp and compute the point to great-circle distance.
+
+    Returns:
+        (mean_distance_m, max_distance_m, number_of_raw_points)
+    '''
+
+    #Handle edge case of empty routes
+    if len(raw_route.trajectory) == 0 or len(simplified_route.trajectory) == 0:
+        return 0.0, 0.0, 0
+
+    #Convert coords + times to arrays
+    raw_latlon = np.array([p.get_coords() for p in raw_route.trajectory])
+    simp_latlon = np.array([p.get_coords() for p in simplified_route.trajectory])
+
+    raw_times = np.array([p.ts.timestamp() for p in raw_route.trajectory])
+    simp_times = np.array([p.ts.timestamp() for p in simplified_route.trajectory])
+
+    #Find nearest simplified time index for each raw point, finds the preceding point
+    nearest_idx = find_nearest_simplified_idx_vectorized(raw_times, simp_times)
+
+    #Collect matched simplified coords
+    nearest_points = simp_latlon[nearest_idx]
+
+    #Compute distances vectorized
+    distances = np.array([
+        point_to_great_circle(nearest_points[i], nearest_points[i+1], raw_latlon[i])
+        for i in range(len(raw_latlon))
+    ])
+
+    return float(np.mean(distances)), float(np.max(distances)), len(distances)
+
 def ped_results(raw_data_routes: list[Route], simplified_routes: list[Route]) -> tuple[float, float]:
-    """Calculate the average Point to segment Euclidean distance between two trajectories and the maximum Point to segment Euclidean distance between two trajectories.
+    '''Calculate the average Point to segment Euclidean distance between two trajectories and the maximum Point to segment Euclidean distance between two trajectories.
 
     Returns:
         tuple of floats: The average PED between the two trajectories and the max distance.
-    """
-    max_distance = 0
-    total_distance = 0
-    count = 0
+    '''
 
-    for i, raw_route in enumerate(raw_data_routes):
-        simplified_route = simplified_routes[i]
-        for point in raw_route.trajectory:
-            segment = find_segment(point, simplified_route.trajectory)
-            if segment is not None:
-                start_seg, end_seg = segment
-                distance = point_to_great_circle(start_seg.get_coords(), end_seg.get_coords(), point.get_coords()) #ped((point.lat.get_coords(), point.lon.get_coords()), (start_seg[0], start_seg[1]), (end_seg[0], end_seg[1]))
-                total_distance += distance
-                count += 1
-                if distance > max_distance:
-                        max_distance = distance
+    #Calculate PED for each route pair
+    results = [
+        ped_single_route_vectorized(raw, simplified)
+        for raw, simplified in zip(raw_data_routes, simplified_routes)
+    ]
 
-    if count == 0:
-        return 0,0  # both average and max are zero
+    #Aggregate results
+    total_distance = sum(avg * count for avg, _, count in results)
+    total_points = sum(count for _, _, count in results)
+    max_distance = max(max_dist for _, max_dist, _ in results)
 
+    avg_distance = total_distance / total_points if total_points > 0 else 0
 
-    avg_distance = total_distance / count
     return round(avg_distance, 2), round(max_distance, 2)
