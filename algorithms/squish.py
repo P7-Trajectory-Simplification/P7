@@ -7,6 +7,7 @@ import numpy as np
 
 singleton = None
 
+
 def run_squish(route: Route, params: dict) -> Route:
     global singleton
     if singleton is None:
@@ -18,7 +19,16 @@ def run_squish(route: Route, params: dict) -> Route:
         squish.simplify()
     return Route(squish.trajectory)
 
+
 class Squish(Simplifier):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["buff_size"])
+
+    @property
+    def name(self):
+        return "SQUISH"
+
     def __init__(self, buffer_size: int = 100):
         super().__init__()
         self.buffer_size = buffer_size

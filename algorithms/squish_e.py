@@ -7,6 +7,7 @@ import numpy as np
 
 singleton = None
 
+
 def run_squish_e(route: Route, params: dict) -> Route:
     global singleton
     if singleton is None:
@@ -18,8 +19,19 @@ def run_squish_e(route: Route, params: dict) -> Route:
         squish_e.simplify()
     return Route(squish_e.trajectory)
 
+
 class SquishE(Simplifier):
-    def __init__(self, lower_compression_rate: float = 2.0, upper_bound_sed: float = 100.0):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["low_comp"], params["max_sed"])
+
+    @property
+    def name(self):
+        return "SQUISH_E"
+
+    def __init__(
+        self, lower_compression_rate: float = 2.0, upper_bound_sed: float = 100.0
+    ):
         super().__init__()
         self.lower_compression_rate = lower_compression_rate
         self.upper_bound_sed = upper_bound_sed

@@ -37,6 +37,14 @@ def run_sr(route: Route, params: dict) -> Route:
 
 
 class SquishReckoning(Simplifier):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["buff_size"])
+
+    @property
+    def name(self):
+        return "SQUISH_RECKONING"
+
     def __init__(self, buffer_size: int = 100):
         super().__init__()
         self.buffer_size = buffer_size

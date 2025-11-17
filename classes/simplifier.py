@@ -12,6 +12,16 @@ class Simplifier(ABC):  # "ABC" means it's an abstract class
         Must be overridden by derived classes."""
         raise NotImplementedError
 
+    @property  # this is a property so we don't waste memory by storing a name in every object
+    def name(self):
+        """Return the name of the algorithm the simplifier implements."""
+        raise NotImplementedError
+
+    @classmethod
+    def from_params(cls, params: dict[str, int]):
+        """Create an instance of a derived class using only relevant values from dictionary of parameters."""
+        raise NotImplementedError
+
 
 # The description needs to be as compact as possible, since we need to send one for each request for each route.
 # Conceptual description example:
