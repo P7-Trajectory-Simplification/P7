@@ -44,19 +44,10 @@ class DouglasPeucker(Simplifier):
     def douglas_peucker(self, trajectory: list[VesselLog]) -> list[VesselLog]:
         '''
         Simplifies a given set of points using the Douglas-Peucker algorithm.
-
-        Parameters
-        ---------
-        points (list of tuples): List of (lat, lon) coordinates representing the points.
-        epsilon (float): The maximum distance threshold for simplification.
-
-        Returns
-        ---------
-        list of tuples: Simplified list of points.
         '''
-        dmax = 0
-        index = 0
-        end = len(trajectory) - 1
+        dmax = 0 # Maximum distance
+        index = 0 # Index of the point with maximum distance
+        end = len(trajectory) - 1 # Index of the last point
         for i in range(1, end):
             # Calculate the perpendicular distance from point to line segment
             d = np.abs(
@@ -66,13 +57,13 @@ class DouglasPeucker(Simplifier):
                     trajectory[i].get_coords(),
                 )
             )
-            if d > dmax:
+            if d > dmax: # Update maximum distance and index
                 index = i
                 dmax = d
 
-        if dmax > self.epsilon:
+        if dmax > self.epsilon: # If maximum distance is greater than epsilon, recursively simplify
             rec_results1 = self.douglas_peucker(trajectory[: index + 1])
             rec_results2 = self.douglas_peucker(trajectory[index:])
 
-            return rec_results1[:-1] + rec_results2
-        return [trajectory[0], trajectory[end]]
+            return rec_results1[:-1] + rec_results2 # Combine results excluding the last point of the first half to avoid duplication
+        return [trajectory[0], trajectory[end]] # Return start and end points

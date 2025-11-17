@@ -54,29 +54,29 @@ class SquishReckoning(Simplifier):
         self.trajectory = self.squish_reckoning(self.trajectory)
 
     def squish_reckoning(self, trajectory: list[VesselLog]) -> list[VesselLog]:
-        new_point = trajectory[-1]
-        self.buffer.insert(new_point, float('inf'))
+        new_point = trajectory[-1] # Get the newest point
+        self.buffer.insert(new_point) # Insert it into the buffer with infinite score
 
         if self.buffer.size() > 1:  # After the first point
-            predecessor = trajectory[-2]
-            self.buffer.succ[predecessor.id] = new_point
-            self.buffer.pred[new_point.id] = predecessor
+            predecessor = trajectory[-2] # Get the predecessor point
+            self.buffer.succ[predecessor.id] = new_point # Update successor mapping
+            self.buffer.pred[new_point.id] = predecessor # Update predecessor mapping
 
 
         if self.buffer.size() > 2: # After the second point
-            predecessor = trajectory[-2]
+            predecessor = trajectory[-2] # Get the predecessor point
             score = reckon(
                 self.buffer.pred[predecessor.id],
                 predecessor,
                 self.buffer.succ[predecessor.id]
-            )
-            self.buffer.insert(predecessor, score)
+            ) # Calculate the score
+            self.buffer.insert(predecessor, score) # Update the score of the predecessor in the buffer
 
-        if self.buffer.size() == self.buffer_size + 1:
-            point, _ = self.buffer.remove_min()
+        if self.buffer.size() == self.buffer_size + 1: # Buffer full, need to remove one point
+            point, _ = self.buffer.remove_min() # Remove point with the lowest score
 
-            if point.id in self.buffer.pred:
-                predecessor = self.buffer.pred[point.id]
+            if point.id in self.buffer.pred: # Not the first point
+                predecessor = self.buffer.pred[point.id] # Get predecessor
                 self.buffer.insert(
                     predecessor,
                     reckon(
@@ -84,10 +84,10 @@ class SquishReckoning(Simplifier):
                         predecessor,
                         self.buffer.succ[predecessor.id]
                     )
-                )
+                ) # Recalculate and update score of predecessor
 
-            if point.id in self.buffer.succ:
-                successor = self.buffer.succ[point.id]
+            if point.id in self.buffer.succ: # Not the last point
+                successor = self.buffer.succ[point.id] # Get successor
                 self.buffer.insert(
                     successor,
                     reckon(
@@ -95,5 +95,5 @@ class SquishReckoning(Simplifier):
                         successor,
                         self.buffer.succ[successor.id]
                     )
-                )
-        return self.buffer.to_list()
+                ) # Recalculate and update score of successor
+        return self.buffer.to_list() # Return the points in the buffer as a list

@@ -53,7 +53,7 @@ class UniformSampling(Simplifier):
         ---------
         list of VesselLog: Simplified list of points.
         '''
-        if self.counter == self.sampling_rate:
+        if self.counter == self.sampling_rate: # If counter reaches sampling rate
             self.counter = 0 # Reset counter
             trajectory.pop(-2) # Remove the second last point
-        return trajectory
+        return trajectory # Return the (maybe) simplified trajectory
