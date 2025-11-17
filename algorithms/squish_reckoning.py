@@ -74,7 +74,6 @@ class SquishReckoning(Simplifier):
 
         if self.buffer.size() == self.buffer_size + 1:
             point, _ = self.buffer.remove_min()
-            trajectory.remove(point)
 
             if point.id in self.buffer.pred:
                 predecessor = self.buffer.pred[point.id]
@@ -97,4 +96,4 @@ class SquishReckoning(Simplifier):
                         self.buffer.succ[successor.id]
                     )
                 )
-        return trajectory
+        return self.buffer.to_list()

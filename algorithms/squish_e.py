@@ -47,7 +47,6 @@ class SquishE(Simplifier):
         Describes how the heap is reduced when the buffer size is full
         """
         point, priority = self.buffer.remove_min()
-        self.trajectory.remove(point)
         if point.id in self.buffer.pred or point.id in self.buffer.succ:
             self.max_neighbor[self.buffer.succ[point.id].id] = max(priority, self.max_neighbor[self.buffer.succ[point.id].id])
             self.max_neighbor[self.buffer.pred[point.id].id] = max(priority, self.max_neighbor[self.buffer.pred[point.id].id])
@@ -103,4 +102,4 @@ class SquishE(Simplifier):
         while self.buffer.min_priority() <= self.upper_bound_sed:
             self.reduce()
 
-        return trajectory
+        return self.buffer.to_list()

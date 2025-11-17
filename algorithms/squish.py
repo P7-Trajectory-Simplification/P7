@@ -64,10 +64,9 @@ class Squish(Simplifier):
 
         if self.buffer.size() == self.buffer_size + 1:
             point, _ = self.buffer.remove_min()
-            trajectory.remove(point)
 
             if point.id in self.buffer.pred or point.id in self.buffer.succ:
                 self.update_sed(self.buffer.pred[point.id])
                 self.update_sed(self.buffer.succ[point.id])
 
-        return trajectory
+        return self.buffer.to_list()

@@ -63,3 +63,12 @@ class PriorityQueue:
 
     def size(self):
         return len(self.entry_finder)
+
+    def to_list(self) -> list[VesselLog]:
+        trajectory_list = []
+        start = next((pid for pid in self.pred if self.pred[pid] is None), 0)
+        curr = start
+        while curr is not None:  # Add each point in order
+            trajectory_list.append(self.entry_finder[curr][2])
+            curr = self.succ.get(curr)
+        return trajectory_list
