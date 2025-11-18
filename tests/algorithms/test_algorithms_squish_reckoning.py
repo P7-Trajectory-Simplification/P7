@@ -6,13 +6,9 @@ from tests.test_mock_vessel_logs import mock_vessel_logs
 from algorithms.squish_reckoning import run_sr, SquishReckoning
 
 class SquishReckoningTest (unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.route = Route(trajectory=mock_vessel_logs)
-
     def setUp(self):
         # Clear memoized scores before each test to avoid interference
-        self.route = Route(trajectory=mock_vessel_logs.copy())
+        self.route = Route(trajectory=mock_vessel_logs)
 
     def test_run_squish_reckoning(self):
         self.route = Route(trajectory=mock_vessel_logs)

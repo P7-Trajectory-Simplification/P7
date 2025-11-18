@@ -66,15 +66,16 @@ class SquishE(Simplifier):
         if point.id in self.buffer.pred and point.id in self.buffer.succ:  # Check if first or last point
             predecessor = self.buffer.pred[point.id]
             successor = self.buffer.succ[point.id]
-            if point.ts - predecessor.ts < successor.ts - point.ts:  # Find nearest point in time to compute sed (This is not entirely correct squish-e)
-                # Closer to predecessor
-                priority = self.max_neighbor[point.id] + np.abs(
-                    great_circle_distance(point.get_coords(), predecessor.get_coords()))
-            else:
-                # Closer to successor
-                priority = self.max_neighbor[point.id] + np.abs(
-                    great_circle_distance(point.get_coords(), successor.get_coords()))
-            self.buffer.insert(point, priority) # Update priority in the priority queue
+            if predecessor is not None and successor is not None:
+                if point.ts - predecessor.ts < successor.ts - point.ts:  # Find nearest point in time to compute sed (This is not entirely correct squish-e)
+                    # Closer to predecessor
+                    priority = self.max_neighbor[point.id] + np.abs(
+                        great_circle_distance(point.get_coords(), predecessor.get_coords()))
+                else:
+                    # Closer to successor
+                    priority = self.max_neighbor[point.id] + np.abs(
+                        great_circle_distance(point.get_coords(), successor.get_coords()))
+                self.buffer.insert(point, priority) # Update priority in the priority queue
 
     def squish_e(self, trajectory: list[VesselLog]) -> list[VesselLog]:
         """
@@ -87,10 +88,8 @@ class SquishE(Simplifier):
         new_point = trajectory[-1] # Get the newest point
         self.buffer.insert(new_point)  # Insert point with priority = inf
         self.max_neighbor[new_point.id] = 0 # Initialize max_neighbor for the new point
-        if self.buffer.size() > 1:  # After the first point
+        if self.buffer.size() > 2:  # After the first point
             predecessor = trajectory[-2] # Get the predecessor point
-            self.buffer.succ[predecessor.id] = new_point # Update successor mapping
-            self.buffer.pred[new_point.id] = predecessor # Update predecessor mapping
             self.adjust_priority(predecessor)  # Update priority
 
         if self.buffer.size() == self.buffer_size + 1:  # Reduce buffer when full

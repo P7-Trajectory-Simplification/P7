@@ -57,12 +57,6 @@ class SquishReckoning(Simplifier):
         new_point = trajectory[-1] # Get the newest point
         self.buffer.insert(new_point) # Insert it into the buffer with infinite score
 
-        if self.buffer.size() > 1:  # After the first point
-            predecessor = trajectory[-2] # Get the predecessor point
-            self.buffer.succ[predecessor.id] = new_point # Update successor mapping
-            self.buffer.pred[new_point.id] = predecessor # Update predecessor mapping
-
-
         if self.buffer.size() > 2: # After the second point
             predecessor = trajectory[-2] # Get the predecessor point
             score = reckon(

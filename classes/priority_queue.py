@@ -12,13 +12,22 @@ class PriorityQueue:
         self.REMOVED = "<removed>" # Placeholder for a removed point
         self.counter = itertools.count() # Unique sequence count
 
-        self.pred: dict[int, VesselLog] = {} # Maps point id to its predecessor
-        self.succ: dict[int, VesselLog] = {} # Maps point id to its successor
+        self.pred: dict[int, VesselLog|None] = {} # Maps point id to its predecessor
+        self.succ: dict[int, VesselLog|None] = {} # Maps point id to its successor
+        self.last: VesselLog|None = None
 
     def insert(self, point: VesselLog, priority=float('inf')):
         """Equivalent to 'set priority(Pi, priority, Q)'."""
         if point.id in self.entry_finder: # Point already in the queue
             self.remove(point) # Lazy removal
+        else:
+            if self.last is None:
+                self.pred[point.id] = None # No predecessor for the first point
+            else:
+                self.pred[point.id] = self.last # Set predecessor
+                self.succ[self.last.id] = point # Set successor of the last point
+                self.succ[point.id] = None # No successor yet
+            self.last = point
         count = next(self.counter) # Unique sequence count
         entry = [priority, count, point] # Create new entry
         self.entry_finder[point.id] = entry # Add to entry finder
@@ -29,6 +38,8 @@ class PriorityQueue:
         while self.heap: # While there are entries in the heap
             priority, _, point = heapq.heappop(self.heap) # Pop the smallest entry
             if point != self.REMOVED: # If it's not a removed point
+                if self.pred[point.id] is None or self.succ[point.id] is None:
+                    raise RuntimeError("Cannot remove endpoint from priority queue")
                 del self.entry_finder[point.id] # Remove from entry finder
 
                 self.succ[self.pred[point.id].id] = self.succ[point.id] # Update successor of predecessor
@@ -50,12 +61,6 @@ class PriorityQueue:
             return priority # Return the priority
         return float('inf') # If heap is empty
 
-    def update_priority(self, point: VesselLog, new_priority: float):
-        """Equivalent to 'adjust priority' operation."""
-        if point.id in self.entry_finder: # If point is in the queue
-            _, _, point = self.entry_finder[point.id] # Get the existing point
-            self.insert(point, new_priority) # Re-insert with new priority
-
     def remove(self, point: VesselLog):
         """Lazy removal helper."""
         entry = self.entry_finder.pop(point.id, None) # Remove from entry finder
@@ -67,9 +72,28 @@ class PriorityQueue:
 
     def to_list(self) -> list[VesselLog]:
         trajectory_list = [] # List to hold the trajectory points
-        start = next((pid for pid in self.pred if self.pred[pid] is None), 0) # Find the start point (no predecessor)
-        curr = start # Start from the first point
-        while curr is not None:  # Add each point in order
-            trajectory_list.append(self.entry_finder[curr][2]) # Append current point
-            curr = self.succ.get(curr) # Move to the successor
-        return trajectory_list # Return the ordered list of points
+        starts = [pid for pid, p in self.pred.items() if p is None]
+        if len(starts) != 1:
+            raise RuntimeError(f"Invalid predecessor structure. Expected 1 start, found {len(starts)}")
+
+        curr = starts[0] # Start from the first point
+        result = []
+
+        visited = set()
+
+        while curr is not None:
+            if curr in visited:
+                raise RuntimeError(f"Cycle detected at {curr}")
+            visited.add(curr)
+            entry = self.entry_finder.get(curr)
+            if entry is None:
+                raise RuntimeError(f"Missing entry_finder entry for id {curr}")
+
+            result.append(entry[2])
+
+            succ = self.succ.get(curr)
+            if succ is None:
+                break
+            curr = succ.id
+
+        return result
