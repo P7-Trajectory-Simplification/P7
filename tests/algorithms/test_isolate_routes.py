@@ -17,10 +17,10 @@ class IsolateRoutesTest(unittest.TestCase):
         # Mock data with time gap bigger than 2 days (Should maybe be a parameter in the isolate routes function)
         start_time = datetime(2024, 1, 1, 12, 0, 0)
         logs = [
-            VesselLog(ts=start_time, lon=10, lat=50),
-            VesselLog(ts=start_time + timedelta(hours=1), lon=10.1, lat=50.1),
-            VesselLog(ts=start_time + timedelta(days=3), lon=11, lat=51),  # gap > 2 days, should start new route
-            VesselLog(ts=start_time + timedelta(days=3, hours=1), lon=11.1, lat=51.1),
+            VesselLog(ts=start_time, lon=10, lat=50, imo=1, id=1),
+            VesselLog(ts=start_time + timedelta(hours=1), lon=10.1, lat=50.1, imo=1, id=2),
+            VesselLog(ts=start_time + timedelta(days=3), lon=11, lat=51, imo=1, id=3),  # gap > 2 days, should start new route
+            VesselLog(ts=start_time + timedelta(days=3, hours=1), lon=11.1, lat=51.1, imo=1, id=4)
         ]
 
         routes = isolate_routes(logs)
@@ -39,11 +39,11 @@ class IsolateRoutesTest(unittest.TestCase):
         self.assertEqual(routes[1].trajectory[0], logs[2], "Second route should start at log after time gap.")
         self.assertEqual(routes[1].trajectory[-1], logs[3], "Second route should end with the final log.")
 
-        # All logs are close to each other so isolate_routes shouldnt split them
+        # All logs are close to each other so isolate_routes shouldn't split them
         close_logs = [
-            VesselLog(ts=start_time, lon=12, lat=52),
-            VesselLog(ts=start_time + timedelta(hours=12), lon=12.1, lat=52.1),
-            VesselLog(ts=start_time + timedelta(days=1, hours=1), lon=12.2, lat=52.2)
+            VesselLog(ts=start_time, lon=12, lat=52, imo=2, id=5),
+            VesselLog(ts=start_time + timedelta(hours=12), lon=12.1, lat=52.1, imo=2, id=6),
+            VesselLog(ts=start_time + timedelta(days=1, hours=1), lon=12.2, lat=52.2, imo=2, id=7)
         ]
         routes = isolate_routes(close_logs)
         self.assertEqual(len(routes), 1, "All logs within 2 days should form one route.")

@@ -3,17 +3,12 @@ import unittest
 from classes.route import Route
 from tests.algorithms.routes_basic_assertions import BasicAssertions
 from tests.test_mock_vessel_logs import mock_vessel_logs
-from algorithms.squish_reckoning import run_sr, squish_reckoning, scores
+from algorithms.squish_reckoning import run_sr, SquishReckoning
 
 class SquishReckoningTest (unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.route = Route(trajectory=mock_vessel_logs)
-
     def setUp(self):
         # Clear memoized scores before each test to avoid interference
-        scores.clear()
-        self.route = Route(trajectory=mock_vessel_logs.copy())
+        self.route = Route(trajectory=mock_vessel_logs)
 
     def test_run_squish_reckoning(self):
         self.route = Route(trajectory=mock_vessel_logs)
@@ -22,25 +17,19 @@ class SquishReckoningTest (unittest.TestCase):
         BasicAssertions(self.route, simplified_route)
     
     def test_squish_reckoning(self):
-        trajectory_copy = self.route.trajectory.copy()
-        simplified_route = []
-        for point in trajectory_copy:
-            simplified_route.append(point)
-            simplified_route = squish_reckoning(simplified_route, buffer_size=len(trajectory_copy) + 5)
+        squishReckoning = SquishReckoning(len(self.route.trajectory) + 5)
+        for vessel_log in self.route.trajectory:
+           squishReckoning.trajectory.append(vessel_log)
+           squishReckoning.simplify()
 
-        self.assertEqual(len(simplified_route), len(self.route.trajectory), "No points should be removed when below buffer size.")
+        self.assertEqual(len(squishReckoning.trajectory), len(self.route.trajectory), "No points should be removed when below buffer size.")
 
-        small_buffer = 5
-        trajectory_copy = self.route.trajectory.copy()
-        simplified_route = []
-        for point in trajectory_copy:
-            simplified_route.append(point)
-            simplified_route = squish_reckoning(simplified_route, buffer_size=small_buffer)
+        squishReckoning = SquishReckoning(5)
+        for vessel_log in self.route.trajectory:
+            squishReckoning.trajectory.append(vessel_log)
+            squishReckoning.simplify()
 
-        self.assertLessEqual(len(simplified_route), small_buffer, "Trajectory should not exceed buffer size after squishing.")
-
-
-        self.assertTrue(len(scores) > 0, "Scores dictionary should be populated after reckoning.")
+        self.assertLessEqual(len(squishReckoning.trajectory), 5, "Trajectory should not exceed buffer size after squishing.")
 
 if __name__ == '__main__':
     unittest.main()

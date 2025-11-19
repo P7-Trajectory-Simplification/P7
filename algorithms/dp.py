@@ -2,39 +2,68 @@ from algorithms.great_circle_math import point_to_great_circle
 from classes.route import Route
 from classes.vessel_log import VesselLog
 import numpy as np
-
-
-def douglas_peucker(points: list[VesselLog], epsilon: float) -> list[VesselLog]:
-    '''
-    Simplifies a given set of points using the Douglas-Peucker algorithm.
-
-    Parameters
-    ---------
-    points (list of tuples): List of (lat, lon) coordinates representing the points.
-    epsilon (float): The maximum distance threshold for simplification.
-
-    Returns
-    ---------
-    list of tuples: Simplified list of points.
-    '''
-    dmax = 0
-    index = 0
-    end = len(points) - 1
-    for i in range(1, end):
-        # Calculate the perpendicular distance from point to line segment
-        d = np.abs(point_to_great_circle(points[0].get_coords(), points[end].get_coords(), points[i].get_coords()))
-        if d > dmax:
-            index = i
-            dmax = d
-
-    if dmax > epsilon:
-        rec_results1 = douglas_peucker(points[:index + 1], epsilon)
-        rec_results2 = douglas_peucker(points[index:], epsilon)
-
-        return rec_results1[:-1] + rec_results2
-    return [points[0], points[end]]
+from classes.route import Route
+from classes.simplifier import Simplifier
+from classes.vessel_log import VesselLog
+singleton = None
 
 
 def run_dp(route: Route, params: dict) -> Route:
-    simplified_trajectory = douglas_peucker(route.trajectory, params["epsilon"])
-    return Route(simplified_trajectory)
+    global singleton
+    if singleton is None:
+        singleton = DouglasPeucker(params["epsilon"])
+    dp = singleton
+
+    for vessel_log in route.trajectory:
+        dp.append_point(vessel_log)
+        dp.simplify()
+
+    return Route(dp.trajectory)
+
+
+class DouglasPeucker(Simplifier):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["epsilon"])
+
+    @property
+    def name(self):
+        return "DP"
+
+    def __init__(self, epsilon: float):
+        super().__init__()
+        self.epsilon = epsilon
+        self.original_trajectory = []
+
+    def append_point(self, point):
+        self.original_trajectory.append(point)
+
+    def simplify(self):
+        self.trajectory = self.douglas_peucker(self.original_trajectory)
+
+    def douglas_peucker(self, trajectory: list[VesselLog]) -> list[VesselLog]:
+        '''
+        Simplifies a given set of points using the Douglas-Peucker algorithm.
+        '''
+        dmax = 0 # Maximum distance
+        index = 0 # Index of the point with maximum distance
+        end = len(trajectory) - 1 # Index of the last point
+        for i in range(1, end):
+            # Calculate the perpendicular distance from point to line segment
+            d = np.abs(
+                point_to_great_circle(
+                    trajectory[0].get_coords(),
+                    trajectory[end].get_coords(),
+                    trajectory[i].get_coords(),
+                )
+            )
+            if d > dmax: # Update maximum distance and index
+                index = i
+                dmax = d
+
+        if dmax > self.epsilon: # If maximum distance is greater than epsilon, recursively simplify
+            rec_results1 = self.douglas_peucker(trajectory[: index + 1])
+            rec_results2 = self.douglas_peucker(trajectory[index:])
+
+            return rec_results1[:-1] + rec_results2 # Combine results excluding the last point of the first half to avoid duplication
+        return [trajectory[0], trajectory[end]] # Return start and end points
