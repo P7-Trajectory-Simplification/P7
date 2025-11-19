@@ -106,8 +106,10 @@ algorithms_mappings = {
 
 
 def get_error_metrics(
-    raw_routes: list[Route], simplified_routes: list[Route]
+    raw_routes: dict[int, list[VesselLog]],
+    simplified_routes: dict[int, list[VesselLog]],
 ) -> list[float]:
+
     ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
     sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
     comp_ratio = comp_ratio_results(raw_routes, simplified_routes)
@@ -185,7 +187,7 @@ def finalize_response(
     }  # TODO add error metrics and a name field for simplifiers
 '''
 
-simplifiers = {}  # type: dict[int, list[Simplifier]]
+simplifiers = {}  # type: dict[int, dict[str, Simplifier]]
 
 simplifier_classes = {
     'DR': DeadReckoning,
@@ -205,12 +207,13 @@ def process_trajectories(routes: dict[int, list[VesselLog]], algorithm_names, pa
     for route_id, logs in routes.items():
         if route_id not in simplifiers:
             # create the necessary simplifiers for the given route and make sure the logs are recorded
-            simplifiers[route_id] = [
-                simplifier_classes[name].from_params(params) for name in algorithm_names
-            ]
+            simplifiers[route_id] = {
+                name: simplifier_classes[name].from_params(params)
+                for name in algorithm_names
+            }
             raw_routes[route_id] = []
         raw_routes[route_id] += logs
-        for simplifier in simplifiers[route_id]:
+        for simplifier in simplifiers[route_id].values():
             for log in logs:
                 simplifier.append_point(log)
                 simplifier.simplify()
@@ -267,22 +270,27 @@ def run_algorithms(
     # NOTE this is extremely temporary: We know there's only one vessel, so there will only ever be one active route.
     # Therefore we can simply attribute any trajectory from a given simplifier to that vessel.
     print('Writing response...')
-    error_metrics_placeholder = [0, 0, 0, 0, 0]
-    for simplifier_list in simplifiers.values():
-        for simplifier in simplifier_list:
+    for simplifier_dict in simplifiers.values():
+        for simplifier in simplifier_dict.values():
             if simplifier.name not in response:
                 response[simplifier.name] = []
                 # append all trajectories simplified by this algorithm to the same part of the response
             response[simplifier.name].append(
                 [(log.lat, log.lon, log.ts) for log in simplifier.trajectory]
             )
-            response[simplifier.name + '_error_metrics'] = error_metrics_placeholder
     response['raw'] = [
         # NOTE that we are using the accumulated raw routes, and not just the logs for this iteration
         [(log.lat, log.lon, log.ts) for log in logs]
         for logs in raw_routes.values()
     ]
-    for name in simplifier_classes.keys():
+    for name in algorithm_names:
+        response[name + '_error_metrics'] = get_error_metrics(
+            raw_routes,
+            {
+                route_id: simplifier_dict[name].trajectory
+                for route_id, simplifier_dict in simplifiers.items()
+            },
+        )
         if name not in response:
             response[name] = []
 

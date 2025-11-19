@@ -1,19 +1,23 @@
-from classes.route import Route
+from classes.vessel_log import VesselLog
 
-def comp_ratio_results(raw_data_routes: list[Route], simplified_routes: list[Route]) -> float:
+
+def comp_ratio_results(
+    raw_data_routes: dict[int, list[VesselLog]],
+    simplified_routes: dict[int, list[VesselLog]],
+) -> float:
     """Calculate the compression ratio between two trajectories."""
     total_raw_points = 0
     total_simplified_points = 0
 
     # Count total points in raw and simplified routes
-    for i, raw_route in enumerate(raw_data_routes):
-        simplified_route = simplified_routes[i]
-        total_raw_points += len(raw_route.trajectory)
-        total_simplified_points += len(simplified_route.trajectory)
+    for key, raw_route in raw_data_routes.items():
+        simplified_route = simplified_routes[key]
+        total_raw_points += len(raw_route)
+        total_simplified_points += len(simplified_route)
 
     if total_raw_points == 0:
         return 0.0  # Avoid division by zero
 
-    # Calculate compression ratio in percentage
-    compression_ratio = total_simplified_points / total_raw_points * 100
+    # Calculate compression ratio (not as a percentage!)
+    compression_ratio = total_simplified_points / total_raw_points
     return round(compression_ratio, 4)
