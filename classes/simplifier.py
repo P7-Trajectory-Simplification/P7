@@ -12,6 +12,10 @@ class Simplifier(ABC):  # "ABC" means it's an abstract class
         Must be overridden by derived classes."""
         raise NotImplementedError
 
+    def append_point(self, point):
+        """Append a point to the trajectory."""
+        self.trajectory.append(point)
+
     @property  # this is a property so we don't waste memory by storing a name in every object
     def name(self):
         """Return the name of the algorithm the simplifier implements."""

@@ -11,8 +11,9 @@ def run_uniform_sampling(route: Route, params: dict) -> Route:
         singleton = UniformSampling(params["sampling_rate"])
     uniform_sampling = singleton
 
-    uniform_sampling.trajectory = route.trajectory
-    uniform_sampling.simplify()
+    for vessel_log in route.trajectory:
+        uniform_sampling.append_point(vessel_log)
+        uniform_sampling.simplify()
 
     return Route(uniform_sampling.trajectory)
 
@@ -29,13 +30,18 @@ class UniformSampling(Simplifier):
     def __init__(self, sampling_rate: int = 10):
         super().__init__()
         self.sampling_rate = sampling_rate
-        if self.sampling_rate <= 0:
-            raise ValueError("Frequency must be a positive number.")
+        self.counter = 0
+        if self.sampling_rate < 3: # To keep the first, last and at least one middle point to remove
+            raise ValueError("Frequency must be a positive number and bigger than 3.")
+
+    def append_point(self, point):
+        self.trajectory.append(point)
+        self.counter += 1
 
     def simplify(self):
         self.trajectory = self.uniform_sampling(self.trajectory)
 
-    def uniform_sampling(self, points: list[VesselLog]) -> list[VesselLog]:
+    def uniform_sampling(self, trajectory: list[VesselLog]) -> list[VesselLog]:
         '''
         Simplifies a given set of points using uniform sampling.
 
@@ -47,12 +53,7 @@ class UniformSampling(Simplifier):
         ---------
         list of VesselLog: Simplified list of points.
         '''
-        sampled_points = []
-        for i in range(0, len(points), self.sampling_rate):
-            sampled_points.append(points[i])
-
-        # Ensure the last point is included
-        if points[-1] not in sampled_points:
-            sampled_points.append(points[-1])
-
-        return sampled_points
+        if self.counter == self.sampling_rate: # If counter reaches sampling rate
+            self.counter = 0 # Reset counter
+            trajectory.pop(-2) # Remove the second last point
+        return trajectory # Return the (maybe) simplified trajectory
