@@ -53,7 +53,7 @@ def get_vessel_logs(imo: int, start_ts: datetime, end_ts: datetime) -> list[Vess
     end_time = end_ts.strftime('%Y-%m-%d %H:%M:%S')
     conn = open_connection()
     statement = text(
-        'SELECT imo, lat, lon, ts FROM vessel_logs WHERE imo = :imo AND ts >= :start_ts AND ts <= :end_ts ORDER BY ts;'
+        'SELECT imo, lat, lon, ts, id FROM vessel_logs WHERE imo = :imo AND ts >= :start_ts AND ts <= :end_ts ORDER BY ts;'
     )
     result = conn.execute(
         statement, {'imo': imo, 'start_ts': start_time, 'end_ts': end_time}
@@ -62,7 +62,7 @@ def get_vessel_logs(imo: int, start_ts: datetime, end_ts: datetime) -> list[Vess
 
 
 def hydrate_vessel_logs(raw_logs: Sequence[Row]) -> list[VesselLog]:
-    return [VesselLog(lat, lon, ts, imo) for imo, lat, lon, ts in raw_logs]
+    return [VesselLog(lat, lon, ts, imo, id) for imo, lat, lon, ts, id in raw_logs]
 
 
 def hydrate_vessels(raw_vessel: Sequence[Row]) -> list[Vessel]:

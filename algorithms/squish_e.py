@@ -1,127 +1,102 @@
-from algorithms.great_circle_math import great_circle_distance, EARTH_RADIUS_METERS
+from algorithms.great_circle_math import great_circle_distance
 from classes.route import Route
-from classes.squish_point import SquishPoint
+from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
 from classes.priority_queue import PriorityQueue
 import numpy as np
 
-
-def adjust_priority(point_id: int, point: VesselLog, trajectory: list[VesselLog], heap: PriorityQueue, pred: dict, succ: dict, max_neighbor: dict):
-    """
-    Called when inserting and removing points and updates the priority (sed) of all of the neighboring points
-
-    Parameters
-    ---------
-    point_id: int
-        The ID of the point that has to be updated
-    point: VesselLog
-        The lat lon and time of the point
-    trajectory: list[VesselLog]
-        A list of all the raw data points that needs to be compressed
-    heap: PriorityQueue
-        A priority queue which sorts the items based on priority (sed)
-    pred: dict
-        Map storing, for each point ∈ heap, Points closest predecessor among the points in heap
-    succ: dict
-        Map storing, for each point ∈ heap, Points closest successor among the points in heap
-    max_neighbor: dict
-        Map storing, for each point ∈ heap, the maximum of the priorities that the neighboring    
-        points had when they were removed from heap
-    """
-
-    if point_id in pred and point_id in succ: #Check if first or last point
-        before = trajectory[pred[point_id]]
-        after = trajectory[succ[point_id]]
-        if point.ts - before.ts < after.ts - point.ts: #Find nearest point in time to compute sed (This is not entirely correct squish-e)
-            priority = max_neighbor[point_id] + np.abs(great_circle_distance(point.get_coords(), before.get_coords()))
-        else:
-            priority = max_neighbor[point_id] + np.abs(great_circle_distance(point.get_coords(), after.get_coords()))
-        heap.insert(point_id, point, priority)
-        
-def reduce(trajectory: list[VesselLog], heap: PriorityQueue, pred: dict, succ: dict, max_neighbor: dict):
-    """
-    Describes how the heap is reduced when the buffer size is full
-
-    Parameters
-    -----------
-    trajectory: list[VesselLog]
-        A list of all the raw data points that needs to be compressed
-    heap: PriorityQueue
-        A priority queue which sorts the items based on priority (sed)
-    pred: dict
-        Map storing, for each point ∈ heap, Points closest predecessor among the points in heap
-    succ: dict
-        Map storing, for each point ∈ heap, Points closest successor among the points in heap
-    max_neighbor: dict
-        Map storing, for each point ∈ heap, the maximum of the priorities that the neighboring    
-        points had when they were removed from heap
-    """
-
-    id, _, priority = heap.remove_min()
-
-    max_neighbor[succ[id]] = max(priority, max_neighbor[succ[id]])
-    max_neighbor[pred[id]] = max(priority, max_neighbor[pred[id]])
-
-    succ[pred[id]] = succ[id] #register succ[Pj] as the closest successor of pred[Pj]
-    pred[succ[id]] = pred[id] #register pred[Pj] as the closest predecessor of succ[Pj]
-
-    #Adjust neighboring points
-    adjust_priority(pred[id], trajectory[pred[id]], trajectory, heap, pred, succ, max_neighbor)
-    adjust_priority(succ[id], trajectory[succ[id]], trajectory, heap, pred, succ, max_neighbor)
-
-    #Garbage Collection
-    del pred[id]; del succ[id]; del max_neighbor[id] 
-
-def squish_e (trajectory: list[VesselLog], buff: list[VesselLog], low_comp_rate: float, up_bound_sed: float, buff_size: int = 4):
-    """
-    Implementation of the SQUISH-E algorithm, which is a trajectory simplification algorithm that works like SQUISH
-    It implements an adaptable buffer and ensures all the points are at least of a certain importance
-
-    Parameters
-    --------------
-    trajectory: list[VesselLog]
-        A list of all the raw data points that needs to be compressed
-    buff: list[VesselLog]
-        The final storage list for the finished simplified trajectory
-    low_comp_rate: float
-        The lower bound compression rate, should never be 0. 
-        If = 1, SQUISH-E only simplifies based on SED error
-    up_bound_sed: float
-        The upper bound SED error, if = 0, SQUISH-E only cares about compression rate.
-    """
-    heap = PriorityQueue()
-    pred = {}
-    succ = {}
-    max_neighbor = {}
-
-    for i in range(0, len(trajectory)):
-
-        if i/low_comp_rate >= buff_size: #increase buff_size based on lower bound compression rate
-            buff_size += 1
-        
-        heap.insert(i, trajectory[i], float('inf')) #Insert point with priority = inf
-        max_neighbor[i] = 0
-
-        if i > 0: #After the first point
-            succ[i - 1] = i
-            pred[i] = i - 1
-            adjust_priority(i-1, trajectory[i-1], trajectory, heap, pred, succ, max_neighbor) #update priority
-
-        if len(heap.heap) == buff_size: #Reduce buffer when full
-            reduce(trajectory, heap, pred, succ, max_neighbor)
-    
-    #After finishing looping through, keep reducing heap until all points satisfies upper bound on SED
-    while heap.min_priority() <= up_bound_sed:
-        reduce(trajectory, heap, pred, succ, max_neighbor)
-    
-    #The first point is the one with 0 predecessors
-    start = next((pid for pid in pred if pred[pid] is None), 0)
-    curr = start
-    while curr is not None: #Add each point in order
-        buff.append(trajectory[curr])
-        curr = succ.get(curr)
+singleton = None
 
 
 def run_squish_e(route: Route, params: dict) -> Route:
-    squish_e(route.trajectory, route.squish_e_buff, params["low_comp"], params["max_sed"], 4)
-    return Route(route.squish_e_buff)
+    global singleton
+    if singleton is None:
+        singleton = SquishE(params["low_comp"], params["max_sed"])
+    squish_e = singleton
+
+    for vessel_log in route.trajectory:
+        squish_e.append_point(vessel_log)
+        squish_e.simplify()
+    return Route(squish_e.trajectory)
+
+
+class SquishE(Simplifier):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["low_comp"], params["max_sed"])
+
+    @property
+    def name(self):
+        return "SQUISH_E"
+
+    def __init__(
+        self, lower_compression_rate: float = 2.0, upper_bound_sed: float = 100.0
+    ):
+        super().__init__()
+        self.lower_compression_rate = lower_compression_rate
+        self.upper_bound_sed = upper_bound_sed
+        self.buffer_size = 4
+        self.buffer = PriorityQueue() # Buffer is a priority queue
+        self.max_neighbor: dict[int, float] = {} # Maps point id to max sed of its neighbors
+
+    def simplify(self):
+        self.trajectory = self.squish_e(self.trajectory)
+
+    def reduce(self):
+        """
+        Describes how the heap is reduced when the buffer size is full
+        """
+        point, priority = self.buffer.remove_min() # Remove point with the lowest priority
+        if point.id in self.buffer.pred or point.id in self.buffer.succ: # Not the first or last point
+            # Update max_neighbor for neighboring points
+            self.max_neighbor[self.buffer.succ[point.id].id] = max(priority, self.max_neighbor[self.buffer.succ[point.id].id])
+            self.max_neighbor[self.buffer.pred[point.id].id] = max(priority, self.max_neighbor[self.buffer.pred[point.id].id])
+
+            # Update priority for neighboring points
+            self.adjust_priority(self.buffer.pred[point.id])
+            self.adjust_priority(self.buffer.succ[point.id])
+
+        # Garbage Collection
+        del self.max_neighbor[point.id]
+
+    def adjust_priority(self, point: VesselLog):
+        """
+        Called when inserting and removing points and updates the priority (sed) of all the neighboring points
+        """
+        if point.id in self.buffer.pred and point.id in self.buffer.succ:  # Check if first or last point
+            predecessor = self.buffer.pred[point.id]
+            successor = self.buffer.succ[point.id]
+            if predecessor is not None and successor is not None:
+                if point.ts - predecessor.ts < successor.ts - point.ts:  # Find nearest point in time to compute sed (This is not entirely correct squish-e)
+                    # Closer to predecessor
+                    priority = self.max_neighbor[point.id] + np.abs(
+                        great_circle_distance(point.get_coords(), predecessor.get_coords()))
+                else:
+                    # Closer to successor
+                    priority = self.max_neighbor[point.id] + np.abs(
+                        great_circle_distance(point.get_coords(), successor.get_coords()))
+                self.buffer.insert(point, priority) # Update priority in the priority queue
+
+    def squish_e(self, trajectory: list[VesselLog]) -> list[VesselLog]:
+        """
+        Implementation of the SQUISH-E algorithm, which is a trajectory simplification algorithm that works like SQUISH
+        It implements an adaptable buffer and ensures all the points are at least of a certain importance
+        """
+        if self.buffer.size() / self.lower_compression_rate >= self.buffer_size:  # Increase buff_size based on lower bound compression rate
+            self.buffer_size += 1
+
+        new_point = trajectory[-1] # Get the newest point
+        self.buffer.insert(new_point)  # Insert point with priority = inf
+        self.max_neighbor[new_point.id] = 0 # Initialize max_neighbor for the new point
+        if self.buffer.size() > 2:  # After the first point
+            predecessor = trajectory[-2] # Get the predecessor point
+            self.adjust_priority(predecessor)  # Update priority
+
+        if self.buffer.size() == self.buffer_size + 1:  # Reduce buffer when full
+            self.reduce()
+
+        # After finishing looping through, keep reducing heap until all points satisfies upper bound on SED
+        while self.buffer.min_priority() <= self.upper_bound_sed:
+            self.reduce()
+
+        return self.buffer.to_list() # Return the points in the buffer as a list

@@ -1,49 +1,68 @@
-from algorithms.great_circle_math import (
-    point_to_great_circle,
-    great_circle_distance,
-    EARTH_RADIUS_METERS,
-)
+from algorithms.great_circle_math import great_circle_distance
 from classes.route import Route
-from classes.squish_point import SquishPoint
+from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
+from classes.priority_queue import PriorityQueue
 import numpy as np
 
-
-def update_sed(index: int, buff: list[SquishPoint]):
-    a = buff[index - 1].vessel_log
-    b = buff[index + 1].vessel_log
-    target = buff[index].vessel_log
-    
-    if target.ts - a.ts < b.ts - target.ts:
-        # Closer to a
-        buff[index].sed = np.abs(great_circle_distance(a.get_coords(), target.get_coords()))
-    else:
-        # Closer to b
-        buff[index].sed = np.abs(great_circle_distance(b.get_coords(), target.get_coords()))
-
-
-def find_min_sed(buff: list[SquishPoint]) -> int:
-    if len(buff) <= 2:
-        return 0
-    return min(range(1, len(buff) - 1), key=lambda i: buff[i].sed)
-
-
-def squish(trajectory: list[VesselLog], buff: list[SquishPoint], buff_size: int = 100):
-    for i in range(0, len(trajectory)):
-        buff.append(SquishPoint(trajectory[i], float('inf')))
-        buff_length = len(buff)
-        if buff_length >= 3:
-            update_sed(buff_length - 2, buff)
-        if buff_length == buff_size:
-            index = find_min_sed(buff)
-            del buff[index]
-            buff_length = len(buff)
-            if 1 < index:
-                update_sed(index - 1, buff)
-            if index < buff_length - 1:
-                update_sed(index, buff)
+singleton = None
 
 
 def run_squish(route: Route, params: dict) -> Route:
-    squish(route.trajectory, route.squish_buff, params["buff_size"])
-    return Route(route.extract_squish_buffer())
+    global singleton
+    if singleton is None:
+        singleton = Squish(params["buff_size"])
+    squish = singleton
+
+    for vessel_log in route.trajectory:
+        squish.append_point(vessel_log)
+        squish.simplify()
+    return Route(squish.trajectory)
+
+
+class Squish(Simplifier):
+    @classmethod
+    def from_params(cls, params):
+        return cls(params["buff_size"])
+
+    @property
+    def name(self):
+        return "SQUISH"
+
+    def __init__(self, buffer_size: int = 100):
+        super().__init__()
+        self.buffer_size = buffer_size
+        self.buffer = PriorityQueue() # Buffer is a priority queue
+
+    def simplify(self):
+        self.trajectory = self.squish(self.trajectory)
+
+    def update_sed(self, target: VesselLog):
+        if target.id in self.buffer.pred and target.id in self.buffer.succ: # Not the first or last point
+            predecessor = self.buffer.pred[target.id]
+            successor = self.buffer.succ[target.id]
+
+            if target.ts - predecessor.ts < successor.ts - target.ts:
+                # Closer to predecessor
+                sed = np.abs(great_circle_distance(predecessor.get_coords(), target.get_coords()))
+            else:
+                # Closer to successor
+                sed = np.abs(great_circle_distance(successor.get_coords(), target.get_coords()))
+            self.buffer.insert(target, sed) # Update the SED value in the priority queue
+
+    def squish(self, trajectory: list[VesselLog]):
+        new_point = trajectory[-1] # Get the newest point
+        self.buffer.insert(new_point) # Insert it into the buffer with infinite SED
+
+        if self.buffer.size() > 2: # After the second point
+            predecessor = trajectory[-2]
+            self.update_sed(predecessor) # Update SED of predecessor
+
+        if self.buffer.size() == self.buffer_size + 1: # Buffer is full
+            point, _ = self.buffer.remove_min() # Remove point with the smallest SED
+
+            if point.id in self.buffer.pred or point.id in self.buffer.succ:
+                self.update_sed(self.buffer.pred[point.id]) # Update SED of predecessor
+                self.update_sed(self.buffer.succ[point.id]) # Update SED of successor
+
+        return self.buffer.to_list() # Return the points in the buffer as a list

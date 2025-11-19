@@ -248,6 +248,56 @@ input[type=number]::-webkit-inner-spin-button {
     border-bottom: none;
 }
 
+#colors {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#colors .color_box{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#colors .color_box div{
+    width: 20px;
+    height: 20px;
+    border: 1px solid black;
+    border-radius: 3px;
+}
+
+#colors .color_box div.blue{
+    background-color: blue;
+}
+
+#colors .color_box div.red{
+    background-color: red;
+}
+
+#colors .color_box div.yellow{
+    background-color: yellow;
+}
+
+#colors .color_box div.green{
+    background-color: green;
+}
+
+#colors .color_box div.cyan{
+    background-color: cyan;
+}
+
+#colors .color_box div.orange{
+    background-color: orange;
+}
+
+#colors .color_box div.magenta{
+    background-color: magenta;
+}
+
+
+
 
 #map {
     border: 2px solid black;
