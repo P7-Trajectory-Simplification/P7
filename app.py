@@ -104,7 +104,10 @@ algorithms_mappings = {
     'SQUISH_RECKONING': run_sr,
 }
 
-def get_error_metrics(raw_routes: list[Route], simplified_routes: list[Route]) -> list[float]:
+
+def get_error_metrics(
+    raw_routes: list[Route], simplified_routes: list[Route]
+) -> list[float]:
     ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
     sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
     comp_ratio = comp_ratio_results(raw_routes, simplified_routes)
@@ -140,12 +143,12 @@ def get_algorithms():
     return run_algorithms(algorithms, start_time_dt, end_time_dt, params_req, vessel)
 
 
+# SECTION new run_algorithms stuff
 # the last end time we received (beginning at epoch just to have something)
 # we will use this value as the start_time when retrieving from the database
 # unless the start_time received from the website changes, at which point we will use that instead
 last_end_time = datetime.fromtimestamp(0)
 
-# TODO ensure the database does not fetch logs at the start time, only those between the start and end time and at the end time
 last_start_time = datetime.fromtimestamp(0)
 '''
 def prepare_processing(
@@ -182,7 +185,6 @@ def finalize_response(
     }  # TODO add error metrics and a name field for simplifiers
 '''
 
-# SECTION new run_algorithms stuff
 simplifiers = {}  # type: dict[int, list[Simplifier]]
 
 simplifier_classes = {
@@ -194,14 +196,20 @@ simplifier_classes = {
     'SQUISH_RECKONING': SquishReckoning,
 }
 
+# this will accumulate all the points in all the routes over time. For use in error metric computation.
+raw_routes = {}  # type: dict[int, list[VesselLog]]
+
 
 def process_trajectories(routes: dict[int, list[VesselLog]], algorithm_names, params):
     '''Create the necessary simplifiers according to the given params and append the given logs to them, simplifying each time.'''
     for route_id, logs in routes.items():
         if route_id not in simplifiers:
+            # create the necessary simplifiers for the given route and make sure the logs are recorded
             simplifiers[route_id] = [
                 simplifier_classes[name].from_params(params) for name in algorithm_names
             ]
+            raw_routes[route_id] = []
+        raw_routes[route_id] += logs
         for simplifier in simplifiers[route_id]:
             for log in logs:
                 simplifier.trajectory.append(log)
@@ -270,7 +278,9 @@ def run_algorithms(
             )
             response[simplifier.name + '_error_metrics'] = error_metrics_placeholder
     response['raw'] = [
-        [(log.lat, log.lon, log.ts) for log in logs] for logs in routes.values()
+        # NOTE that we are using the accumulated raw routes, and not just the logs for this iteration
+        [(log.lat, log.lon, log.ts) for log in logs]
+        for logs in raw_routes.values()
     ]
     for name in simplifier_classes.keys():
         if name not in response:
