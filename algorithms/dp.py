@@ -5,7 +5,6 @@ import numpy as np
 from classes.route import Route
 from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
-
 singleton = None
 
 
@@ -15,8 +14,9 @@ def run_dp(route: Route, params: dict) -> Route:
         singleton = DouglasPeucker(params["epsilon"])
     dp = singleton
 
-    dp.trajectory = route.trajectory
-    dp.simplify()
+    for vessel_log in route.trajectory:
+        dp.append_point(vessel_log)
+        dp.simplify()
 
     return Route(dp.trajectory)
 
@@ -33,26 +33,21 @@ class DouglasPeucker(Simplifier):
     def __init__(self, epsilon: float):
         super().__init__()
         self.epsilon = epsilon
+        self.original_trajectory = []
+
+    def append_point(self, point):
+        self.original_trajectory.append(point)
 
     def simplify(self):
-        self.trajectory = self.douglas_peucker(self.trajectory)
+        self.trajectory = self.douglas_peucker(self.original_trajectory)
 
     def douglas_peucker(self, trajectory: list[VesselLog]) -> list[VesselLog]:
         '''
         Simplifies a given set of points using the Douglas-Peucker algorithm.
-
-        Parameters
-        ---------
-        points (list of tuples): List of (lat, lon) coordinates representing the points.
-        epsilon (float): The maximum distance threshold for simplification.
-
-        Returns
-        ---------
-        list of tuples: Simplified list of points.
         '''
-        dmax = 0
-        index = 0
-        end = len(trajectory) - 1
+        dmax = 0 # Maximum distance
+        index = 0 # Index of the point with maximum distance
+        end = len(trajectory) - 1 # Index of the last point
         for i in range(1, end):
             # Calculate the perpendicular distance from point to line segment
             d = np.abs(
@@ -62,13 +57,13 @@ class DouglasPeucker(Simplifier):
                     trajectory[i].get_coords(),
                 )
             )
-            if d > dmax:
+            if d > dmax: # Update maximum distance and index
                 index = i
                 dmax = d
 
-        if dmax > self.epsilon:
+        if dmax > self.epsilon: # If maximum distance is greater than epsilon, recursively simplify
             rec_results1 = self.douglas_peucker(trajectory[: index + 1])
             rec_results2 = self.douglas_peucker(trajectory[index:])
 
-            return rec_results1[:-1] + rec_results2
-        return [trajectory[0], trajectory[end]]
+            return rec_results1[:-1] + rec_results2 # Combine results excluding the last point of the first half to avoid duplication
+        return [trajectory[0], trajectory[end]] # Return start and end points

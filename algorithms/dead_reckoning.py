@@ -18,7 +18,7 @@ def run_dr(route: Route, params: dict) -> Route:
     dr = singleton
 
     for vessel_log in route.trajectory:
-        dr.trajectory.append(vessel_log)
+        dr.append_point(vessel_log)
         dr.simplify()
 
     return Route(dr.trajectory)
@@ -43,9 +43,9 @@ class DeadReckoning(Simplifier):
         self.trajectory = self.dead_reckoning(self.trajectory)
 
     def dead_reckoning(self, trajectory: list[VesselLog]) -> list[VesselLog]:
-        if len(trajectory) < 2:
+        if len(trajectory) < 2: # Need at least two points to make a prediction
             return trajectory
-        elif len(trajectory) == 2:
+        elif len(trajectory) == 2: # Initialize prediction points
             self.prediction_startpoint = trajectory[-2]
             self.prediction_endpoint = trajectory[-1]
             return trajectory

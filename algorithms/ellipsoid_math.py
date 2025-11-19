@@ -1,8 +1,5 @@
-
 import numpy as np
 from geographiclib.geodesic import Geodesic
-#TODO: Maybe use this instead? from geokernels.geodesics import geodesic_vincenty, supports radians and is MUCH faster: https://pypi.org/project/geodistpy/
-
 # we use a model of the Earth as defined by WGS84: Earth is an ellipsoid of rotation
 # with a semi-major axis of 6378137.0 m and a semi-minor axis of approximately 6356752.314245 meters
 geodesic = Geodesic.WGS84

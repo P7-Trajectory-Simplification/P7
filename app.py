@@ -212,7 +212,7 @@ def process_trajectories(routes: dict[int, list[VesselLog]], algorithm_names, pa
         raw_routes[route_id] += logs
         for simplifier in simplifiers[route_id]:
             for log in logs:
-                simplifier.trajectory.append(log)
+                simplifier.append_point(log)
                 simplifier.simplify()
 
 
