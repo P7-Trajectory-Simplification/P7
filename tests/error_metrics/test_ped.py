@@ -1,29 +1,13 @@
 import unittest
 import numpy as np
 from datetime import datetime, timedelta
+from tests.test_mock_vessel_logs import mock_vessel_logs
 
 from classes.vessel_log import VesselLog
 from error_metrics.ped import (
     find_nearest_simplified_idx_vectorized, 
     ped_single_route_vectorized, 
     ped_results,)
-
-# Mock data for testing
-def generate_mock_logs(n, start_lat=50.0, start_lon=10.0):
-    logs = []
-    start = datetime(2024, 1, 1, 0, 0, 0)
-    for i in range(n):
-        logs.append(
-            VesselLog(
-                ts=start + timedelta(seconds=i),
-                lon=start_lon + i * 0.01,
-                lat=start_lat + i * 0.01,
-                imo=1,
-                id=i,
-            )
-        )
-    return logs
-
 
 class PedTest(unittest.TestCase):
     def test_find_nearest_basic(self):
@@ -54,8 +38,8 @@ class PedTest(unittest.TestCase):
         self.assertEqual(count, 0, "Empty input should result in count 0.")
 
     def test_ped_single_one_simplified_point(self):
-        raw = generate_mock_logs(5)
-        simp = [raw[0]]  # only first point
+        raw = mock_vessel_logs
+        simp = [mock_vessel_logs[0]]  # only first point
 
         avg, maxd, count = ped_single_route_vectorized(raw, simp)
 
@@ -65,8 +49,8 @@ class PedTest(unittest.TestCase):
         self.assertGreaterEqual(maxd, avg, "Max PED should be >= average PED.")
 
     def test_ped_single_normal(self):
-        raw = generate_mock_logs(10)
-        simp = [raw[0], raw[-1]]
+        raw = mock_vessel_logs
+        simp = [mock_vessel_logs[0], mock_vessel_logs[-1]]
 
         avg, maxd, count = ped_single_route_vectorized(raw, simp)
 
@@ -81,8 +65,8 @@ class PedTest(unittest.TestCase):
         self.assertEqual(maxd, 0.0, "Empty route data should produce max=0.")
 
     def test_ped_results_single_route(self):
-        raw = generate_mock_logs(6)
-        simp = [raw[0], raw[-1]]
+        raw = mock_vessel_logs
+        simp = [mock_vessel_logs[0], mock_vessel_logs[-1]]
 
         avg, maxd = ped_results(
             {1: raw},
@@ -94,8 +78,8 @@ class PedTest(unittest.TestCase):
 
     def test_ped_results_multiple_routes(self):
         raw_routes = {
-            1: generate_mock_logs(8, 50, 10),
-            2: generate_mock_logs(8, 60, 20),
+            1: mock_vessel_logs,
+            2: mock_vessel_logs,
         }
         simplified_routes = {
             1: [raw_routes[1][0], raw_routes[1][-1]],
