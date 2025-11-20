@@ -15,7 +15,7 @@ def generate_mock_logs(n, start_lat=50.0, start_lon=10.0):
     for i in range(n):
         logs.append(
             VesselLog(
-                ts=start + timedelta(seconds=i),  # REAL datetime ✔
+                ts=start + timedelta(seconds=i),
                 lon=start_lon + i * 0.01,
                 lat=start_lat + i * 0.01,
                 imo=1,
@@ -85,8 +85,8 @@ class PedTest(unittest.TestCase):
         simp = [raw[0], raw[-1]]
 
         avg, maxd = ped_results(
-            {1: raw},       # must be dict
-            {1: simp}       # must be dict
+            {1: raw},
+            {1: simp}
         )
 
         self.assertGreaterEqual(avg, 0)
