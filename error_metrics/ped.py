@@ -14,7 +14,6 @@ def find_nearest_simplified_idx_vectorized(
         left_idx < right_idx
         both in valid ranges
     """
-    #n_simp = len(simp_times)
 
     # For each raw timestamp find the index where it would be inserted in the simplified timestamps
     idx = np.searchsorted(simp_times, raw_times, side="left")
@@ -106,12 +105,13 @@ def ped_results(
         tuple of floats: The average PED between the two trajectories and the max distance.
     '''
 
-    # Calculate PED for each (route, simplified route) pair
+    # Calculate PED for each (raw route, simplified route) pair
     # NOTE that raw_data_routes and simplified_routes will always have the same keys
     results = []
-    for k in raw_data_routes:
-        raw_route = raw_data_routes[k]
-        simp_route = simplified_routes.get(k, [])
+    for key in raw_data_routes:
+        raw_route = raw_data_routes[key]
+        # If simplified route is missing, use empty list
+        simp_route = simplified_routes.get(key, [])
 
         avg_d, max_d, count = ped_single_route_vectorized(raw_route, simp_route)
 
