@@ -1,9 +1,7 @@
 import unittest
 import numpy as np
-from datetime import datetime, timedelta
-from tests.test_mock_vessel_logs import mock_vessel_logs
+from tests.test_mock_vessel_logs import mock_vessel_logs, mock_vessel_logs_second_route
 
-from classes.vessel_log import VesselLog
 from error_metrics.sed import (
     interpolate_simplified_points_vectorized,
     slerp,
@@ -92,7 +90,7 @@ class SedTest(unittest.TestCase):
 
     def test_sed_results_multiple_routes(self):
         """Tests SED results calculation on multiple routes."""
-        raw_routes = {1: mock_vessel_logs, 2: mock_vessel_logs}
+        raw_routes = {1: mock_vessel_logs, 2: mock_vessel_logs_second_route}
         simp_routes = {
             1: [raw_routes[1][0], raw_routes[1][-1]],
             2: [raw_routes[2][0], raw_routes[2][-1]],

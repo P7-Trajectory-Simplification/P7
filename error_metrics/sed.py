@@ -59,8 +59,20 @@ def interpolate_simplified_points_vectorized(raw_times, simp_times, simp_latlon)
     t0 = simp_times[idx]
     t1 = simp_times[idx + 1]
 
-    # Interpolation factor α
-    alpha = (raw_times - t0) / (t1 - t0)
+    # Compute the time diffrence between segment endpoints
+    dt = t1 - t0
+
+    # Boolean mask for zero dt (duplicate timestamps in simplified trajectory)
+    zero_dt = dt == 0
+
+    # Creating alpha array with same shape as dt, initialized to zeros
+    alpha = np.zeros_like(dt, dtype=float)
+
+    # Compute alpha only where dt != 0
+    valid = ~zero_dt
+    alpha[valid] = (raw_times[valid] - t0[valid]) / dt[valid]
+
+    # Clip to [0,1]
     alpha = np.clip(alpha, 0.0, 1.0)
 
     # Allocate result
@@ -122,6 +134,9 @@ def sed_results(
         sed_single_route_vectorized(raw_data_routes[k], simplified_routes[k])
         for k in raw_data_routes
     ]
+    # If no results were computed, return zeros, happens if no matching routes or all empty
+    if not results:
+        return 0.0, 0.0
 
     # Calculate average and max from results
     total_distance = sum(avg * count for avg, _, count in results)

@@ -117,7 +117,8 @@ def ped_results(
 
         if count > 0:  # ignore empty/invalid routes
             results.append((avg_d, max_d, count))
-
+            
+    # If no results were computed, return zeros, happens if no matching routes or all empty
     if not results:
         return 0.0, 0.0
     

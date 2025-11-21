@@ -1,15 +1,14 @@
 import unittest
 import numpy as np
-from datetime import datetime, timedelta
-from tests.test_mock_vessel_logs import mock_vessel_logs
+from tests.test_mock_vessel_logs import mock_vessel_logs, mock_vessel_logs_second_route
 
-from classes.vessel_log import VesselLog
 from error_metrics.ped import (
     find_nearest_simplified_idx_vectorized, 
     ped_single_route_vectorized, 
     ped_results,)
 
 class PedTest(unittest.TestCase):
+    # Tests: find_nearest_simplified_idx_vectorized
     def test_find_nearest_basic(self):
         raw = np.array([10, 20, 30])
         simp = np.array([0, 15, 25, 35])
@@ -79,7 +78,7 @@ class PedTest(unittest.TestCase):
     def test_ped_results_multiple_routes(self):
         raw_routes = {
             1: mock_vessel_logs,
-            2: mock_vessel_logs,
+            2: mock_vessel_logs_second_route,
         }
         simplified_routes = {
             1: [raw_routes[1][0], raw_routes[1][-1]],
