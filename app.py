@@ -177,5 +177,26 @@ def get_algorithms():
         params_req,
         """vessel.name""",  # TODO print vessel names elsewhere, like when starting an experiment
     )
-
     return run_algorithms(algorithms, start_time_dt, end_time_dt, params_req, imos)
+
+
+'''def run_algorithms(
+    algorithms: list,
+    start_time: datetime,
+    end_time: datetime,
+    params: dict,
+    vessel: Vessel,
+):
+    """Run the selected algorithms and return the resulting trajectories."""
+    vessel_logs = get_data_from_cache(vessel, start_time, end_time)
+    routes = assign_routes(vessel_logs)
+    response = {}
+    multiprocess_data = build_multi_process_data(algorithms, routes, algorithms, params)
+    # Use ProcessPoolExecutor to run algorithms in parallel
+    with ProcessPoolExecutor() as executor:
+        results = list(executor.map(multi_process_helper, multiprocess_data))
+        for alg, alg_route, error_metrics in results:
+            response[alg] = alg_route
+            response[alg + '_error_metrics'] = error_metrics
+    response['raw'] = routes_to_list(routes)
+    return response'''
