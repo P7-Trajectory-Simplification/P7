@@ -261,7 +261,6 @@ def run_algorithms(
         last_start_time = start_time
     last_end_time = end_time
     print('Fetching logs...')
-    # vessel_logs = get_data_from_cache(vessel, start_time, end_time)
     vessel_logs = get_vessel_logs(imos, start_time, end_time)
     print('Assigning routes...')
     routes = assign_routes(vessel_logs)
