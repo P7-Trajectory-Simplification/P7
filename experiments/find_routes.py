@@ -51,6 +51,22 @@ def save_routes_to_json(routes: list[dict]):
             indent=4,
         )
 
+def load_routes_from_json() -> list[dict]:
+    import json
+    from dateutil import parser
+
+    with open('isolated_routes.json', 'r') as json_file:
+        data = json.load(json_file)
+    return [
+        {
+            'imo': route['imo'],
+            'log_count': route['log_count'],
+            'start_ts': parser.isoparse(route['start_ts']),
+            'end_ts': parser.isoparse(route['end_ts']),
+        }
+        for route in data
+    ]
+
 if __name__ == '__main__':
     top_n = 200
     #results = find_vessels_with_most_vessel_logs(top_n)

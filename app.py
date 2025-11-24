@@ -16,11 +16,11 @@ from classes.vessel_log import VesselLog
 from data.database import get_all_vessels, get_vessel_logs
 from classes.vessel import Vessel
 from datetime import datetime
-from data.vessel_cache import get_data_from_cache
 from typing import Callable
 from error_metrics.comp_ratio import comp_ratio_results
 from error_metrics.sed import sed_results
 from error_metrics.ped import ped_results
+from algorithms.great_circle_math import great_circle_distance, get_final_bearing, predict_sphere_movement, point_to_great_circle
 
 app = Flask(__name__)
 
@@ -147,7 +147,19 @@ def get_algorithms():
         """vessel.name""",  # TODO print vessel names elsewhere, like when starting an experiment
     )
 
-    return run_algorithms(algorithms, start_time_dt, end_time_dt, params_req, imos)
+    return run_algorithms(
+        algorithms,
+        start_time_dt,
+        end_time_dt,
+        params_req,
+        imos,
+        {
+            "point_to_point_distance": great_circle_distance,
+            "get_final_bearing": get_final_bearing,
+            "predict_sphere_movement": predict_sphere_movement,
+            "point_to_line_distance": point_to_great_circle
+        }
+    )
 
 
 # SECTION new run_algorithms stuff
@@ -207,13 +219,16 @@ simplifier_classes = {
 raw_routes = {}  # type: dict[int, list[VesselLog]]
 
 
-def process_trajectories(routes: dict[int, list[VesselLog]], algorithm_names, params):
+def process_trajectories(routes: dict[int, list[VesselLog]], algorithm_names, params, math: dict):
     '''Create the necessary simplifiers according to the given params and append the given logs to them, simplifying each time.'''
     for route_id, logs in routes.items():
         if route_id not in simplifiers:
             # create the necessary simplifiers for the given route and make sure the logs are recorded
             simplifiers[route_id] = {
-                name: simplifier_classes[name].from_params(params)
+                name: simplifier_classes[name].from_params(
+                    params,
+                    math
+                )
                 for name in algorithm_names
             }
             raw_routes[route_id] = []
@@ -246,6 +261,7 @@ def run_algorithms(
     end_time: datetime,
     params: dict,
     imos: list[int],
+    math: dict
 ):
     '''Run the selected algorithms and return the resulting trajectories.'''
     global last_start_time
@@ -269,7 +285,7 @@ def run_algorithms(
     # NOTE no multiprocessing for now
     # REVIEW how many calls to simplify() are needed to justify multiprocessing?
     print('Processing...')
-    process_trajectories(routes, algorithm_names, params)
+    process_trajectories(routes, algorithm_names, params, math)
 
     # SECTION
     # NOTE this is extremely temporary: We know there's only one vessel, so there will only ever be one active route.

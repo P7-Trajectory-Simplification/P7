@@ -1,4 +1,3 @@
-from algorithms.great_circle_math import great_circle_distance
 from classes.route import Route
 from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
@@ -22,17 +21,24 @@ def run_squish_e(route: Route, params: dict) -> Route:
 
 class SquishE(Simplifier):
     @classmethod
-    def from_params(cls, params):
-        return cls(params["low_comp"], params["max_sed"])
+    def from_params(cls, params, math):
+        return cls(
+            params["low_comp"],
+            params["max_sed"],
+            math["point_to_point_distance"]
+        )
 
     @property
     def name(self):
         return "SQUISH_E"
 
     def __init__(
-        self, lower_compression_rate: float = 2.0, upper_bound_sed: float = 100.0
+        self,
+        lower_compression_rate: float = 2.0,
+        upper_bound_sed: float = 100.0,
+        point_to_point_distance=None
     ):
-        super().__init__()
+        super().__init__(point_to_point_distance=point_to_point_distance)
         self.lower_compression_rate = lower_compression_rate
         self.upper_bound_sed = upper_bound_sed
         self.buffer_size = 4
@@ -70,11 +76,11 @@ class SquishE(Simplifier):
                 if point.ts - predecessor.ts < successor.ts - point.ts:  # Find nearest point in time to compute sed (This is not entirely correct squish-e)
                     # Closer to predecessor
                     priority = self.max_neighbor[point.id] + np.abs(
-                        great_circle_distance(point.get_coords(), predecessor.get_coords()))
+                        self.point_to_point_distance(point.get_coords(), predecessor.get_coords()))
                 else:
                     # Closer to successor
                     priority = self.max_neighbor[point.id] + np.abs(
-                        great_circle_distance(point.get_coords(), successor.get_coords()))
+                        self.point_to_point_distance(point.get_coords(), successor.get_coords()))
                 self.buffer.insert(point, priority) # Update priority in the priority queue
 
     def squish_e(self, trajectory: list[VesselLog]) -> list[VesselLog]:
