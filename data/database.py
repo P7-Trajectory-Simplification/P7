@@ -67,3 +67,5 @@ def hydrate_vessel_logs(raw_logs: Sequence[Row]) -> list[VesselLog]:
 
 def hydrate_vessels(raw_vessel: Sequence[Row]) -> list[Vessel]:
     return [Vessel(imo, name, ship_type) for imo, name, ship_type in raw_vessel]
+
+
