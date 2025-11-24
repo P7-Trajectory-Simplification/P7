@@ -13,7 +13,7 @@ from algorithms.uniform_sampling import UniformSampling, run_uniform_sampling
 from classes.route import Route
 from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
-from data.database import get_all_vessels
+from data.database import get_all_vessels, get_vessel_logs
 from classes.vessel import Vessel
 from datetime import datetime
 from data.vessel_cache import get_data_from_cache
@@ -136,13 +136,18 @@ def get_algorithms():
     start_time_dt = datetime.strptime(start_date_req, '%Y-%m-%d')
     end_time_dt = datetime.strptime(end_date_req, '%Y-%m-%d %H:%M:%S')
 
-    vessel = get_all_vessels()[125]  # Example vessel
+    imos = [get_all_vessels()[125].imo, get_all_vessels()[100].imo]
 
     print(
-        "Request for:", algorithms, start_time_dt, end_time_dt, params_req, vessel.name
+        "Request for:",
+        algorithms,
+        start_time_dt,
+        end_time_dt,
+        params_req,
+        """vessel.name""",  # TODO print vessel names elsewhere, like when starting an experiment
     )
 
-    return run_algorithms(algorithms, start_time_dt, end_time_dt, params_req, vessel)
+    return run_algorithms(algorithms, start_time_dt, end_time_dt, params_req, imos)
 
 
 # SECTION new run_algorithms stuff
@@ -240,7 +245,7 @@ def run_algorithms(
     start_time: datetime,
     end_time: datetime,
     params: dict,
-    vessel: Vessel,
+    imos: list[int],
 ):
     '''Run the selected algorithms and return the resulting trajectories.'''
     global last_start_time
@@ -256,7 +261,7 @@ def run_algorithms(
         last_start_time = start_time
     last_end_time = end_time
     print('Fetching logs...')
-    vessel_logs = get_data_from_cache(vessel, start_time, end_time)
+    vessel_logs = get_vessel_logs(imos, start_time, end_time)
     print('Assigning routes...')
     routes = assign_routes(vessel_logs)
     response = {}
@@ -291,6 +296,7 @@ def run_algorithms(
                 for route_id, simplifier_dict in simplifiers.items()
             },
         )
+    for name in simplifier_classes:
         if name not in response:
             response[name] = []
 
