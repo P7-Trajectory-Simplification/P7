@@ -31,7 +31,9 @@ class UniformSampling(Simplifier):
         super().__init__()
         self.sampling_rate = sampling_rate
         self.counter = 0
-        if self.sampling_rate < 3: # To keep the first, last and at least one middle point to remove
+        if (
+            self.sampling_rate < 3
+        ):  # To keep the first, last and at least one middle point to remove
             raise ValueError("Frequency must be a positive number and bigger than 3.")
 
     def append_point(self, point):
@@ -42,7 +44,7 @@ class UniformSampling(Simplifier):
         self.trajectory = self.uniform_sampling(self.trajectory)
 
     def uniform_sampling(self, trajectory: list[VesselLog]) -> list[VesselLog]:
-        '''
+        """
         Simplifies a given set of points using uniform sampling.
 
         Parameters
@@ -52,8 +54,9 @@ class UniformSampling(Simplifier):
         Returns
         ---------
         list of VesselLog: Simplified list of points.
-        '''
-        if self.counter == self.sampling_rate: # If counter reaches sampling rate
-            self.counter = 0 # Reset counter
-            trajectory.pop(-2) # Remove the second last point
-        return trajectory # Return the (maybe) simplified trajectory
+        """
+        if self.counter == self.sampling_rate:  # If counter reaches sampling rate
+            self.counter = 0  # Reset counter
+        elif len(self.trajectory) > 2:  # If not, and there are more than 2 points
+            trajectory.pop(-2)  # Remove the second last point
+        return trajectory  # Return the (maybe) simplified trajectory
