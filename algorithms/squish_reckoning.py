@@ -4,10 +4,10 @@ from classes.route import Route
 from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
 
-'''
+"""
 # memoization of VesselLogs' scores. Remember to delete logs that aren't in the buffer!
 scores = {}
-'''
+"""
 
 
 # singleton just for the proof of concept
@@ -28,7 +28,7 @@ def run_sr(route: Route, params: dict) -> Route:
     # proof of concept to show how the class works
     global singleton
     if singleton is None:
-        singleton = SquishReckoning(params['buff_size'])
+        singleton = SquishReckoning(params["buff_size"])
     sr = singleton
     for vessel_log in route.trajectory:
         sr.append_point(vessel_log)
@@ -54,40 +54,47 @@ class SquishReckoning(Simplifier):
         self.trajectory = self.squish_reckoning(self.trajectory)
 
     def squish_reckoning(self, trajectory: list[VesselLog]) -> list[VesselLog]:
-        new_point = trajectory[-1] # Get the newest point
-        self.buffer.insert(new_point) # Insert it into the buffer with infinite score
+        new_point = trajectory[-1]  # Get the newest point
+        self.buffer.insert(new_point)  # Insert it into the buffer with infinite score
 
-        if self.buffer.size() > 2: # After the second point
-            predecessor = trajectory[-2] # Get the predecessor point
+        if self.buffer.size() > 2:  # After the second point
+            predecessor = trajectory[-2]  # Get the predecessor point
             score = reckon(
                 self.buffer.pred[predecessor.id],
                 predecessor,
-                self.buffer.succ[predecessor.id]
-            ) # Calculate the score
-            self.buffer.insert(predecessor, score) # Update the score of the predecessor in the buffer
+                self.buffer.succ[predecessor.id],
+            )  # Calculate the score
+            self.buffer.insert(
+                predecessor, score
+            )  # Update the score of the predecessor in the buffer
 
-        if self.buffer.size() == self.buffer_size + 1: # Buffer full, need to remove one point
-            point, _ = self.buffer.remove_min() # Remove point with the lowest score
+        if (
+            self.buffer.size() == self.buffer_size + 1
+        ):  # Buffer full, need to remove one point
+            point, _ = self.buffer.remove_min()  # Remove point with the lowest score
 
-            if point.id in self.buffer.pred: # Not the first point
-                predecessor = self.buffer.pred[point.id] # Get predecessor
+            if point.id in self.buffer.pred:  # Not the first point
+                predecessor = self.buffer.pred[point.id]  # Get predecessor
                 self.buffer.insert(
                     predecessor,
                     reckon(
                         self.buffer.pred[predecessor.id],
                         predecessor,
-                        self.buffer.succ[predecessor.id]
-                    )
-                ) # Recalculate and update score of predecessor
+                        self.buffer.succ[predecessor.id],
+                    ),
+                )  # Recalculate and update score of predecessor
 
-            if point.id in self.buffer.succ: # Not the last point
-                successor = self.buffer.succ[point.id] # Get successor
+            if point.id in self.buffer.succ:  # Not the last point
+                successor = self.buffer.succ[point.id]  # Get successor
                 self.buffer.insert(
                     successor,
                     reckon(
                         self.buffer.pred[successor.id],
                         successor,
-                        self.buffer.succ[successor.id]
-                    )
-                ) # Recalculate and update score of successor
-        return self.buffer.to_list() # Return the points in the buffer as a list
+                        self.buffer.succ[successor.id],
+                    ),
+                )  # Recalculate and update score of successor
+        return self.buffer.to_list()  # Return the points in the buffer as a list
+
+    def __repr__(self):
+        return "SquishReckoning Instance with " + f"buffer_size={self.buffer_size}"

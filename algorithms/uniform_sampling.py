@@ -60,3 +60,6 @@ class UniformSampling(Simplifier):
         elif len(self.trajectory) > 2:  # If not, and there are more than 2 points
             trajectory.pop(-2)  # Remove the second last point
         return trajectory  # Return the (maybe) simplified trajectory
+
+    def __repr__(self):
+        return "UniformSampling Instance with " + f"sampling_rate={self.sampling_rate}"

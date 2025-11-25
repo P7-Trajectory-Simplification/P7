@@ -1,13 +1,13 @@
 from flask import Flask, request
 from flask import render_template
 
-from algorithms.dead_reckoning import DeadReckoning, run_dr
-from algorithms.dp import DouglasPeucker, run_dp
+from algorithms.dead_reckoning import DeadReckoning
+from algorithms.dp import DouglasPeucker
 from algorithms.isolate_routes import assign_routes
-from algorithms.squish import Squish, run_squish
-from algorithms.squish_reckoning import SquishReckoning, run_sr
-from algorithms.squish_e import SquishE, run_squish_e
-from algorithms.uniform_sampling import UniformSampling, run_uniform_sampling
+from algorithms.squish import Squish
+from algorithms.squish_reckoning import SquishReckoning
+from algorithms.squish_e import SquishE
+from algorithms.uniform_sampling import UniformSampling
 from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
 from data.database import get_all_vessels, get_vessel_logs
@@ -19,14 +19,6 @@ from error_metrics.ped import ped_results
 
 app = Flask(__name__)
 
-algorithms_mappings = {
-    "DR": run_dr,
-    "DP": run_dp,
-    "SQUISH": run_squish,
-    "SQUISH_E": run_squish_e,
-    "UNIFORM_SAMPLING": run_uniform_sampling,
-    "SQUISH_RECKONING": run_sr,
-}
 simplifier_classes = {
     "DR": DeadReckoning,
     "DP": DouglasPeucker,
@@ -61,21 +53,24 @@ def get_error_metrics(
 
 def process_trajectories(
     routes: dict[int, list[VesselLog]],
-    algorithm_names: dict[str, Simplifier],
+    algorithm_names: list[str],
     params: dict[str, int],
 ):
     """Create the necessary simplifiers according to the given params and append the given logs to them, simplifying each time."""
-    for route_id, logs in routes.items():
-        if route_id not in simplifiers:
-            # create the necessary simplifiers for the given route and make sure the logs are recorded
-            simplifiers[route_id] = {
-                name: simplifier_classes[name].from_params(params)
-                for name in algorithm_names
-            }
-            raw_routes[route_id] = []
-        raw_routes[route_id] += logs
-        for simplifier in simplifiers[route_id].values():
-            for log in logs:
+    print("This is the routes " + str(routes.keys()))
+    print("This is the algorithm names " + str(algorithm_names))
+    for id in routes.keys():
+        if id not in raw_routes:
+            raw_routes[id] = []
+
+    for route_id, route_trajectory in routes.items():
+        raw_routes[route_id] += route_trajectory
+
+    for key in raw_routes.keys():
+        for name in algorithm_names:
+            simplifiers[key] = {name: simplifier_classes[name].from_params(params)}
+        for simplifier in simplifiers[key].values():
+            for log in raw_routes[key]:
                 simplifier.append_point(log)
                 simplifier.simplify()
 
@@ -149,7 +144,7 @@ def run_algorithms(
 
 @app.route("/")
 def index():
-    return render_template("index.html.jinja", algorithms=algorithms_mappings.keys())
+    return render_template("index.html.jinja", algorithms=simplifier_classes.keys())
 
 
 @app.route("/algorithm", methods=["POST"])
