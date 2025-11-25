@@ -57,8 +57,6 @@ def process_trajectories(
     params: dict[str, int],
 ):
     """Create the necessary simplifiers according to the given params and append the given logs to them, simplifying each time."""
-    print("This is the routes " + str(routes.keys()))
-    print("This is the algorithm names " + str(algorithm_names))
     for id in routes.keys():
         if id not in raw_routes:
             raw_routes[id] = []
@@ -67,8 +65,9 @@ def process_trajectories(
         raw_routes[route_id] += route_trajectory
 
     for key in raw_routes.keys():
+        simplifiers[key] = {}
         for name in algorithm_names:
-            simplifiers[key] = {name: simplifier_classes[name].from_params(params)}
+            simplifiers[key][name] = simplifier_classes[name].from_params(params)
         for simplifier in simplifiers[key].values():
             for log in raw_routes[key]:
                 simplifier.append_point(log)
