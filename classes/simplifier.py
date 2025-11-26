@@ -4,8 +4,18 @@ from abc import ABC
 # this is an abstract class with the job of holding a trajectory (which is a list of VesselLogs)
 # and providing a simplify()-method to be overridden by specific simplification algorithms
 class Simplifier(ABC):  # "ABC" means it's an abstract class
-    def __init__(self):
+    def __init__(
+            self,
+            point_to_point_distance=None,
+            predict_sphere_movement=None,
+            get_final_bearing=None,
+            point_to_line_distance=None,
+    ):
         self.trajectory = []
+        self.point_to_point_distance = point_to_point_distance
+        self.predict_sphere_movement = predict_sphere_movement
+        self.get_final_bearing = get_final_bearing
+        self.point_to_line_distance = point_to_line_distance
 
     def simplify(self):
         """Simplify the current trajectory in-place and return a description of the changes made to it.
@@ -22,7 +32,7 @@ class Simplifier(ABC):  # "ABC" means it's an abstract class
         raise NotImplementedError
 
     @classmethod
-    def from_params(cls, params: dict[str, int]):
+    def from_params(cls, params: dict[str, int], math: dict):
         """Create an instance of a derived class using only relevant values from dictionary of parameters."""
         raise NotImplementedError
 

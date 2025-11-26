@@ -1,3 +1,4 @@
+import time
 from flask import Flask, request
 from flask import render_template
 
@@ -12,10 +13,11 @@ from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
 from data.database import get_all_vessels, get_vessel_logs
 from datetime import datetime
-from data.vessel_cache import get_data_from_cache
+from typing import Callable
 from error_metrics.comp_ratio import comp_ratio_results
 from error_metrics.sed import sed_results
 from error_metrics.ped import ped_results
+from algorithms.great_circle_math import great_circle_distance, get_final_bearing, predict_sphere_movement, point_to_great_circle
 
 app = Flask(__name__)
 
@@ -43,10 +45,11 @@ raw_routes = {}  # type: dict[int, list[VesselLog]]
 def get_error_metrics(
     raw_routes: dict[int, list[VesselLog]],
     simplified_routes: dict[int, list[VesselLog]],
+    math: dict,
 ) -> list[float]:
 
-    ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
-    sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
+    ped_avg, ped_max = ped_results(raw_routes, simplified_routes, math)
+    sed_avg, sed_max = sed_results(raw_routes, simplified_routes, math)
     comp_ratio = comp_ratio_results(raw_routes, simplified_routes)
     return [ped_avg, ped_max, sed_avg, sed_max, comp_ratio]
 
@@ -55,6 +58,7 @@ def process_trajectories(
     routes: dict[int, list[VesselLog]],
     algorithm_names: list[str],
     params: dict[str, int],
+    math: dict
 ):
     """Create the necessary simplifiers according to the given params and append the given logs to them, simplifying each time."""
     for id in routes.keys():
@@ -67,11 +71,16 @@ def process_trajectories(
     for key in raw_routes.keys():
         simplifiers[key] = {}
         for name in algorithm_names:
-            simplifiers[key][name] = simplifier_classes[name].from_params(params)
+            simplifiers[key][name] = simplifier_classes[name].from_params(params, math)
         for simplifier in simplifiers[key].values():
             for log in raw_routes[key]:
                 simplifier.append_point(log)
                 simplifier.simplify()
+            end_time = time.time()
+            delta = end_time - start_time
+            if route_id not in run_times:
+                run_times[route_id] = {}
+            run_times[route_id][simplifier.name] = delta
 
 
 def run_algorithms(
@@ -80,6 +89,7 @@ def run_algorithms(
     end_time: datetime,
     params: dict[str, int],
     imos: list[int],
+    math: dict
 ) -> dict[str, list[list[tuple[float, float, datetime]]]]:
     """Run the selected algorithms and return the resulting trajectories."""
     global last_start_time
@@ -103,7 +113,7 @@ def run_algorithms(
     # NOTE no multiprocessing for now
     # REVIEW how many calls to simplify() are needed to justify multiprocessing?
     print("Processing...")
-    process_trajectories(routes, algorithm_names, params)
+    process_trajectories(routes, algorithm_names, params, math)
 
     # SECTION
     # NOTE this is extremely temporary: We know there's only one vessel, so there will only ever be one active route.
@@ -171,7 +181,19 @@ def get_algorithms():
         params_req,
         """vessel.name""",  # TODO print vessel names elsewhere, like when starting an experiment
     )
-    return run_algorithms(algorithms, start_time_dt, end_time_dt, params_req, imos)
+    return run_algorithms(
+      algorithms, 
+      start_time_dt, 
+      end_time_dt, 
+      params_req, 
+      imos,
+      {
+          "point_to_point_distance": great_circle_distance,
+          "get_final_bearing": get_final_bearing,
+          "predict_sphere_movement": predict_sphere_movement,
+          "point_to_line_distance": point_to_great_circle
+      }
+    )
 
 
 '''def run_algorithms(

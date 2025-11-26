@@ -38,15 +38,30 @@ def run_sr(route: Route, params: dict) -> Route:
 
 class SquishReckoning(Simplifier):
     @classmethod
-    def from_params(cls, params):
-        return cls(params["buff_size"])
+    def from_params(cls, params, math):
+        return cls(
+            params["buff_size"],
+            math["point_to_point_distance"],
+            math["get_final_bearing"],
+            math["predict_sphere_movement"]
+        )
 
     @property
     def name(self):
         return "SQUISH_RECKONING"
 
-    def __init__(self, buffer_size: int = 100):
-        super().__init__()
+    def __init__(
+        self,
+        buffer_size: int = 100,
+        point_to_point_distance=None,
+        get_final_bearing=None,
+        predict_sphere_movement=None
+    ):
+        super().__init__(
+            point_to_point_distance=point_to_point_distance,
+            get_final_bearing=get_final_bearing,
+            predict_sphere_movement=predict_sphere_movement
+        )
         self.buffer_size = buffer_size
         self.buffer = PriorityQueue()
 
@@ -63,26 +78,28 @@ class SquishReckoning(Simplifier):
                 self.buffer.pred[predecessor.id],
                 predecessor,
                 self.buffer.succ[predecessor.id],
-            )  # Calculate the score
-            self.buffer.insert(
-                predecessor, score
-            )  # Update the score of the predecessor in the buffer
+                self.point_to_point_distance,
+                self.get_final_bearing,
+                self.predict_sphere_movement
+            ) # Calculate the score
+            self.buffer.insert(predecessor, score) # Update the score of the predecessor in the buffer
 
-        if (
-            self.buffer.size() == self.buffer_size + 1
-        ):  # Buffer full, need to remove one point
-            point, _ = self.buffer.remove_min()  # Remove point with the lowest score
+        if self.buffer.size() == self.buffer_size + 1: # Buffer full, need to remove one point
+            point, _ = self.buffer.remove_min() # Remove point with the lowest score
 
-            if point.id in self.buffer.pred:  # Not the first point
-                predecessor = self.buffer.pred[point.id]  # Get predecessor
+            if point.id in self.buffer.pred: # Not the first point
+                predecessor = self.buffer.pred[point.id] # Get predecessor
                 self.buffer.insert(
                     predecessor,
                     reckon(
                         self.buffer.pred[predecessor.id],
                         predecessor,
                         self.buffer.succ[predecessor.id],
-                    ),
-                )  # Recalculate and update score of predecessor
+                        self.point_to_point_distance,
+                        self.get_final_bearing,
+                        self.predict_sphere_movement
+                    )
+                ) # Recalculate and update score of predecessor
 
             if point.id in self.buffer.succ:  # Not the last point
                 successor = self.buffer.succ[point.id]  # Get successor
@@ -92,9 +109,9 @@ class SquishReckoning(Simplifier):
                         self.buffer.pred[successor.id],
                         successor,
                         self.buffer.succ[successor.id],
-                    ),
-                )  # Recalculate and update score of successor
-        return self.buffer.to_list()  # Return the points in the buffer as a list
-
-    def __repr__(self):
-        return "SquishReckoning Instance with " + f"buffer_size={self.buffer_size}"
+                        self.point_to_point_distance,
+                        self.get_final_bearing,
+                        self.predict_sphere_movement
+                    )
+                ) # Recalculate and update score of successor
+        return self.buffer.to_list() # Return the points in the buffer as a list

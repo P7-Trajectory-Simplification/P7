@@ -1,9 +1,4 @@
 import numpy as np
-from algorithms.great_circle_math import (
-    great_circle_distance,
-    predict_sphere_movement,
-    get_final_bearing,
-)
 from classes.route import Route
 from classes.simplifier import Simplifier
 from classes.vessel_log import VesselLog
@@ -26,15 +21,30 @@ def run_dr(route: Route, params: dict) -> Route:
 
 class DeadReckoning(Simplifier):
     @classmethod
-    def from_params(cls, params):
-        return cls(params["tolerance"])
+    def from_params(cls, params, math):
+        return cls(
+            params["tolerance"],
+            math["point_to_point_distance"],
+            math["get_final_bearing"],
+            math["predict_sphere_movement"]
+        )
 
     @property
     def name(self):
         return "DR"
 
-    def __init__(self, tolerance: int = 100):
-        super().__init__()
+    def __init__(
+        self,
+        tolerance: int = 100,
+        point_to_point_distance=None,
+        get_final_bearing=None,
+        predict_sphere_movement=None
+    ):
+        super().__init__(
+            point_to_point_distance=point_to_point_distance,
+            get_final_bearing=get_final_bearing,
+            predict_sphere_movement=predict_sphere_movement
+        )
         self.tolerance = tolerance
         self.prediction_startpoint = None
         self.prediction_endpoint = None
@@ -50,13 +60,25 @@ class DeadReckoning(Simplifier):
             self.prediction_endpoint = trajectory[-1]
             return trajectory
 
-        reckon(self.prediction_startpoint, self.prediction_endpoint, trajectory[-1])
+        reckon(
+            self.prediction_startpoint,
+            self.prediction_endpoint,
+            trajectory[-1],
+            self.point_to_point_distance,
+            self.get_final_bearing,
+            self.predict_sphere_movement
+        )
 
         next_newest_point = trajectory[-2]
         newest_point = trajectory[-1]
 
         error = reckon(
-            self.prediction_startpoint, self.prediction_endpoint, newest_point
+            self.prediction_startpoint,
+            self.prediction_endpoint,
+            newest_point,
+            self.point_to_point_distance,
+            self.get_final_bearing,
+            self.predict_sphere_movement
         )
 
         if np.abs(error) > self.tolerance:
@@ -73,18 +95,25 @@ class DeadReckoning(Simplifier):
 
 
 # Helper function for squish reckoning
-def reckon(point_a: VesselLog, point_b: VesselLog, point_c: VesselLog) -> float:
-    """Given three points with latitude, longitude, and timestamp, return the distance between point c and point c as predicted by point a and b via dead reckoning
+def reckon(
+        point_a: VesselLog,
+        point_b: VesselLog,
+        point_c: VesselLog,
+        great_circle_distance,
+        get_final_bearing,
+        predict_sphere_movement
+) -> float:
+    '''Given three points with latitude, longitude, and timestamp, return the distance between point c and point c as predicted by point a and b via dead reckoning
 
     Parameters
     ----------
-    point_a : _VesselLog_
-        The log representing the first point.
-    point_b : _VesselLog_
-        The log representing the second point. It is this point we attribute the returned value distance to.
-    point_c : _VesselLog_
-        The log representing the point to predict.
-    """
+        :param point_a: The log representing the first point.
+        :param point_b: The log representing the second point. It is this point we attribute the returned value distance to.
+        :param point_c: The log representing the point to predict.
+        :param predict_sphere_movement:
+        :param get_final_bearing:
+        :param great_circle_distance:
+    '''
     latlon_a = point_a.get_coords()
     latlon_b = point_b.get_coords()
 

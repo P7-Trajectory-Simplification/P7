@@ -1,6 +1,3 @@
-from algorithms.great_circle_math import point_to_great_circle
-from classes.route import Route
-from classes.vessel_log import VesselLog
 import numpy as np
 from classes.route import Route
 from classes.simplifier import Simplifier
@@ -24,15 +21,22 @@ def run_dp(route: Route, params: dict) -> Route:
 
 class DouglasPeucker(Simplifier):
     @classmethod
-    def from_params(cls, params):
-        return cls(params["epsilon"])
+    def from_params(cls, params, math):
+        return cls(
+            params["epsilon"],
+            math["point_to_line_distance"]
+        )
 
     @property
     def name(self):
         return "DP"
 
-    def __init__(self, epsilon: float):
-        super().__init__()
+    def __init__(
+        self,
+        epsilon: float,
+        point_to_line_distance=None
+    ):
+        super().__init__(point_to_line_distance=point_to_line_distance)
         self.epsilon = epsilon
         self.original_trajectory = []
 
@@ -52,7 +56,7 @@ class DouglasPeucker(Simplifier):
         for i in range(1, end):
             # Calculate the perpendicular distance from point to line segment
             d = np.abs(
-                point_to_great_circle(
+                self.point_to_line_distance(
                     trajectory[0].get_coords(),
                     trajectory[end].get_coords(),
                     trajectory[i].get_coords(),
