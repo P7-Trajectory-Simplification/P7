@@ -36,12 +36,13 @@ class SquishE(Simplifier):
         self.lower_compression_rate = lower_compression_rate
         self.upper_bound_sed = upper_bound_sed
         self.buffer_size = 4
+        self.counter = 0
         self.buffer = PriorityQueue()  # Buffer is a priority queue
-        self.max_neighbor: dict[int, float] = (
-            {}
-        )  # Maps point id to max sed of its neighbors
+        self.max_neighbor: dict[int, float] = {}
+        # Maps point id to max sed of its neighbors
 
     def simplify(self):
+        self.counter += 1
         self.trajectory = self.squish_e(self.trajectory)
 
     def reduce(self):
@@ -105,7 +106,7 @@ class SquishE(Simplifier):
         It implements an adaptable buffer and ensures all the points are at least of a certain importance
         """
         if (
-            self.buffer.size() / self.lower_compression_rate >= self.buffer_size
+            self.counter / self.lower_compression_rate >= self.buffer_size
         ):  # Increase buff_size based on lower bound compression rate
             self.buffer_size += 1
 
@@ -116,12 +117,13 @@ class SquishE(Simplifier):
             predecessor = trajectory[-2]  # Get the predecessor point
             self.adjust_priority(predecessor)  # Update priority
 
-        if self.buffer.size() == self.buffer_size + 1:  # Reduce buffer when full
+        if self.buffer.size() == self.buffer_size:  # Reduce buffer when full
             self.reduce()
 
         # After finishing looping through, keep reducing heap until all points satisfies upper bound on SED
-        while self.buffer.min_priority() <= self.upper_bound_sed:
-            self.reduce()
+        if self.upper_bound_sed > 0:
+            while self.buffer.min_priority() <= self.upper_bound_sed:
+                self.reduce()
 
         return self.buffer.to_list()  # Return the points in the buffer as a list
 
