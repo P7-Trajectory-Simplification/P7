@@ -43,9 +43,9 @@ class DeadReckoning(Simplifier):
         self.trajectory = self.dead_reckoning(self.trajectory)
 
     def dead_reckoning(self, trajectory: list[VesselLog]) -> list[VesselLog]:
-        if len(trajectory) < 2: # Need at least two points to make a prediction
+        if len(trajectory) < 2:  # Need at least two points to make a prediction
             return trajectory
-        elif len(trajectory) == 2: # Initialize prediction points
+        elif len(trajectory) == 2:  # Initialize prediction points
             self.prediction_startpoint = trajectory[-2]
             self.prediction_endpoint = trajectory[-1]
             return trajectory
@@ -68,10 +68,13 @@ class DeadReckoning(Simplifier):
             del trajectory[-2]
         return trajectory
 
+    def __repr__(self):
+        return "DeadReckoning Instance with " + f"tolerance={self.tolerance}"
+
 
 # Helper function for squish reckoning
 def reckon(point_a: VesselLog, point_b: VesselLog, point_c: VesselLog) -> float:
-    '''Given three points with latitude, longitude, and timestamp, return the distance between point c and point c as predicted by point a and b via dead reckoning
+    """Given three points with latitude, longitude, and timestamp, return the distance between point c and point c as predicted by point a and b via dead reckoning
 
     Parameters
     ----------
@@ -81,7 +84,7 @@ def reckon(point_a: VesselLog, point_b: VesselLog, point_c: VesselLog) -> float:
         The log representing the second point. It is this point we attribute the returned value distance to.
     point_c : _VesselLog_
         The log representing the point to predict.
-    '''
+    """
     latlon_a = point_a.get_coords()
     latlon_b = point_b.get_coords()
 

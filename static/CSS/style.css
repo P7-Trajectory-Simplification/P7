@@ -1,133 +1,133 @@
 * {
-    box-sizing: border-box;
-    font-family: montserrat;
+  box-sizing: border-box;
+  font-family: montserrat;
 }
 
-body{
-    margin: 0;
-    padding: 50px 5% 120px 5%;
-    display: flex;
-    flex-direction: column;
+body {
+  margin: 0;
+  padding: 50px 5% 120px 5%;
+  display: flex;
+  flex-direction: column;
 }
 
 .body {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
-h1{
-    font-size: 48px;
-    justify-self: center;
+h1 {
+  font-size: 48px;
+  justify-self: center;
 }
 
 #buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .algorithms {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    margin-bottom: 10px;
-    margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 .checkbox {
-    display: flex;
-    background: none;
-    cursor: pointer;
+  display: flex;
+  background: none;
+  cursor: pointer;
 }
 .checkbox input[type="checkbox"] {
-    display: none;
+  display: none;
 }
 
 .checkbox label {
-    font-size: 18px;
-    padding: 5px 10px;
-    border-radius: 5px;
-    border: 2px solid black;
-    cursor: pointer;
-    user-select: none;
+  font-size: 18px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 2px solid black;
+  cursor: pointer;
+  user-select: none;
 }
 
 .checkbox input[type="checkbox"]:checked + label {
-    background-color: #d56c6c;
-    font-weight: bold;
+  background-color: #d56c6c;
+  font-weight: bold;
 }
 
 #show_errors {
-    background: none;
-    margin-top: 5px;
-    margin-bottom: 10px;
-    font-size: 18px;
-    padding: 5px 5px 5px 10px;
-    border-radius: 5px;
-    border: solid;
-    border-color: black;
-    cursor: pointer;
-    transition: 0.3s;
-    position: relative;
-    display: flex;
-    flex-direction: row;
+  background: none;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  font-size: 18px;
+  padding: 5px 5px 5px 10px;
+  border-radius: 5px;
+  border: solid;
+  border-color: black;
+  cursor: pointer;
+  transition: 0.3s;
+  position: relative;
+  display: flex;
+  flex-direction: row;
 }
 
 #show_errors svg {
-    height: 25px;
-    width: 25px;
-    vertical-align: middle;
+  height: 25px;
+  width: 25px;
+  vertical-align: middle;
 }
 
 #show_errors.active {
-    background-color: #d56c6c;
-    font-weight: bold;
+  background-color: #d56c6c;
+  font-weight: bold;
 }
 
 #show_errors svg.active {
-    display: none;
+  display: none;
 }
 
 #show_errors.active svg.active {
-    display: block;
+  display: block;
 }
 
 #show_errors svg.inactive {
-    display: block;
+  display: block;
 }
 
 #show_errors.active svg.inactive {
-    display: none;
+  display: none;
 }
 
 #show_errors:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 #alg_settings {
-    display: flex;
-    flex-direction: row;
-    padding: 10px 0px 10px 0px;
-    gap: 10px;
+  display: flex;
+  flex-direction: row;
+  padding: 10px 0px 10px 0px;
+  gap: 10px;
 }
 
-.alg_params{
-    display: flex;
-    flex-direction: column;
+.alg_params {
+  display: flex;
+  flex-direction: column;
 }
 input[type="number"] {
-    -webkit-appearance: none;
-    border-style: solid;
-    border-radius: 5px;
-    border-color: black;
-    width: 100%;
+  -webkit-appearance: none;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: black;
+  width: 100%;
 }
 
 input[type="number"]:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .alg_params:has(input[type="number"]:disabled) .alg_desc_box {
@@ -135,298 +135,288 @@ input[type="number"]:disabled {
   pointer-events: none;
 }
 
-
-input[type=number]::-webkit-outer-spin-button,
-input[type=number]::-webkit-inner-spin-button {
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
 .alg_desc_box {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 .help_button {
-    -webkit-appearance: none;
-    background-color: white;
-    border: none;
-    display: flex;
+  -webkit-appearance: none;
+  background-color: white;
+  border: none;
+  display: flex;
 }
 .help_button svg {
-    fill: rgb(94, 94, 94);
+  fill: rgb(94, 94, 94);
 }
 .help_button svg:hover {
-    fill: blue;
-    cursor: pointer;
+  fill: blue;
+  cursor: pointer;
 }
 
 .help-box {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #f8f9fa;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    padding: 14px 18px;
-    max-width: 260px;
-    font-family: sans-serif;
-    font-size: 14px;
-    color: #333;
-    z-index: 9999;
-    transition: opacity 0.2s ease;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #f8f9fa;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 14px 18px;
+  max-width: 260px;
+  font-family: sans-serif;
+  font-size: 14px;
+  color: #333;
+  z-index: 9999;
+  transition: opacity 0.2s ease;
 }
 
 .help-box button.close-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .help-box button.close-btn svg {
-    width: 16px;
-    height: 16px;
-    stroke: #888;
-    stroke-width: 2;
-    fill: none;
-    transition: stroke 0.2s;
+  width: 16px;
+  height: 16px;
+  stroke: #888;
+  stroke-width: 2;
+  fill: none;
+  transition: stroke 0.2s;
 }
 
 .help-box button.close-btn:hover svg {
-    stroke: #000;
+  stroke: #000;
 }
 
 #analytics_info {
-    height: 0px;
-    transition: 0.3s;
+  max-height: 0px;
+  transition: max-height 0.3s;
+  overflow: hidden;
 }
 
 #analytics_info.active {
-    border: solid;
-    border-color: black;
-    border-radius: 5px;
-    padding: 10px 20px;
-    margin-bottom: 10px;
-    height: fit-content;
-    transition: 0.3s;
+  border: solid;
+  border-color: black;
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin-bottom: 10px;
+  max-height: 600px;
+  transition: max-height 0.3s;
 }
 
 #analytics_info table {
-    border-collapse: collapse;
-    width: 100%;
+  border-collapse: collapse;
+  width: 100%;
 }
 
 #analytics_info th {
-    font-weight: bold;
+  font-weight: bold;
 }
 
-#analytics_info * > th, #analytics_info td {
-    border: 0px;
-    padding: 5px;
-    text-align: center;
+#analytics_info * > th,
+#analytics_info td {
+  border: 0px;
+  padding: 5px;
+  text-align: center;
 }
 
 #analytics_info tr {
-    display: table-row;
-    padding: 20px 5px;
-    text-align: center;
-    border-bottom: 1px  solid rgb(186, 186, 186);
+  display: table-row;
+  padding: 20px 5px;
+  text-align: center;
+  border-bottom: 1px solid rgb(186, 186, 186);
 }
 
 #analytics_info tr > *:first-child {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 #analytics_info :last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 #colors {
-    display: flex;
-    gap: 15px;
-    margin-top: 10px;
-    margin-bottom: 10px;
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
-#colors .color_box{
-    display: flex;
-    align-items: center;
-    gap: 5px;
+#colors .color_box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-#colors .color_box div{
-    width: 20px;
-    height: 20px;
-    border: 1px solid black;
-    border-radius: 3px;
+#colors .color_box div {
+  width: 20px;
+  height: 20px;
+  border: 1px solid black;
+  border-radius: 3px;
 }
 
-#colors .color_box div.blue{
-    background-color: blue;
+#colors .color_box div.blue {
+  background-color: blue;
 }
 
-#colors .color_box div.red{
-    background-color: red;
+#colors .color_box div.red {
+  background-color: red;
 }
 
-#colors .color_box div.yellow{
-    background-color: yellow;
+#colors .color_box div.yellow {
+  background-color: yellow;
 }
 
-#colors .color_box div.green{
-    background-color: green;
+#colors .color_box div.green {
+  background-color: green;
 }
 
-#colors .color_box div.cyan{
-    background-color: cyan;
+#colors .color_box div.cyan {
+  background-color: cyan;
 }
 
-#colors .color_box div.orange{
-    background-color: orange;
+#colors .color_box div.orange {
+  background-color: orange;
 }
 
-#colors .color_box div.magenta{
-    background-color: magenta;
+#colors .color_box div.magenta {
+  background-color: magenta;
 }
-
-
-
 
 #map {
-    border: 2px solid black;
-    border-radius: 10px;
-    height: 500px;
-    justify-self: center;
+  border: 2px solid black;
+  border-radius: 10px;
+  height: 500px;
+  justify-self: center;
 }
 
 #settings {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-#output_box{
-    display: flex;
-    justify-content: center;
+#output_box {
+  display: flex;
+  justify-content: center;
 }
 
 #date_box {
-    display: flex;
-    gap: 5px;
+  display: flex;
+  gap: 5px;
 }
 
 #date_box .date_subbox {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
-input[type="date"]{
-    padding: 5px 10px;
-    font-size: 18px;
-    width: fit-content;
-    border: 2px solid black;
-    border-radius: 5px;
-    cursor: pointer;
-    position: relative;
+input[type="date"] {
+  padding: 5px 10px;
+  font-size: 18px;
+  width: fit-content;
+  border: 2px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
-  position: absolute;  /* positioned relative to input now */
+  position: absolute; /* positioned relative to input now */
   bottom: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;          /* invisible but clickable */
+  opacity: 0; /* invisible but clickable */
   cursor: pointer;
   pointer-events: auto;
 }
-
 
 /* Inner text field area */
 input[type="date"]::-webkit-datetime-edit {
   pointer-events: none;
 }
 
-
-
-
-
 .angle-marker {
-    color: #d56c6c;
-    font-size: 14px;
-    transform: translate(-50%, -50%) rotate(0deg);
+  color: #d56c6c;
+  font-size: 14px;
+  transform: translate(-50%, -50%) rotate(0deg);
 }
 
-
-
-
 #range_container {
-    align-items: center;
-    display: flex;
-    gap: 5px;
+  align-items: center;
+  display: flex;
+  gap: 5px;
 }
 
 #range_container button {
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    position: relative;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  position: relative;
 }
 
-#range_container input[type=range]{
-    flex: 1;
+#range_container input[type="range"] {
+  flex: 1;
 }
 
 #play_button {
-    border-radius: 50%;
-    border-style: solid;
-    border-color: #d56c6c;
-    background: white;
-    transition: 0.3s;
+  border-radius: 50%;
+  border-style: solid;
+  border-color: #d56c6c;
+  background: white;
+  transition: 0.3s;
 }
 
 #play_button:hover {
-    background-color: #c9c9c9;
+  background-color: #c9c9c9;
 }
 
 #play_button svg {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 60%;
-    height: 60%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
 }
 
 #play_button:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 #range_container button svg path {
-    fill: #d56c6c;
+  fill: #d56c6c;
 }
 
 #play_button.pause svg.play,
 #play_button.play svg.pause {
-    display: none;
+  display: none;
 }
 
 #play_button.pause svg.pause,
 #play_button.play svg.play {
-    display: block;
+  display: block;
 }
 
-input[type=range] {
+input[type="range"] {
   margin-top: 15px;
   margin-bottom: 15px;
   cursor: pointer;
@@ -436,12 +426,12 @@ input[type=range] {
   background: linear-gradient(to right, #d56c6c 50%, #c9c9c9 50%);
 }
 
-input[type="range"]::-webkit-slider-runnable-track{
+input[type="range"]::-webkit-slider-runnable-track {
   height: 1rem;
   border-radius: 1rem;
 }
 
-input[type="range"]::-webkit-slider-thumb{
+input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   background-color: #d56c6c;
   border: none;
@@ -451,7 +441,7 @@ input[type="range"]::-webkit-slider-thumb{
   margin-top: -8px;
 }
 
-input[type="range"]:focus::-webkit-slider-thumb{
+input[type="range"]:focus::-webkit-slider-thumb {
   outline: 3px solid #d56c6c;
   outline-offset: 0.125rem;
 }
