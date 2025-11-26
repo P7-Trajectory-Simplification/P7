@@ -53,9 +53,9 @@ class DeadReckoning(Simplifier):
         self.trajectory = self.dead_reckoning(self.trajectory)
 
     def dead_reckoning(self, trajectory: list[VesselLog]) -> list[VesselLog]:
-        if len(trajectory) < 2: # Need at least two points to make a prediction
+        if len(trajectory) < 2:  # Need at least two points to make a prediction
             return trajectory
-        elif len(trajectory) == 2: # Initialize prediction points
+        elif len(trajectory) == 2:  # Initialize prediction points
             self.prediction_startpoint = trajectory[-2]
             self.prediction_endpoint = trajectory[-1]
             return trajectory
@@ -89,6 +89,9 @@ class DeadReckoning(Simplifier):
             # if the predicted point is close enough, we don't need the next newest point anymore and can safely exclude it
             del trajectory[-2]
         return trajectory
+
+    def __repr__(self):
+        return "DeadReckoning Instance with " + f"tolerance={self.tolerance}"
 
 
 # Helper function for squish reckoning

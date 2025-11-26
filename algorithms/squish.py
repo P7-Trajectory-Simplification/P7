@@ -40,13 +40,15 @@ class Squish(Simplifier):
             point_to_point_distance=point_to_point_distance
         )
         self.buffer_size = buffer_size
-        self.buffer = PriorityQueue() # Buffer is a priority queue
+        self.buffer = PriorityQueue()  # Buffer is a priority queue
 
     def simplify(self):
         self.trajectory = self.squish(self.trajectory)
 
     def update_sed(self, target: VesselLog):
-        if target.id in self.buffer.pred and target.id in self.buffer.succ: # Not the first or last point
+        if (
+            target.id in self.buffer.pred and target.id in self.buffer.succ
+        ):  # Not the first or last point
             predecessor = self.buffer.pred[target.id]
             successor = self.buffer.succ[target.id]
 
@@ -59,18 +61,21 @@ class Squish(Simplifier):
             self.buffer.insert(target, sed) # Update the SED value in the priority queue
 
     def squish(self, trajectory: list[VesselLog]):
-        new_point = trajectory[-1] # Get the newest point
-        self.buffer.insert(new_point) # Insert it into the buffer with infinite SED
+        new_point = trajectory[-1]  # Get the newest point
+        self.buffer.insert(new_point)  # Insert it into the buffer with infinite SED
 
-        if self.buffer.size() > 2: # After the second point
+        if self.buffer.size() > 2:  # After the second point
             predecessor = trajectory[-2]
-            self.update_sed(predecessor) # Update SED of predecessor
+            self.update_sed(predecessor)  # Update SED of predecessor
 
-        if self.buffer.size() == self.buffer_size + 1: # Buffer is full
-            point, _ = self.buffer.remove_min() # Remove point with the smallest SED
+        if self.buffer.size() == self.buffer_size + 1:  # Buffer is full
+            point, _ = self.buffer.remove_min()  # Remove point with the smallest SED
 
             if point.id in self.buffer.pred or point.id in self.buffer.succ:
-                self.update_sed(self.buffer.pred[point.id]) # Update SED of predecessor
-                self.update_sed(self.buffer.succ[point.id]) # Update SED of successor
+                self.update_sed(self.buffer.pred[point.id])  # Update SED of predecessor
+                self.update_sed(self.buffer.succ[point.id])  # Update SED of successor
 
-        return self.buffer.to_list() # Return the points in the buffer as a list
+        return self.buffer.to_list()  # Return the points in the buffer as a list
+
+    def __repr__(self):
+        return "Squish Instance with " + f"buffer_size={self.buffer_size}"

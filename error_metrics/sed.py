@@ -1,48 +1,37 @@
 from concurrent.futures import ProcessPoolExecutor
 import numpy as np
-from algorithms.great_circle_math import great_circle_distance
+from algorithms.great_circle_math import (
+    get_final_bearing,
+    great_circle_distance,
+    predict_sphere_movement,
+)
 from classes.route import Route
 from classes.vessel_log import VesselLog
 
 
-# Convert to 3D Cartesian
-def to_cart(lat, lon):
-    return np.array([np.cos(lat) * np.cos(lon), np.cos(lat) * np.sin(lon), np.sin(lat)])
+def slerp(A: tuple[float, float], B: tuple[float, float], alpha: float, math: dict):
+    '''Linearly interpolate between two latitudes and longitudes on a sphere.
 
+    Parameters
+    ----------
+    A :  _latitude and longitude-tuple_
+        The point to interpolate from.
+    B :  _latitude and longitude-tuple_
+        The point to interpolate to.
+    alpha : float in range [0,1]
+        How far to interpolate: 0.0 returns A, and 1.0 returns B, 0.5 returns the point exactly between A and B.
 
-def slerp(p0, p1, t, math: dict):
-    '''Spherical linear interpolation between two points on a sphere.
-
-    p0, p1: (lat, lon) in radians
-    t: interpolation factor in [0,1]
+    Returns
+    -------
+    _latitude and longitude-tuple_
+        The interpolated point.
     '''
-    lat0, lon0 = p0
-    lat1, lon1 = p1
-
-    # Convert to 3D Cartesian coordinates
-    v0 = to_cart(lat0, lon0)
-    v1 = to_cart(lat1, lon1)
-
-    # Compute the angle between v0 and v1 and clip in case of floating point errors
-    dot = np.dot(v0, v1)
-    dot = np.clip(dot, -1.0, 1.0)
-
-    # Great-circle angular distance in radians.
-    omega = np.arccos(dot)
-
-    if omega < 1e-12:  # Almost identical
-        return p0
-
-    s0 = np.sin((1 - t) * omega) / np.sin(omega)
-    s1 = np.sin(t * omega) / np.sin(omega)
-
-    v = s0 * v0 + s1 * v1  # Interpolated Cartesian
-
-    # Convert back to (lat, lon)
-    lat = np.arctan2(v[2], np.sqrt(v[0] ** 2 + v[1] ** 2))
-    lon = np.arctan2(v[1], v[0])
-
-    return np.array([lat, lon])
+    # find out how far from A we should end up
+    distance = alpha * great_circle_distance(A, B)
+    # find the direction from A to B
+    bearing = get_final_bearing(B, A) + np.radians(180)
+    # find the point at the given distance from A in the direction of B
+    return predict_sphere_movement(A, distance, bearing)
 
 
 def interpolate_simplified_points_vectorized(raw_times, simp_times, simp_latlon, math):

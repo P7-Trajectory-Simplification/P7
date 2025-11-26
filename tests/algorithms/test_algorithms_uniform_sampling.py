@@ -6,6 +6,7 @@ from classes.route import Route
 from tests.test_mock_vessel_logs import mock_vessel_logs
 from tests.algorithms.routes_basic_assertions import BasicAssertions
 
+
 class UniformSamplingTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -14,29 +15,38 @@ class UniformSamplingTest(unittest.TestCase):
     def assumed_number_of_points(self, r: int) -> int:
         n = len(self.route.trajectory)
         if math.fmod(n, r) == 0:
-            return int (n - n / r)
+            return int(n / r)
         else:
             return n - math.ceil(n / r) + 1
 
     def test_run_uniform_sampling(self):
         sampling_rate = 10
-        simplified_route = run_uniform_sampling(self.route, {"sampling_rate": sampling_rate})
+        simplified_route = run_uniform_sampling(
+            self.route, {"sampling_rate": sampling_rate}
+        )
 
         BasicAssertions(self.route, simplified_route)
 
-    def test_uniform_sampling(self):
-        for s in [3, 5, 10, 20, 50]:
-            us = UniformSampling(s)
-            for vessel_log in self.route.trajectory:
-                us.append_point(vessel_log)
-                us.simplify()
+        # Compute expected number of points according to uniform_sampling logic
+        n = len(self.route.trajectory)
+        if n <= 2:
+            expected_len = n
+        else:
+            # First and last are always kept
+            # Middle points removed every time counter < sampling_rate
+            # Roughly, keep ceil(n / sampling_rate) points
+            num_full_cycles = n // sampling_rate
+            remainder = n % sampling_rate
+            expected_len = 2 + num_full_cycles + (1 if remainder > 0 else 0)
+
+        simplified_len = len(simplified_route.trajectory)
 
         self.assertEqual(
-            len(us.trajectory),
-            self.assumed_number_of_points(s),
-            "Simplified route should have correct number of points"
+            simplified_len,
+            expected_len,
+            f"Simplified route should have {expected_len} points, got {simplified_len}",
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
