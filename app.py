@@ -76,11 +76,6 @@ def process_trajectories(
             for log in raw_routes[key]:
                 simplifier.append_point(log)
                 simplifier.simplify()
-            end_time = time.time()
-            delta = end_time - start_time
-            if route_id not in run_times:
-                run_times[route_id] = {}
-            run_times[route_id][simplifier.name] = delta
 
 
 def run_algorithms(
