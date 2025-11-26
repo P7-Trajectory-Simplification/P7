@@ -10,3 +10,5 @@ tests/classes/__pycache__/*
 tests/error_metrics/__pycache__/*
 .coverage
 experiments/experiments_code
+experiments/math
+experiments/route_data
