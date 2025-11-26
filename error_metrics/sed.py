@@ -27,11 +27,11 @@ def slerp(A: tuple[float, float], B: tuple[float, float], alpha: float, math: di
         The interpolated point.
     '''
     # find out how far from A we should end up
-    distance = alpha * great_circle_distance(A, B)
+    distance = alpha * math["point_to_point_distance"](A, B)
     # find the direction from A to B
-    bearing = get_final_bearing(B, A) + np.radians(180)
+    bearing = math["get_final_bearing"](B, A) + np.radians(180)
     # find the point at the given distance from A in the direction of B
-    return predict_sphere_movement(A, distance, bearing)
+    return math["predict_sphere_movement"](A, distance, bearing)
 
 
 def interpolate_simplified_points_vectorized(raw_times, simp_times, simp_latlon, math):

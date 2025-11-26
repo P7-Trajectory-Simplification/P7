@@ -29,7 +29,7 @@ def find_nearest_simplified_idx_vectorized(
 
 
 def ped_single_route_vectorized(
-    raw_route: list[VesselLog], simplified_route: list[VesselLog]
+    raw_route: list[VesselLog], simplified_route: list[VesselLog], math: dict
 ) -> tuple[float, float, int]:
     '''PED: for each raw point, find the simplified point
     with the closest previous timestamp and compute the point to great-circle distance.
@@ -58,7 +58,7 @@ def ped_single_route_vectorized(
     # Case: only one simplified point -> PED is point-to-point distance
     if n_simp == 1:
         distances = np.array([
-            great_circle_distance(simp_latlon[0], raw_latlon[i])
+            math["point_to_point_distance"](simp_latlon[0], raw_latlon[i])
             for i in range(n_raw)
         ])
         if len(distances) == 0:
@@ -81,9 +81,9 @@ def ped_single_route_vectorized(
 
         # Handle segment where (A == B)
         if np.allclose(A, B):
-            d = great_circle_distance(A, P)
+            d = math["point_to_point_distance"](A, P)
         else:
-            d = point_to_great_circle(A, B, P)
+            d = math["point_to_line_distance"](A, B, P)
 
         if not np.isnan(d) and d >= 0:
             distances.append(d)
@@ -98,6 +98,7 @@ def ped_single_route_vectorized(
 def ped_results(
     raw_data_routes: dict[int, list[VesselLog]],
     simplified_routes: dict[int, list[VesselLog]],
+    math: dict
 ) -> tuple[float, float]:
     '''Calculate the average Point to segment Euclidean distance between two trajectories and the maximum Point to segment Euclidean distance between two trajectories.
 
@@ -113,7 +114,7 @@ def ped_results(
         # If simplified route is missing, use empty list
         simp_route = simplified_routes.get(key, [])
 
-        avg_d, max_d, count = ped_single_route_vectorized(raw_route, simp_route)
+        avg_d, max_d, count = ped_single_route_vectorized(raw_route, simp_route, math)
 
         if count > 0:  # ignore empty/invalid routes
             results.append((avg_d, max_d, count))
