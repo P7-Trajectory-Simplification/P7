@@ -12,10 +12,10 @@ class Simplifier(ABC):  # "ABC" means it's an abstract class
             point_to_line_distance=None,
     ):
         self.trajectory = []
-        self.point_to_point_distance = point_to_point_distance,
-        self.predict_sphere_movement = predict_sphere_movement,
-        self.get_final_bearing = get_final_bearing,
-        self.point_to_line_distance = point_to_line_distance,
+        self.point_to_point_distance = point_to_point_distance
+        self.predict_sphere_movement = predict_sphere_movement
+        self.get_final_bearing = get_final_bearing
+        self.point_to_line_distance = point_to_line_distance
 
     def simplify(self):
         """Simplify the current trajectory in-place and return a description of the changes made to it.

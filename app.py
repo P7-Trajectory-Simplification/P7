@@ -1,3 +1,4 @@
+import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from flask import Flask, request
 from flask import render_template
@@ -108,10 +109,11 @@ algorithms_mappings = {
 def get_error_metrics(
     raw_routes: dict[int, list[VesselLog]],
     simplified_routes: dict[int, list[VesselLog]],
+    math: dict,
 ) -> list[float]:
 
-    ped_avg, ped_max = ped_results(raw_routes, simplified_routes)
-    sed_avg, sed_max = sed_results(raw_routes, simplified_routes)
+    ped_avg, ped_max = ped_results(raw_routes, simplified_routes, math)
+    sed_avg, sed_max = sed_results(raw_routes, simplified_routes, math)
     comp_ratio = comp_ratio_results(raw_routes, simplified_routes)
     return [ped_avg, ped_max, sed_avg, sed_max, comp_ratio]
 
@@ -205,6 +207,7 @@ def finalize_response(
 '''
 
 simplifiers = {}  # type: dict[int, dict[str, Simplifier]]
+run_times = {}  # type: dict[int, dict[str, float]]
 
 simplifier_classes = {
     'DR': DeadReckoning,
@@ -220,6 +223,7 @@ raw_routes = {}  # type: dict[int, list[VesselLog]]
 
 
 def process_trajectories(routes: dict[int, list[VesselLog]], algorithm_names, params, math: dict):
+    global run_times
     '''Create the necessary simplifiers according to the given params and append the given logs to them, simplifying each time.'''
     for route_id, logs in routes.items():
         if route_id not in simplifiers:
@@ -234,9 +238,15 @@ def process_trajectories(routes: dict[int, list[VesselLog]], algorithm_names, pa
             raw_routes[route_id] = []
         raw_routes[route_id] += logs
         for simplifier in simplifiers[route_id].values():
+            start_time = time.time()
             for log in logs:
                 simplifier.append_point(log)
                 simplifier.simplify()
+            end_time = time.time()
+            delta = end_time - start_time
+            if route_id not in run_times:
+                run_times[route_id] = {}
+            run_times[route_id][simplifier.name] = delta
 
 
 '''

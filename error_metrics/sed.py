@@ -10,7 +10,7 @@ def to_cart(lat, lon):
     return np.array([np.cos(lat) * np.cos(lon), np.cos(lat) * np.sin(lon), np.sin(lat)])
 
 
-def slerp(p0, p1, t):
+def slerp(p0, p1, t, math: dict):
     '''Spherical linear interpolation between two points on a sphere.
 
     p0, p1: (lat, lon) in radians
@@ -45,7 +45,7 @@ def slerp(p0, p1, t):
     return np.array([lat, lon])
 
 
-def interpolate_simplified_points_vectorized(raw_times, simp_times, simp_latlon):
+def interpolate_simplified_points_vectorized(raw_times, simp_times, simp_latlon, math):
     '''For each raw timestamp, return the spherical interpolated point
     on the simplified trajectory at that timestamp.
     '''
@@ -82,13 +82,13 @@ def interpolate_simplified_points_vectorized(raw_times, simp_times, simp_latlon)
     for i in range(len(raw_times)):
         p0 = simp_latlon[idx[i]]
         p1 = simp_latlon[idx[i] + 1]
-        result[i] = slerp(p0, p1, alpha[i])
+        result[i] = slerp(p0, p1, alpha[i], math)
 
     return result
 
 
 def sed_single_route_vectorized(
-    raw_route: list[VesselLog], simplified_route: list[VesselLog]
+    raw_route: list[VesselLog], simplified_route: list[VesselLog], math: dict
 ) -> tuple[float, float, int]:
     '''Compute SED for a single route (vectorized).
     Using vectorized simplified point lookup and great-circle distance computation.
@@ -106,13 +106,13 @@ def sed_single_route_vectorized(
 
     # Gets an array of simplified point indices for each raw point
     interp_points = interpolate_simplified_points_vectorized(
-        raw_times, simplified_times, simplified_latlon
+        raw_times, simplified_times, simplified_latlon, math
     )
 
     # Compute distances using great_circle_distance
     distances = np.array(
         [
-            great_circle_distance(interp_points[i], raw_latlon[i])
+            math["point_to_point_distance"](interp_points[i], raw_latlon[i])
             for i in range(len(raw_latlon))
         ]
     )
@@ -123,6 +123,7 @@ def sed_single_route_vectorized(
 def sed_results(
     raw_data_routes: dict[int, list[VesselLog]],
     simplified_routes: dict[int, list[VesselLog]],
+    math: dict
 ) -> tuple[float, float]:
     '''Calculate the average Point to simplified point Euclidean distance between two trajectories
     and the maximum Point to simplified point Euclidean distance between two trajectories.
@@ -131,7 +132,7 @@ def sed_results(
         tuple with floats: The average SED between the two trajectories and the max distance.
     '''
     results = [
-        sed_single_route_vectorized(raw_data_routes[k], simplified_routes[k])
+        sed_single_route_vectorized(raw_data_routes[k], simplified_routes[k], math)
         for k in raw_data_routes
     ]
     # If no results were computed, return zeros, happens if no matching routes or all empty
