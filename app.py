@@ -134,6 +134,7 @@ def run_algorithms(
                 route_id: simplifier_dict[name].trajectory
                 for route_id, simplifier_dict in simplifiers.items()
             },
+            math
         )
     for name in simplifier_classes:
         if name not in response:
@@ -165,8 +166,8 @@ def get_algorithms():
     algorithms = data["algorithms"]
     start_time_dt = datetime.strptime(start_date_req, "%Y-%m-%d")
     end_time_dt = datetime.strptime(end_date_req, "%Y-%m-%d %H:%M:%S")
-
-    imos = [get_all_vessels()[125].imo, get_all_vessels()[100].imo]
+#get_all_vessels()[125].imo, get_all_vessels()[100].imo,
+    imos = [9898929]
 
     print(
         "Request for:",

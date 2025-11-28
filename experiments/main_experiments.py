@@ -58,12 +58,14 @@ if __name__ == "__main__":
 
     error_metrics = get_error_metrics(
         {0: trajectory},
-        {0: simplifier.trajectory}
+        {0: simplifier.trajectory},
+        math_args
     )
 
     ped_avg, ped_max, sed_avg, sed_max, comp_ratio = error_metrics
     print(
         "algorithm_name:"+algorithm_name+','+
+        "math:"+math+','+
         "ped_avg:"+str(ped_avg)+','+
         "ped_max:"+str(ped_max)+','+
         "sed_avg:"+str(sed_avg)+','+

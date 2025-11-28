@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def sanitize_line(line: str):
@@ -25,18 +26,20 @@ for subdir, dirs, files in os.walk(results_dir):
             "comp_ratio": 0.0,
             "run_time": 0.0
         }
-        file_content = ""
-        result['math'] = file.split('_')[-1].replace('.log', '')
-        with open(os.path.join(results_dir, file), 'r') as csvfile:
-            lines = csvfile.readlines()
-            for line in lines:
-                file_content += line
-            parts = file_content.split(',')
+        math = file.split('_')[-1].replace('.log', '')
+        result["math"] = math
+        with open(os.path.join(results_dir, file), 'r') as f:
+            content = f.read()
+            if content == "":
+                continue
+            parts = content.split(',')
             for part in parts:
                 key, value = part.split(':')
                 value = value.replace('\n', '')
                 if 'algorithm_name' == key:
                     result['algorithm_name'] = value
+                elif 'math' == key:
+                    result['math'] = value
                 elif 'ped_avg' == key:
                     result['ped_avg'] = float(value)
                 elif 'ped_max' == key:
@@ -84,6 +87,64 @@ plt.ylabel("sed_avg")
 plt.legend()
 plt.title("comp_ratio vs sed_avg")
 
-fig1.show()
-fig2.show()
-fig3.show()
+#fig1.show()
+#fig2.show()
+#fig3.show()
+
+
+def regression_line(x, y):
+    x = np.array(x)
+    y = np.array(y)
+
+    coef = np.polyfit(x, y, 1)
+    poly = np.poly1d(coef)
+
+    xs = np.linspace(min(x), max(x), 200)
+    ys = poly(xs)
+    return xs, ys
+
+
+# ----------------------
+# REGRESSION PLOTS (LINES ONLY)
+# ----------------------
+
+# Regression for run_time
+fig4 = plt.figure()
+xs, ys = regression_line(extract(circle,"comp_ratio"), extract(circle,"run_time"))
+plt.plot(xs, ys, label="circle")
+
+xs, ys = regression_line(extract(ellipsoid,"comp_ratio"), extract(ellipsoid,"run_time"))
+plt.plot(xs, ys, label="ellipsoid")
+
+plt.xlabel("comp_ratio")
+plt.ylabel("run_time (fit)")
+plt.legend()
+plt.title("Regression: comp_ratio vs run_time")
+
+# Regression for ped_avg
+fig5 = plt.figure()
+xs, ys = regression_line(extract(circle,"comp_ratio"), extract(circle,"ped_avg"))
+plt.plot(xs, ys, label="circle")
+
+xs, ys = regression_line(extract(ellipsoid,"comp_ratio"), extract(ellipsoid,"ped_avg"))
+plt.plot(xs, ys, label="ellipsoid")
+
+plt.xlabel("comp_ratio")
+plt.ylabel("ped_avg (fit)")
+plt.legend()
+plt.title("Regression: comp_ratio vs ped_avg")
+
+# Regression for sed_avg
+fig6 = plt.figure()
+xs, ys = regression_line(extract(circle,"comp_ratio"), extract(circle,"sed_avg"))
+plt.plot(xs, ys, label="circle")
+
+xs, ys = regression_line(extract(ellipsoid,"comp_ratio"), extract(ellipsoid,"sed_avg"))
+plt.plot(xs, ys, label="ellipsoid")
+
+plt.xlabel("comp_ratio")
+plt.ylabel("sed_avg (fit)")
+plt.legend()
+plt.title("Regression: comp_ratio vs sed_avg")
+
+plt.show()
