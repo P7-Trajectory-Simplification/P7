@@ -39,7 +39,6 @@ class DeadReckoning(Simplifier):
         point_to_point_distance=None,
         get_final_bearing=None,
         predict_sphere_movement=None,
-        mode="online",
     ):
         super().__init__(
             point_to_point_distance=point_to_point_distance,
@@ -49,6 +48,7 @@ class DeadReckoning(Simplifier):
         self.tolerance = tolerance
         self.prediction_startpoint = None
         self.prediction_endpoint = None
+        self.mode = "online"
 
     def simplify(self):
         self.trajectory = self.dead_reckoning(self.trajectory)
