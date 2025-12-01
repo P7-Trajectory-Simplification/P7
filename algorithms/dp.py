@@ -22,20 +22,13 @@ def run_dp(route: Route, params: dict) -> Route:
 class DouglasPeucker(Simplifier):
     @classmethod
     def from_params(cls, params, math):
-        return cls(
-            params["epsilon"],
-            math["point_to_line_distance"]
-        )
+        return cls(params["epsilon"], math["point_to_line_distance"])
 
     @property
     def name(self):
         return "DP"
 
-    def __init__(
-        self,
-        epsilon: float,
-        point_to_line_distance=None
-    ):
+    def __init__(self, epsilon: float, point_to_line_distance=None, mode="batch"):
         super().__init__(point_to_line_distance=point_to_line_distance)
         self.epsilon = epsilon
         self.original_trajectory = []

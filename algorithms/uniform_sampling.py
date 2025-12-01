@@ -30,7 +30,8 @@ class UniformSampling(Simplifier):
     def __init__(self, sampling_rate: int = 10):
         super().__init__()
         self.sampling_rate = sampling_rate
-        self.counter = 0
+        self.counter = (0,)
+        mode = "online"
         if (
             self.sampling_rate < 3
         ):  # To keep the first, last and at least one middle point to remove
