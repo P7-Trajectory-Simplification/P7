@@ -71,5 +71,6 @@ if __name__ == "__main__":
         "sed_avg:"+str(sed_avg)+','+
         "sed_max:"+str(sed_max)+','+
         "comp_ratio:"+str(comp_ratio)+','+
-        "run_time:"+str(run_time)+'\n'
+        "run_time:"+str(run_time)+','+
+        "params:"+str(args.params)+'\n'
     , flush=True)
