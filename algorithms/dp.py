@@ -28,10 +28,11 @@ class DouglasPeucker(Simplifier):
     def name(self):
         return "DP"
 
-    def __init__(self, epsilon: float, point_to_line_distance=None, mode="batch"):
+    def __init__(self, epsilon: float, point_to_line_distance=None):
         super().__init__(point_to_line_distance=point_to_line_distance)
         self.epsilon = epsilon
         self.original_trajectory = []
+        self.mode = "batch"
 
     def append_point(self, point):
         self.original_trajectory.append(point)

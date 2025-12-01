@@ -137,6 +137,7 @@ def run_algorithms(
         [(log.lat, log.lon, log.ts) for log in logs]
         for logs in raw_routes.values()
     ]
+    print("Calculating error metrics...")
     for name in algorithm_names:
         response[name + "_error_metrics"] = get_error_metrics(
             raw_routes,
