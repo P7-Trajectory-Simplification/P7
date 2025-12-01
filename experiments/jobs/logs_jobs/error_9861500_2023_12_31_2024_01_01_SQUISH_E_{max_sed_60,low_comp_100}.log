@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/nfs/home/student.aau.dk/tb30jn/P7/experiments/main_experiments.py", line 46, in <module>
+    trajectory = load_route_data_from_json(filename)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nfs/home/student.aau.dk/tb30jn/P7/experiments/find_routes.py", line 100, in load_route_data_from_json
+    with open(filepath, 'r') as json_file:
+         ^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/nfs/home/student.aau.dk/tb30jn/P7/experiments/route_data/imo_9861500_start_2023-12-31_end_2024-01-01.json'

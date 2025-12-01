@@ -1,0 +1,2 @@
+algorithm_name:SQUISH_RECKONING,math:circle,ped_avg:7.23,ped_max:60.97,sed_avg:0.03,sed_max:59.57,comp_ratio:1.0,run_time:408.2823305130005,params:{\"buff_size\": 100000}
+
