@@ -81,7 +81,6 @@ def process_results_jobs(results: list[dict]):
         ys_seds.append(y_sed)
         ys_runtimes.append(y_runtime)
 
-    print(xs, ys_peds, ys_seds, ys_runtimes, alg_names)
     plot_metric_jobs(xs, ys_seds, "SED average", alg_names)
     plot_metric_jobs(xs, ys_peds, "PED average", alg_names)
     plot_metric_jobs(xs, ys_runtimes, "Runtime", alg_names)
