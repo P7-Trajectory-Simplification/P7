@@ -23,9 +23,7 @@ class SquishE(Simplifier):
     @classmethod
     def from_params(cls, params, math):
         return cls(
-            params["low_comp"],
-            params["max_sed"],
-            math["point_to_point_distance"]
+            params["low_comp"], params["max_sed"], math["point_to_point_distance"]
         )
 
     @property
@@ -36,7 +34,7 @@ class SquishE(Simplifier):
         self,
         lower_compression_rate: float = 2.0,
         upper_bound_sed: float = 100.0,
-        point_to_point_distance=None
+        point_to_point_distance=None,
     ):
         super().__init__(point_to_point_distance=point_to_point_distance)
         self.lower_compression_rate = lower_compression_rate
@@ -45,6 +43,7 @@ class SquishE(Simplifier):
         self.counter = 0
         self.buffer = PriorityQueue()  # Buffer is a priority queue
         self.max_neighbor: dict[int, float] = {}
+        self.mode = "online"
         # Maps point id to max sed of its neighbors
 
     def simplify(self):
@@ -91,12 +90,20 @@ class SquishE(Simplifier):
                 ):  # Find nearest point in time to compute sed (This is not entirely correct squish-e)
                     # Closer to predecessor
                     priority = self.max_neighbor[point.id] + np.abs(
-                        self.point_to_point_distance(point.get_coords(), predecessor.get_coords()))
+                        self.point_to_point_distance(
+                            point.get_coords(), predecessor.get_coords()
+                        )
+                    )
                 else:
                     # Closer to successor
                     priority = self.max_neighbor[point.id] + np.abs(
-                        self.point_to_point_distance(point.get_coords(), successor.get_coords()))
-                self.buffer.insert(point, priority) # Update priority in the priority queue
+                        self.point_to_point_distance(
+                            point.get_coords(), successor.get_coords()
+                        )
+                    )
+                self.buffer.insert(
+                    point, priority
+                )  # Update priority in the priority queue
 
     def squish_e(self, trajectory: list[VesselLog]) -> list[VesselLog]:
         """
@@ -122,7 +129,6 @@ class SquishE(Simplifier):
         if self.upper_bound_sed > 0:
             while self.buffer.min_priority() <= self.upper_bound_sed:
                 self.reduce()
-
         return self.buffer.to_list()  # Return the points in the buffer as a list
 
     def __repr__(self):

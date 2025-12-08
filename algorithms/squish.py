@@ -22,25 +22,17 @@ def run_squish(route: Route, params: dict) -> Route:
 class Squish(Simplifier):
     @classmethod
     def from_params(cls, params, math):
-        return cls(
-            params["buff_size"],
-            math["point_to_point_distance"]
-        )
+        return cls(params["buff_size"], math["point_to_point_distance"])
 
     @property
     def name(self):
         return "SQUISH"
 
-    def __init__(
-        self,
-        buffer_size: int = 100,
-        point_to_point_distance=None
-    ):
-        super().__init__(
-            point_to_point_distance=point_to_point_distance
-        )
+    def __init__(self, buffer_size: int = 100, point_to_point_distance=None):
+        super().__init__(point_to_point_distance=point_to_point_distance)
         self.buffer_size = buffer_size
         self.buffer = PriorityQueue()  # Buffer is a priority queue
+        self.mode = "online"
 
     def simplify(self):
         self.trajectory = self.squish(self.trajectory)
@@ -54,11 +46,21 @@ class Squish(Simplifier):
 
             if target.ts - predecessor.ts < successor.ts - target.ts:
                 # Closer to predecessor
-                sed = np.abs(self.point_to_point_distance(predecessor.get_coords(), target.get_coords()))
+                sed = np.abs(
+                    self.point_to_point_distance(
+                        predecessor.get_coords(), target.get_coords()
+                    )
+                )
             else:
                 # Closer to successor
-                sed = np.abs(self.point_to_point_distance(successor.get_coords(), target.get_coords()))
-            self.buffer.insert(target, sed) # Update the SED value in the priority queue
+                sed = np.abs(
+                    self.point_to_point_distance(
+                        successor.get_coords(), target.get_coords()
+                    )
+                )
+            self.buffer.insert(
+                target, sed
+            )  # Update the SED value in the priority queue
 
     def squish(self, trajectory: list[VesselLog]):
         new_point = trajectory[-1]  # Get the newest point

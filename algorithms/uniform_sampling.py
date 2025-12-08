@@ -20,7 +20,7 @@ def run_uniform_sampling(route: Route, params: dict) -> Route:
 
 class UniformSampling(Simplifier):
     @classmethod
-    def from_params(cls, params):
+    def from_params(cls, params, math):
         return cls(params["sampling_rate"])
 
     @property
@@ -31,6 +31,7 @@ class UniformSampling(Simplifier):
         super().__init__()
         self.sampling_rate = sampling_rate
         self.counter = 0
+        self.mode = "online"
         if (
             self.sampling_rate < 3
         ):  # To keep the first, last and at least one middle point to remove

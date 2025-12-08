@@ -17,7 +17,12 @@ from typing import Callable
 from error_metrics.comp_ratio import comp_ratio_results
 from error_metrics.sed import sed_results
 from error_metrics.ped import ped_results
-from algorithms.great_circle_math import great_circle_distance, get_final_bearing, predict_sphere_movement, point_to_great_circle
+from algorithms.great_circle_math import (
+    great_circle_distance,
+    get_final_bearing,
+    predict_sphere_movement,
+    point_to_great_circle,
+)
 
 app = Flask(__name__)
 
@@ -58,7 +63,7 @@ def process_trajectories(
     routes: dict[int, list[VesselLog]],
     algorithm_names: list[str],
     params: dict[str, int],
-    math: dict
+    math: dict,
 ):
     """Create the necessary simplifiers according to the given params and append the given logs to them, simplifying each time."""
     for id in routes.keys():
@@ -73,14 +78,14 @@ def process_trajectories(
         for name in algorithm_names:
             simplifiers[key][name] = simplifier_classes[name].from_params(params, math)
         for simplifier in simplifiers[key].values():
-            for log in raw_routes[key]:
-                simplifier.append_point(log)
+            if simplifier.mode == "online":
+                for log in raw_routes[key]:
+                    simplifier.append_point(log)
+                    simplifier.simplify()
+            else:  # batch mode
+                for log in raw_routes[key]:
+                    simplifier.append_point(log)
                 simplifier.simplify()
-            end_time = time.time()
-            delta = end_time - start_time
-            if route_id not in run_times:
-                run_times[route_id] = {}
-            run_times[route_id][simplifier.name] = delta
 
 
 def run_algorithms(
@@ -89,7 +94,7 @@ def run_algorithms(
     end_time: datetime,
     params: dict[str, int],
     imos: list[int],
-    math: dict
+    math: dict,
 ) -> dict[str, list[list[tuple[float, float, datetime]]]]:
     """Run the selected algorithms and return the resulting trajectories."""
     global last_start_time
@@ -132,6 +137,7 @@ def run_algorithms(
         [(log.lat, log.lon, log.ts) for log in logs]
         for logs in raw_routes.values()
     ]
+    print("Calculating error metrics...")
     for name in algorithm_names:
         response[name + "_error_metrics"] = get_error_metrics(
             raw_routes,
@@ -139,6 +145,7 @@ def run_algorithms(
                 route_id: simplifier_dict[name].trajectory
                 for route_id, simplifier_dict in simplifiers.items()
             },
+            math,
         )
     for name in simplifier_classes:
         if name not in response:
@@ -170,8 +177,8 @@ def get_algorithms():
     algorithms = data["algorithms"]
     start_time_dt = datetime.strptime(start_date_req, "%Y-%m-%d")
     end_time_dt = datetime.strptime(end_date_req, "%Y-%m-%d %H:%M:%S")
-
-    imos = [get_all_vessels()[125].imo, get_all_vessels()[100].imo]
+    # get_all_vessels()[125].imo, get_all_vessels()[100].imo,
+    imos = [9840116]
 
     print(
         "Request for:",
@@ -182,17 +189,17 @@ def get_algorithms():
         """vessel.name""",  # TODO print vessel names elsewhere, like when starting an experiment
     )
     return run_algorithms(
-      algorithms, 
-      start_time_dt, 
-      end_time_dt, 
-      params_req, 
-      imos,
-      {
-          "point_to_point_distance": great_circle_distance,
-          "get_final_bearing": get_final_bearing,
-          "predict_sphere_movement": predict_sphere_movement,
-          "point_to_line_distance": point_to_great_circle
-      }
+        algorithms,
+        start_time_dt,
+        end_time_dt,
+        params_req,
+        imos,
+        {
+            "point_to_point_distance": great_circle_distance,
+            "get_final_bearing": get_final_bearing,
+            "predict_sphere_movement": predict_sphere_movement,
+            "point_to_line_distance": point_to_great_circle,
+        },
     )
 
 

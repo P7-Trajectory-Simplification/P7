@@ -9,6 +9,8 @@ tests/algorithms/__pycache__/*
 tests/classes/__pycache__/*
 tests/error_metrics/__pycache__/*
 .coverage
-experiments/experiments_code
-experiments/math
-experiments/route_data
+experiments/experiment_template.py
+experiments/results/*/data/*
+experiments/results/*/experiments/*
+!experiments/results/*/experiments/logs
+
