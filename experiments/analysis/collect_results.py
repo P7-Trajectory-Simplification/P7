@@ -33,8 +33,6 @@ def collect_results(logs_dir: str) -> list[dict]:
                     continue
                 for pair in content.split(","):
                     key, value = pair.split(":", 1)
-                    if "algorithm_name" in key:
-                        key = "algorithm_name"
                     if value == "nan":
                         print("Found nan value in file:", file, "for key:", key)
                         value = 0.0

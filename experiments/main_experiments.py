@@ -23,8 +23,8 @@ from algorithms.ellipsoid_math import (
     geodesic_length,
 )
 from error_metrics.comp_ratio import comp_ratio
-from error_metrics.ped import ped_single_route_vectorized as ped
-from error_metrics.sed import sed_single_route_vectorized as sed
+from error_metrics.newped import ped_single_route_vectorized as ped
+from error_metrics.newsed import sed_single_route_vectorized as sed
 from experiments.experiment_data import read_trajectory_from_json
 
 if __name__ == "__main__":

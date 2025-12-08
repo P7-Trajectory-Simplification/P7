@@ -15,8 +15,8 @@ from data.database import get_all_vessels, get_vessel_logs
 from datetime import datetime
 from typing import Callable
 from error_metrics.comp_ratio import comp_ratio_results
-from error_metrics.sed import sed_results
-from error_metrics.ped import ped_results
+from error_metrics.newsed import sed_results
+from error_metrics.newped import ped_results
 from algorithms.great_circle_math import (
     great_circle_distance,
     get_final_bearing,
@@ -177,8 +177,8 @@ def get_algorithms():
     algorithms = data["algorithms"]
     start_time_dt = datetime.strptime(start_date_req, "%Y-%m-%d")
     end_time_dt = datetime.strptime(end_date_req, "%Y-%m-%d %H:%M:%S")
-    # get_all_vessels()[125].imo, get_all_vessels()[100].imo,
-    imos = [9840116]
+    imos = get_all_vessels()[125].imo
+    #imos = [9840116]
 
     print(
         "Request for:",
