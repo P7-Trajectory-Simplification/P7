@@ -110,13 +110,8 @@ def sed_single_route_vectorized(
     # Compute distances using great_circle_distance
     distances = []
     for i in range(len(raw_latlon)):
-        if np.isnan(interp_points[i]).any() or np.isnan(raw_latlon[i]).any():
-            print(interp_points[i], raw_latlon[i])
         distance = math["point_to_point_distance"](interp_points[i], raw_latlon[i])
-        if np.isnan(distance).any():
-            print("NaN distance for points:", interp_points[i], raw_latlon[i])
         distances.append(distance)
-    print(np.mean(distances))
 
     # distances = np.array(
     #    [
