@@ -2,8 +2,51 @@ from classes.route import Route
 from classes.vessel_log import VesselLog
 
 
+def is_vessel_static(vessel_logs: list[VesselLog]) -> bool:
+    latitudes = [log.lat for log in vessel_logs]
+    longitudes = [log.lon for log in vessel_logs]
+    if (
+        max(latitudes) - min(latitudes) < 0.001
+        and max(longitudes) - min(longitudes) < 0.001
+    ):
+        return True
+    return False
+
+
+def isolate_trajectories(logs: list[VesselLog]) -> list[list[VesselLog]]:
+    if not logs:
+        return []
+
+    trajectories = []
+    current_trajectory = [logs[0]]  # Add the first point to a trajectory
+
+    # Loops through all logs and determines if the time gap between the points is small enough for it to be the same route.
+    for i in range(1, len(logs)):
+        if (
+            logs[i].ts - logs[i - 1].ts
+        ).total_seconds() > 86400 * 2:  # 86400 seconds in a day
+            trajectories.append(current_trajectory)
+            current_trajectory = [logs[i]]
+        else:
+            current_trajectory.append(logs[i])
+
+    trajectories.append(current_trajectory)
+    return trajectories
+
+
+def is_vessel_static(vessel_logs: list[VesselLog]) -> bool:
+    latitudes = [log.lat for log in vessel_logs]
+    longitudes = [log.lon for log in vessel_logs]
+    if (
+        max(latitudes) - min(latitudes) < 0.001
+        and max(longitudes) - min(longitudes) < 0.001
+    ):
+        return True
+    return False
+
+
 def isolate_routes(logs: list[VesselLog]) -> list[Route]:
-    '''
+    """
     Divide raw data into dedicated routes, so data points with large time gaps in between are not connected.
 
     Parameters
@@ -14,7 +57,7 @@ def isolate_routes(logs: list[VesselLog]) -> list[Route]:
     Returns
     ----------
     A list of dicts with routes and a buffer for the squish algorithm
-    '''
+    """
     if not logs:
         return [Route()]
 
@@ -44,7 +87,7 @@ route_count = 0  # counts how many routes exist
 def assign_routes(
     logs: list[VesselLog], threshold: int | float = 86400 * 2
 ) -> dict[int, list[VesselLog]]:
-    '''Online implementation of isolate_routes.
+    """Online implementation of isolate_routes.
     Places the points from the given list into routes and ensures all routes have a unique ID.
     Assigns a new route to a vessel if enough time has passed since the last point was recorded.
 
@@ -61,7 +104,7 @@ def assign_routes(
     ----------
     A dictionary mapping route IDs to lists of VesselLogs
     in the order they should be considered for the routes they are part of.
-    '''
+    """
     global route_count
     routes = {}
     for log in logs:

@@ -1,2 +1,0 @@
-algorithm_name:SQUISH_E,math:circle,ped_avg:1879.85,ped_max:7488.38,sed_avg:6414.72,sed_max:24684.04,comp_ratio:0.0007,run_time:32.537861347198486,params:{\"max_sed\": 60, \"low_comp\": 100}
-

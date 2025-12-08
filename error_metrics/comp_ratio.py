@@ -15,9 +15,14 @@ def comp_ratio_results(
         total_raw_points += len(raw_route)
         total_simplified_points += len(simplified_route)
 
-    if total_raw_points == 0:
+    return comp_ratio(total_raw_points, total_simplified_points)
+
+
+def comp_ratio(raw_data_num_points: int, simplified_num_points: int) -> float:
+    """Calculate the compression ratio between two trajectories."""
+    if raw_data_num_points == 0:
         return 0.0  # Avoid division by zero
 
     # Calculate compression ratio (not as a percentage!)
-    compression_ratio = total_simplified_points / total_raw_points
+    compression_ratio = simplified_num_points / raw_data_num_points
     return round(compression_ratio, 4)

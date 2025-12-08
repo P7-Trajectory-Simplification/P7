@@ -1,7 +1,0 @@
-Traceback (most recent call last):
-  File "<frozen runpy>", line 198, in _run_module_as_main
-  File "<frozen runpy>", line 88, in _run_code
-  File "/nfs/home/student.aau.dk/tb30jn/P7/experiments/main_experiments.py", line 47, in <module>
-    simplifier = simplifier_classes[algorithm_name].from_params(
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: UniformSampling.from_params() takes 2 positional arguments but 3 were given

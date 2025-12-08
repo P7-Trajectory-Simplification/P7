@@ -129,7 +129,6 @@ class SquishE(Simplifier):
         if self.upper_bound_sed > 0:
             while self.buffer.min_priority() <= self.upper_bound_sed:
                 self.reduce()
-
         return self.buffer.to_list()  # Return the points in the buffer as a list
 
     def __repr__(self):
