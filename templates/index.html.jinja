@@ -52,15 +52,15 @@
         ],
         'SQUISH': [
         {'label': 'Buffer Size', 'name': 'buff_size', 'type': 'number',
-        'default': 100, 'step': 1, 'min': 2, 'desc': 'The buffer size for the squish algorithm. Denotes the maximum amount of trajectory points allowed in the result. Minimum value = 2.'}
+        'default': 6300, 'step': 1, 'min': 2, 'desc': 'The buffer size for the squish algorithm. Denotes the maximum amount of trajectory points allowed in the result. Minimum value = 2.'}
         ],
         'SQUISH_E': [
         {'label': 'Upper Bound SED', 'name': 'max_sed', 'type': 'number',
-        'default': 100, 'step': 1, 'min': 0, 'desc': 'The upper bound SED error, if = 0, SQUISH-E only cares about compression rate. All points with an SED lower than this value will be removed from the simplification. Minimum value = 0.'}
+        'default': 0, 'step': 1, 'min': 0, 'desc': 'The upper bound SED error, if = 0, SQUISH-E only cares about compression rate. All points with an SED lower than this value will be removed from the simplification. Minimum value = 0.'}
         ],
         'SQUISH_E_2': [
         {'label': 'Lowest Compression', 'name': 'low_comp', 'type': 'number',
-        'default': 2, 'step': 1, 'min': 1, 'desc': 'The lower bound compression rate. If = 1, SQUISH-E only simplifies based on SED error. Minimum value = 1 and all points can be kept in the buffer. If = 2, compresses the data to around +- 50%.'}
+        'default': 10, 'step': 1, 'min': 1, 'desc': 'The lower bound compression rate. If = 1, SQUISH-E only simplifies based on SED error. Minimum value = 1 and all points can be kept in the buffer. If = 2, compresses the data to around +- 50%.'}
         ],
         'UNIFORM_SAMPLING': [
         {'label': 'Sampling Rate', 'name': 'sampling_rate', 'type': 'number',

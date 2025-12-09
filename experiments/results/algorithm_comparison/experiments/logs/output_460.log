@@ -1,2 +1,1 @@
-2.209421020203463
-algorithm_name:UNIFORM_SAMPLING,math:circle,ped_avg:0.7699842032497372,sed_avg:2.209421020203463,comp_ratio:0.2001,run_time:1336702.6521437408
+algorithm_name:UNIFORM_SAMPLING,math:circle,ped_avg:0.01607233833218978,sed_avg:0.05852463931576023,comp_ratio:0.2001,run_time:1442039.4505566044
