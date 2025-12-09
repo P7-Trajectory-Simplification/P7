@@ -142,4 +142,4 @@ def generate_experiments(
 
 if __name__ == "__main__":
     prepare_algorithm_comparison()
-    # prepare_math_comparison()
+    prepare_math_comparison()
